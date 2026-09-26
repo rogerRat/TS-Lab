@@ -1,0 +1,12 @@
+run_id: profile-10b-segl1024s1024
+source:
+  input_dir: data/src/raw/profiles/profile-10b
+  bundle: data/src/shard_dataset/{run_id}
+  catalog: configs/catalog/src/{run_id}.yaml
+reference:
+  spec: configs/ref_spec/fev/spec.yaml
+  fetch_dir: data/bench/fev
+  bundle_root: data/ref/shard_dataset/{run_id}/fev
+  catalog_root: configs/catalog/ref/{run_id}/fev
+mechanism_analysis:
+  enabled: false

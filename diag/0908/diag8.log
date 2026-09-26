@@ -1,0 +1,18 @@
+[21:01:55] merged: 2757 reference / 2722 probe / 4510 exam
+[21:01:55] champion regime: full_lr1e-05_b32_wd0.1_const ({'mechanism': 'full', 'lr': 1e-05, 'batch': 32, 'wd': 0.1, 'schedule': 'const', 'clip': 0.0} best 0.3307 @3200)
+[21:02:06] pool: 68214963 legal windows; 200044 candidates (stride 341)
+[21:06:00] embeddings+scores done in 234s
+[21:06:01] diversity: {"sim_max": {"unique_fragments": 36, "score_p50_p95_max": [0.958984375, 0.99951171875]}, "sim_cent": {"unique_fragments": 36, "score_p50_p95_max": [0.8916015625, 0.94873046875]}}
+[21:14:35] sim_max @ 400: MASE 0.3414 (ce 3.865)
+[21:14:45] sim_max @ 800: MASE 0.3418 (ce 3.866)
+[21:14:56] sim_max @1600: MASE 0.3429 (ce 3.880)
+[21:15:07] sim_max @3200: MASE 0.3458 (ce 3.903)
+[21:23:40] sim_cent @ 400: MASE 0.3415 (ce 3.863)
+[21:23:51] sim_cent @ 800: MASE 0.3421 (ce 3.869)
+[21:24:02] sim_cent @1600: MASE 0.3431 (ce 3.874)
+[21:24:13] sim_cent @3200: MASE 0.3450 (ce 3.893)
+[21:32:44] random @ 400: MASE 0.3406 (ce 3.853)
+[21:32:55] random @ 800: MASE 0.3404 (ce 3.848)
+[21:33:06] random @1600: MASE 0.3401 (ce 3.846)
+[21:33:17] random @3200: MASE 0.3397 (ce 3.838)
+[21:33:17] done -> /root/TS3/diag/0908/diag8_select.json

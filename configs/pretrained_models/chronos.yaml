@@ -1,0 +1,19 @@
+# Immutable registry for third-party Chronos checkpoints used by TS3.
+# `revision` must be a Hugging Face commit SHA, never a mutable branch/tag.
+# `destination` is project-relative below cache/pretrained_models and becomes
+# the only training load path.
+models:
+  chronos-t5-small-46m:
+    repo_id: amazon/chronos-t5-small
+    revision: a971ba21945c4f1796b17a91fe69214b5f4ad472
+    destination: cache/pretrained_models/amazon/chronos-t5-small/a971ba21945c4f1796b17a91fe69214b5f4ad472
+    architecture: T5ForConditionalGeneration
+    parameter_count_range: [45000000, 47000000]
+    status: enabled
+  chronos-t5-base-200m:
+    repo_id: amazon/chronos-t5-base
+    revision: ad294eaacead15db499b740ea4122266dd2a81a2
+    destination: cache/pretrained_models/amazon/chronos-t5-base
+    architecture: T5ForConditionalGeneration
+    parameter_count_range: [190000000, 210000000]
+    status: enabled

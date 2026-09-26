@@ -1,0 +1,16 @@
+# Model repositories/checkpoints used by adapters.foundation.
+timemoe-source https://github.com/Time-MoE/Time-MoE.git 67460eb4af69eeed5fa86e591846cb0ae0744c26
+timemoe-200m https://huggingface.co/Maple728/TimeMoE-200M 794591bfeb1225fdf742cec0f4c71f20c3f3b87e
+transformers-timemoe-runtime pypi:transformers 4.40.1
+timesfm-source https://github.com/google-research/timesfm.git 8cb0628371af142e16b8c232cc9fbf667ffb12f9
+timesfm-runtime pypi:timesfm 3.0.1
+timesfm-3.0 https://huggingface.co/google/timesfm-3.0-pytorch 43046b85ec22d584a13f8098c2ed39c889e129c2
+timesfm-2.5 https://huggingface.co/google/timesfm-2.5-200m-transformers 5a9806b9b291fad9233b5249d88263f1846304d3
+transformers-timesfm2.5 https://github.com/huggingface/transformers.git 1ee3185123da3b0549b7396c586b3ba936d66ace
+transformers-timesfm2.5-runtime pypi:transformers 5.3.0
+huggingface-hub-timesfm-runtime pypi:huggingface-hub 1.3.7
+sundial-source https://github.com/thuml/Sundial.git 3ef03b8c3804f64a506e57101a173470040aaece
+sundial-base-128m https://huggingface.co/thuml/sundial-base-128m 3212e42564493f520593e5414af4367fc4b49226
+transformers-sundial-runtime pypi:transformers 4.40.1
+timerxl-84m https://huggingface.co/thuml/timer-base-84m 70077a71acce1b4c00d98332fcaabc694255d8e5
+transformers-timerxl-runtime pypi:transformers 4.40.1

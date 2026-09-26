@@ -1,0 +1,21 @@
+# Checkpoint is supplied only by evaluate.run --checkpoint.
+schema_version: 1
+benchmark: fev
+model:
+  id: replace_with_explicit_model_id
+adapter:
+  class: adapters.chronos.eval.fev:ChronosFEVEvaluationAdapter
+  config:
+    model: {device: cuda, torch_dtype: bfloat16}
+    inference:
+      batch_size: 256
+      num_samples: 20
+      temperature: 1.0
+      top_k: 50
+      top_p: 1.0
+      seed: 20260722
+      # single_window uses the latest ground-truth history once; rolling evaluates every declared cutoff.
+      evaluation_mode: single_window
+bench_config:
+  task_file: default.yaml
+  expected_tasks: 20

@@ -1,0 +1,92 @@
+{
+  "purpose": "rags_random_comparison",
+  "resampling_revision": "full-pool-resampling-0914-v1",
+  "batch": "mixed-random-rags-0914",
+  "pool_equivalents": 16284,
+  "pool_seed": 0,
+  "context_length": 512,
+  "prediction_length": 64,
+  "students": [
+    "chronos-base",
+    "timesfm-2.5",
+    "timemoe-200m"
+  ],
+  "datasets": [
+    "boomlet_1676",
+    "boomlet_619",
+    "boomlet_1282",
+    "jena_weather_1H",
+    "ETT_1H",
+    "ETT_15T"
+  ],
+  "arms": [
+    "random",
+    "rags"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "inputs": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/full-scale-inputs",
+  "source_load": "/root/autodl-tmp/TS3/data/src/shard_dataset/profile-10b-segl512s512/load",
+  "reference_root": "/root/autodl-tmp/TS3/data/ref/shard_dataset/profile-10b-segl512s512/fev",
+  "train_batch": 32,
+  "eval_batch": 32,
+  "original_first": true,
+  "online_evaluation": true,
+  "checkpoint_retention": "completed_cell_cleanup",
+  "precision_policy": "bf16-model-fp32-master-loss-probe-v1",
+  "crb": {
+    "cover_density": 0.02,
+    "error_density": 0.02,
+    "split_density": 0.005,
+    "curvature_cap": 1
+  },
+  "selection_execution": {
+    "gradient_batch": 1,
+    "inference_batch": 32,
+    "cpu_threads": 4,
+    "generation": "eager"
+  },
+  "student_environments": {
+    "chronos-base": "/root/miniconda3/envs/ts3/bin/python",
+    "timesfm-2.5": "/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python",
+    "timemoe-200m": "/root/autodl-tmp/conda/envs/ts3-timemoe/bin/python"
+  },
+  "model_paths": {
+    "chronos-base": "/root/autodl-tmp/pretrained_models/chronos-t5-base",
+    "timesfm-2.5": "/root/autodl-tmp/hf-cache/hub/models--google--timesfm-2.5-200m-transformers/snapshots/5a9806b9b291fad9233b5249d88263f1846304d3",
+    "timemoe-200m": "/root/autodl-tmp/hf-cache/hub/models--Maple728--TimeMoE-200M/snapshots/794591bfeb1225fdf742cec0f4c71f20c3f3b87e"
+  },
+  "settings": {
+    "chronos-base": {
+      "epsilon_calibration": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/epsilon-chronos-base/epsilon.json",
+      "epochs": 3,
+      "learning_rate": 1e-7,
+      "temperature": {
+        "rags": 1
+      },
+      "development_evidence": "Previous FP32 development learning rates are candidate starting points only, not RAGS-optimal mixed-precision schedules; identical LR for Random and RAGS. FP32 scoring/calibration unchanged."
+    },
+    "timesfm-2.5": {
+      "epsilon_calibration": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/epsilon-timesfm-2.5/epsilon.json",
+      "epochs": 3,
+      "learning_rate": 0.000001,
+      "temperature": {
+        "rags": 1
+      },
+      "development_evidence": "Previous FP32 development learning rates are candidate starting points only, not RAGS-optimal mixed-precision schedules; identical LR for Random and RAGS. FP32 scoring/calibration unchanged."
+    },
+    "timemoe-200m": {
+      "epsilon_calibration": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/epsilon-timemoe-200m/epsilon.json",
+      "epochs": 3,
+      "learning_rate": 0.000003,
+      "temperature": {
+        "rags": 1
+      },
+      "development_evidence": "Previous FP32 development learning rates are candidate starting points only, not RAGS-optimal mixed-precision schedules; identical LR for Random and RAGS. FP32 scoring/calibration unchanged."
+    }
+  },
+  "reporting": "18 original cells then 108 training cells; six online observations at E0.5/1/1.5/2/2.5/3. Positive relative MASE improvement is better. Report all seeds and all six tasks; no best-test checkpoint selection."
+}

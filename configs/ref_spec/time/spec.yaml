@@ -1,0 +1,15 @@
+schema_version: ts3.reference-extraction-spec.v1
+benchmark: time
+evaluation_declaration:
+  path: ../../eval/time/official_all.yaml
+upstream:
+  provider: Real-TSF/TIME
+  code_commit: b6e7ba9862acb9233c8c55b314c1777052c420ff
+  data_revision: 83e3d0b3be28d11c7182bffcc1892d19b36c4da1
+  data_root: ../../../data/bench/time/83e3d0b3be28d11c7182bffcc1892d19b36c4da1/dataset
+task_selection:
+  mode: explicit
+  items:
+    - Global_Influenza/W|short
+prefix_policy: training_common_earliest_test
+native_format: huggingface-dataset-on-disk.v1

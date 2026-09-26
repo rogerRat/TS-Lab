@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ts3-research"
+version = "0.1.0"
+description = "Time-series data selection research and external baselines"
+requires-python = ">=3.10"
+# Runtime dependencies are pinned in requ/ and the environment profiles.
+
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = ["adapters*", "assets*", "evaluate*", "gradient*",
+           "hub*", "rags*", "runtime*", "ts3*", "visualize*",
+           "baselines*", "configs", "scripts*"]
+exclude = ["*.tests*", "*.__pycache__*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]

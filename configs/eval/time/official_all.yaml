@@ -1,0 +1,29 @@
+schema_version: 1
+benchmark: time
+model:
+  id: ts3_10pct_ts3e_final
+adapter:
+  class: adapters.chronos.eval.time:ChronosTIMEEvaluationAdapter
+  config:
+    model: {device: cuda, torch_dtype: bfloat16}
+    inference:
+      batch_size: 32
+      context_length: 512
+      num_samples: 20
+      temperature: 1.0
+      top_k: 50
+      top_p: 1.0
+      quantile_levels: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+      seed: 20260722
+      evaluation_mode: single_window
+bench_config:
+  source:
+    checkout: third_parties/TIME
+    commit: b6e7ba9862acb9233c8c55b314c1777052c420ff
+    datasets_yaml: third_parties/TIME/src/timebench/config/datasets.yaml
+  dataset:
+    repo_id: Real-TSF/TIME
+    revision: 83e3d0b3be28d11c7182bffcc1892d19b36c4da1
+    root: data/bench/time/83e3d0b3be28d11c7182bffcc1892d19b36c4da1/dataset
+  tasks:
+    mode: official_all

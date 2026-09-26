@@ -1,0 +1,29 @@
+schema_version: 1
+benchmark: quito
+model:
+  id: chronos_quito
+adapter:
+  # The TIME adapter exposes the same batched univariate quantile interface.
+  class: adapters.chronos.eval.time:ChronosTIMEEvaluationAdapter
+  config:
+    model: {device: cuda, torch_dtype: bfloat16}
+    inference:
+      batch_size: 32
+      context_length: 512
+      num_samples: 20
+      temperature: 1.0
+      top_k: 50
+      top_p: 1.0
+      quantile_levels: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+      seed: 20260722
+      evaluation_mode: single_window
+bench_config:
+  dataset:
+    repo_id: hq-bench/quitobench
+    revision: ed4bf8eea27862aa01a063393ee48732910ecd87
+    root: data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87
+  # TS3 common H=64 comparison, not the upstream normalized leaderboard.
+  tasks:
+    - {subset: hour, prediction_length: 64}
+    - {subset: min, prediction_length: 64}
+  stride: 64

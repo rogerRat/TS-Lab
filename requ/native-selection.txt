@@ -1,0 +1,4 @@
+# Additional dependencies in isolated student environments for native selection.
+# Match the versions used by the primary TS3 experiment environment.
+faiss-cpu==1.12.0
+threadpoolctl==3.6.0

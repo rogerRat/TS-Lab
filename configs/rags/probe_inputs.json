@@ -1,0 +1,11 @@
+{
+  "context_length": 512,
+  "prediction_length": 64,
+  "validation_windows": 8,
+  "tasks": [
+    {"id": "quito_hour", "benchmark": "quito", "subset": "hour", "root": "/root/autodl-tmp/TS3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87"},
+    {"id": "quito_min", "benchmark": "quito", "subset": "min", "root": "/root/autodl-tmp/TS3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87"},
+    {"id": "time_cphl_h", "benchmark": "time", "dataset": "CPHL/H", "evaluation_config": "configs/eval/time/official_all.yaml", "seasonality": 24},
+    {"id": "fev_boomlet_1676", "benchmark": "fev", "reference_file": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/full-scale-inputs/boomlet_1676__reference.npz", "manifest_file": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/full-scale-inputs/boomlet_1676__manifest.json", "seasonality": 48}
+  ]
+}

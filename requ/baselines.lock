@@ -1,0 +1,9 @@
+# External baseline sources audited for the RAGS static-selection experiment.
+# Revisions are immutable audit anchors; see the fidelity contract for gaps.
+less https://github.com/princeton-nlp/LESS.git 8abf9628b9a814ac3045445eebc8ba3c908fdc78
+tsds https://github.com/ZifanL/TSDS.git 3dfe13953cffaefaeb9d401172e495aa7e0fd775
+lp_mirror https://github.com/LP-Mirror/LP_Mirror.git 43d010171ad9dfa713bf9e3b5d90ff744e1ead29
+ltsv https://github.com/b1302550313/LTSV.git 38221dc7505ccf5ae22615f2fcba40a39b59830b
+# LTSV HEAD stores its runnable trees as gitlinks without .gitmodules and has
+# removed the original valuation driver. Historical algorithm audit anchor:
+ltsv_algorithm_history https://github.com/b1302550313/LTSV.git 82d3f94b0ec59fa685b867f2f4690e0e892d4ce8

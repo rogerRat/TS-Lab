@@ -1,0 +1,11 @@
+from pathlib import Path
+p=Path("src/rags/experiments/full_pool.py")
+s=p.read_text().replace('temperature=temperature, gating=True)\n    audit["reference_coverage"]', 'temperature=temperature, gating=False)\n    audit["reference_coverage"]', 1)
+s=s.replace('reference_ids=[int(t.fragment_id) for t in refs], temperature=temperature)\n', 'reference_ids=[int(t.fragment_id) for t in refs], temperature=temperature, gating=False)\n', 1)
+p.write_text(s)
+p=Path("docs/MAIN-v2-notes.md")
+s=p.read_text().replace('一次全局 value_mass（温度 0.25，正对齐门）', '一次全局 value_mass（温度 0.25，无硬门）')
+p.write_text(s)
+p=Path("docs/MAIN-v2.md")
+s=p.read_text().replace('一次全局 value_mass（温度 0.25，正对齐门）', '一次全局 value_mass（温度 0.25，无硬门）')
+p.write_text(s)

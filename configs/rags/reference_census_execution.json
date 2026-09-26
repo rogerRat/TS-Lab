@@ -1,0 +1,11 @@
+{
+  "repo": "/root/TS3",
+  "total_budget_gib": 100,
+  "report_subdir": "report-chronos-timesfm",
+  "out": "/root/autodl-tmp/TS3/outputs/reference-census-20260921",
+  "report_python": "/root/miniconda3/envs/ts3/bin/python",
+  "models": [
+    {"student": "chronos-base", "python": "/root/miniconda3/envs/ts3/bin/python", "memory_fraction": 0.65, "batches": [8], "workers": [1, 2, 4, 8], "runs": ["/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918", "/root/autodl-tmp/TS3/outputs/main-rank-volume-uni-20260920"]},
+    {"student": "timesfm-2.5", "python": "/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python", "batches": [4, 8, 16], "workers": [1], "runs": ["/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918", "/root/autodl-tmp/TS3/outputs/main-rank-volume-uni-20260920"]}
+  ]
+}

@@ -1,0 +1,25 @@
+# Parameters for scripts/exp/exp_filter_grad.py.
+# Omitting --config uses the same values as this current default profile.
+experiment:
+  cu_config: configs/scripts/run.46m.cu-ratio.62k.l1024s1024.yaml
+  task_file: configs/eval/fev/profile-10b-local.yaml
+  source_catalog: configs/catalog/src/profile-10b-segl1024s1024.yaml
+  reference_catalog_root: configs/catalog/ref/profile-10b-segl1024s1024/fev
+  task_selection_config: configs/experiments/chronos46m-main-v2-s0/cu-r1.eval.yaml
+  output_dir: outputs/exp/filter-grad-profile-10b-segl1024s1024-20260829-parallel
+  checkpoints:
+    - outputs/models/warmup/chronos-tiny-from-scratch/seed-0/model
+    - outputs/models/warmup/chronos-tiny-from-scratch/seed-3/model
+    - outputs/models/warmup/chronos-tiny-from-scratch/seed-8/model
+    - outputs/models/warmup/chronos-tiny-from-scratch/seed-42/model
+  sample_segments: 1000
+  sample_seed: 42
+  gradient_batch_size: 32
+  projection_dimension: 4096
+  projection_repeats: 1
+  projection_seed: 42
+  token_chunk_size: 8
+  mmap_cache_capacity: 8
+  device: auto
+  save_sketches: false
+  parallel_workers: 4

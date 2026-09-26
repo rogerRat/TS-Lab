@@ -1,0 +1,5 @@
+[15:34:32] task: 100 ref series, 2000 test windows
+[15:34:37] engine ready: 46154240 params
+[15:34:43] A determinism: mase 0.329712 vs 0.329712 identical=True (6s)
+[15:34:46] B canary x10: mase 2.1172184132569765 sql 2.1111807409893317 degraded=True
+[15:34:46] VERDICT: METER OK -> /root/TS3/diag/0908/diag1_meter.json

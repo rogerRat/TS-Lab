@@ -1,0 +1,41 @@
+schema_version: 1
+benchmark: fev
+model:
+  id: fev-anaseg-20-target-15-reference-cu
+adapter:
+  class: adapters.chronos.eval.fev:ChronosFEVEvaluationAdapter
+  config:
+    model:
+      device: cuda
+      torch_dtype: bfloat16
+    inference:
+      batch_size: 128
+      num_samples: 20
+      temperature: 1.0
+      top_k: 50
+      top_p: 1.0
+      seed: 20260722
+bench_config:
+  task_file: /root/TS3/configs/eval/fev/profile-10b-local.yaml
+  expected_tasks: 20
+  task_indices:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19

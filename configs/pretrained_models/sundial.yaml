@@ -1,0 +1,14 @@
+# Revision-pinned Sundial model. No official fine-tuning recipe exists; TS3
+# assembles the checkpoint-native TimeFlow components for training (see the
+# adapter docstring), so training is enabled with self-implemented provenance.
+models:
+  sundial-base-128m:
+    repo_id: thuml/sundial-base-128m
+    revision: 3212e42564493f520593e5414af4367fc4b49226
+    max_context: 2880
+    architecture: SundialForPrediction
+    parameter_count_range: [128000000, 129000000]
+    capabilities: [forecast, training_loss, gradient, fine_tune]
+    dependency_profile: sundial
+    weights_license: Apache-2.0
+    status: enabled

@@ -1,0 +1,16 @@
+# Revision-pinned Timer-XL lineage checkpoint (HF id: thuml/timer-base-84m).
+models:
+  timerxl-84m:
+    repo_id: thuml/timer-base-84m
+    revision: 70077a71acce1b4c00d98332fcaabc694255d8e5
+    max_context: 9600
+    architecture: TimerForPrediction
+    parameter_count_range: [84000000, 84500000]
+    capabilities: [forecast, training_loss, gradient, fine_tune]
+    dependency_profile: timerxl
+    weights_license: Apache-2.0
+    notes: >-
+      Univariate Timer/Timer-XL checkpoint released by the Timer-XL repository.
+      96-point patches; generate tail-truncates context to a patch multiple and
+      normalizes the kept history (revin) by default.
+    status: enabled

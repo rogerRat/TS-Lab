@@ -1,0 +1,8 @@
+{
+  "student_parallelism": 3,
+  "student_selection_execution": {
+    "chronos-base": {"gradient_batch": 8, "gradient_workers": 4, "inference_batch": 64},
+    "timesfm-2.5": {"gradient_batch": 16, "inference_batch": 64},
+    "timemoe-200m": {"gradient_batch": 8, "gradient_workers": 4, "inference_batch": 64}
+  }
+}

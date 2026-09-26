@@ -1,0 +1,254 @@
+{
+  "resampling_revision": "full-pool-rank-volume-v5",
+  "purpose": "1105BudgetCutExp: REF-side CRB 2/1/1 -> 1/1/0.5, source CRB unchanged",
+  "batch": "1105-budget-cut",
+  "context_length": 512,
+  "prediction_length": 64,
+  "pool_equivalents": 16284,
+  "pool_seed": 0,
+  "students": [
+    "chronos-base"
+  ],
+  "student_parallelism": 1,
+  "datasets": [
+    "time_nem_demand_5t"
+  ],
+  "arms": [
+    "orig",
+    "rags-block-linearSum",
+    "rags-block-expSum"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "source_load": "/root/autodl-tmp/TS3/data/src/shard_dataset/profile-10b-segl512s512/load",
+  "reference_root": "/root/autodl-tmp/TS3/data/ref/shard_dataset/profile-10b-segl512s512/fev",
+  "train_batch": 32,
+  "eval_batch": 32,
+  "crb": {
+    "epsilon_policy": "none",
+    "cover_density": 0.02,
+    "error_density": 0.01,
+    "split_density": 0.01,
+    "curvature_cap": 1.0,
+    "split_policy": "min_kappa",
+    "priority_tie_policy": "right",
+    "initial_placement": "longest",
+    "error_placement": "risk"
+  },
+  "selection_execution": {
+    "gradient_batch": 8,
+    "inference_batch": 0,
+    "cpu_threads": 4,
+    "generation": "eager",
+    "gradient_workers": 1
+  },
+  "checkpoint_root": null,
+  "checkpoint_retention": "completed_cell_cleanup",
+  "settings": {
+    "chronos-base": {
+      "learning_rate": 0.001,
+      "epochs": 2,
+      "batch_size": 32,
+      "weight_decay": 0,
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "max_grad_norm": 1,
+        "micro_batch_size": 32,
+        "min_lr_ratio": 0,
+        "schedule": "linear",
+        "warmup_ratio": 0
+      },
+      "schedule_epochs": 6,
+      "temperature": {
+        "less-main": 0.36067376022224085,
+        "rags-block-linearSum": 0.36067376022224085,
+        "rags-block-zeroClipSum": 0.36067376022224085,
+        "rags-block-maxSum": 0.36067376022224085,
+        "rags-block-expSum": 0.36067376022224085,
+        "rags-traj-linearSum": 0.36067376022224085,
+        "rags-traj-zeroClipSum": 0.36067376022224085,
+        "rags-traj-maxSum": 0.36067376022224085,
+        "rags-traj-expSum": 0.36067376022224085,
+        "lp-mirror": 0.05
+      },
+      "development_evidence": "/root/TS3/configs/rags/shared_tasks_10.json",
+      "temperature_evidence": "Frozen object-rank interval curve; LP-Mirror retains its native .05"
+    },
+    "timesfm-2.5": {
+      "learning_rate": 3e-05,
+      "epochs": 2.625,
+      "batch_size": 32,
+      "weight_decay": 0.01,
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "max_grad_norm": 1,
+        "micro_batch_size": 32,
+        "min_lr_ratio": 0,
+        "schedule": "cosine",
+        "warmup_ratio": 0
+      },
+      "schedule_epochs": 6,
+      "temperature": {
+        "less-main": 0.36067376022224085,
+        "rags-block-linearSum": 0.36067376022224085,
+        "rags-block-zeroClipSum": 0.36067376022224085,
+        "rags-block-maxSum": 0.36067376022224085,
+        "rags-block-expSum": 0.36067376022224085,
+        "rags-traj-linearSum": 0.36067376022224085,
+        "rags-traj-zeroClipSum": 0.36067376022224085,
+        "rags-traj-maxSum": 0.36067376022224085,
+        "rags-traj-expSum": 0.36067376022224085,
+        "lp-mirror": 0.05
+      },
+      "development_evidence": "/root/TS3/configs/rags/shared_tasks_10.json",
+      "temperature_evidence": "Frozen object-rank interval curve; LP-Mirror retains its native .05"
+    }
+  },
+  "task_protocol": "shared-ten-formal-20260915",
+  "shared_task_decisions": "/root/TS3/configs/rags/shared_tasks.json",
+  "inputs": "/root/autodl-tmp/TS3/outputs/main-shared-ten-20260915/inputs",
+  "model_paths": {
+    "chronos-base": "/root/autodl-tmp/pretrained_models/chronos-t5-base",
+    "timesfm-2.5": "/root/autodl-tmp/hf-cache/hub/models--google--timesfm-2.5-200m-transformers/snapshots/5a9806b9b291fad9233b5249d88263f1846304d3"
+  },
+  "student_environments": {
+    "chronos-base": "/root/miniconda3/envs/ts3/bin/python",
+    "timesfm-2.5": "/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python"
+  },
+  "original_first": true,
+  "online_evaluation": false,
+  "student_selection_execution": {
+    "chronos-base": {
+      "gradient_batch": 4
+    },
+    "timesfm-2.5": {
+      "gradient_batch": 4
+    }
+  },
+  "experiment_version": "v5",
+  "method_protocols": {
+    "orig": {
+      "kind": "pretrained_evaluation"
+    },
+    "rags-block-linearSum": {
+      "aggregation": "linearSum",
+      "competition": "global",
+      "reference_weights_stage": "score_aggregation",
+      "weight_placement": "before_transform",
+      "source_prior": "legal_window_counts_after_rank_mapping",
+      "rank_protocol": "v5-rank-probability-frozen-20260918",
+      "gating": false,
+      "post_rank_softmax": false,
+      "raw_representatives_retain_norm": true,
+      "matching": "cosine_after_representative_normalization",
+      "anchors": "CRB_coverage_risk_min_kappa",
+      "representative": "raw_endpoint_geometric_midpoint",
+      "reference_weight": "1/N_ref*owned_starts/trajectory_starts",
+      "additional_bp_allowed": false
+    },
+    "rags-block-expSum": {
+      "aggregation": "expSum",
+      "competition": "global",
+      "reference_weights_stage": "score_aggregation",
+      "weight_placement": "after_transform",
+      "source_prior": "legal_window_counts_after_rank_mapping",
+      "rank_protocol": "v5-rank-probability-frozen-20260918",
+      "gating": false,
+      "post_rank_softmax": false,
+      "raw_representatives_retain_norm": true,
+      "matching": "cosine_after_representative_normalization",
+      "anchors": "CRB_coverage_risk_min_kappa",
+      "representative": "raw_endpoint_geometric_midpoint",
+      "reference_weight": "1/N_ref*owned_starts/trajectory_starts",
+      "additional_bp_allowed": false
+    }
+  },
+  "temperature_protocol": "v5-rank-probability-frozen-20260918",
+  "opinion_aggregation_protocol": "reference-weighted-scores-v5",
+  "rags_main_method": null,
+  "rags_main_method_selected": false,
+  "preparation_status": "authorized_launch_after_v3_archive",
+  "historical_linear_run": "/root/autodl-tmp/TS3/outputs/main-shared-nine-v3-t005-20260917",
+  "expert_score_order": "linear_clip_max_weight_before;exp_weight_after",
+  "seed_schedule": {
+    "mode": "serial_rounds",
+    "start": 0,
+    "step": 1,
+    "stop": 3,
+    "barrier": "all_models_tasks_methods_complete",
+    "parallelism": "within_round"
+  },
+  "inactive_models": {
+    "timemoe-200m": "paused: difficult to fine-tune; replacement undecided"
+  },
+  "rank_protocol": {
+    "protocol_id": "v5-rank-probability-frozen-20260918",
+    "status": "approved_frozen",
+    "rank_probability_revision": "object-rank-exponential-interval-v5",
+    "ranking_measure": "equal_object_count",
+    "score_information": "order_and_exact_ties_only",
+    "curve": "F(x)=(1-exp(-x/T))/(1-exp(-1/T)); best_rank_at_x=0",
+    "rank_allocation": "interval_integral",
+    "temperature": 0.36067376022224085,
+    "temperature_expression": "1/(2*ln(4))",
+    "target_top_object_fraction": 0.5,
+    "target_rank_mass_before_source_prior": 0.8,
+    "tie_policy": "whole_interval_then_equal_per_object",
+    "boundary_tie_policy": "preserve_ties_and_report_deviation",
+    "reference_weights_stage": "score_aggregation",
+    "source_prior": "legal_window_counts_after_rank_mapping",
+    "source_length_enters_ranking": false,
+    "source_length_applied_once": true,
+    "normalization_after_source_prior": "required",
+    "post_rank_softmax": false,
+    "gating": false,
+    "within_unit_sampling": "uniform_owned_legal_start",
+    "additional_bp_allowed": false,
+    "missing_prepared_assets": "error_without_bp"
+  },
+  "crb_protocol": {
+    "protocol_id": "v5-crb-min-kappa-rightmost-full-budget-20260918",
+    "status": "approved_frozen",
+    "split_policy": "min_kappa",
+    "epsilon_policy": "none",
+    "priority_tie_policy": "right",
+    "initial_placement": "longest",
+    "error_placement": "risk",
+    "endpoint_gate": false,
+    "score_threshold": false,
+    "split_priority": "norm(g_left+g_right)/(norm(g_left)+norm(g_right))",
+    "zero_zero_kappa": 1.0,
+    "normalize_endpoints_before_priority": false,
+    "recursive": true,
+    "scheduling_ties": "exact_priority_equality_then_rightmost_interval",
+    "tie_rng_enabled": false,
+    "retained_intervals": "all",
+    "split_budget": "strictly_exhaust_after_legal_start_capacity_capping",
+    "premature_budget_exhaustion": "error",
+    "budget_transfer": false,
+    "real_anchor_position": "floor((left_index+right_index)/2)",
+    "representative_position": "geometric_midpoint",
+    "raw_representative": "(raw_left_gradient+raw_right_gradient)/2",
+    "new_bp_stage": "anchor_preparation_only",
+    "split_audit_schema": "min-kappa-split-v5",
+    "ranking_protocol": "v5-rank-probability-frozen-20260918",
+    "full_training_config": true
+  },
+  "input_protocol": "shared-ten-native-rolling-h64-v1",
+  "reference_crb_budget": {
+    "cover_density": 0.01,
+    "error_density": 0.01,
+    "split_density": 0.005
+  }
+}

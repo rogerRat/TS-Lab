@@ -1,0 +1,28 @@
+{
+  "student": "timemoe-200m",
+  "status": "schedule_frozen_probability_development_pending",
+  "learning_rate": 0.000003,
+  "epochs": 3,
+  "applies_equally_to_all_training_arms": true,
+  "development_evidence": {
+    "root": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914",
+    "schedule": [
+      "explore-timemoe_full_scale/results.json",
+      "explore-timemoe-full-scale-replicate/results.json"
+    ],
+    "learning_rate_rule": "lowest final E4 development mean MASE in actual N16284 seed0 grid, then independent seeds1/2 replication",
+    "epoch_rule": "minimum mean development MASE across seeds0/1/2 at actual N16284 among predeclared half/integer observations",
+    "epoch_mean_mase": {
+      "1": 0.9848470890570686,
+      "2": 0.9788977117820096,
+      "3": 0.976964502067489,
+      "4": 0.9772365401924069,
+      "0.5": 0.9901430439701882,
+      "1.5": 0.9798547689716995,
+      "2.5": 0.9780586659372008
+    },
+    "original_mean_mase": 0.997824878510292,
+    "formal_exam_used": false,
+    "limitations": "two-task development; mean gain does not imply every task improves; probability temperatures not frozen; safe-history diagnostics are not source-pool evidence"
+  }
+}

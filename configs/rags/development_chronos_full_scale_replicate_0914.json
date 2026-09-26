@@ -1,0 +1,16 @@
+{
+  "purpose": "independent_source_schedule_replication_at_actual_formal_pool_size",
+  "student": "chronos-base",
+  "model_path": "/root/autodl-tmp/pretrained_models/chronos-t5-base",
+  "inputs": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/full-scale-inputs",
+  "datasets": ["boomlet_1676", "boomlet_619"],
+  "training_data": "source_random",
+  "learning_rates": [0.0000001],
+  "epochs": [0.5, 1, 1.5, 2, 2.5, 3, 4],
+  "seeds": [1, 2],
+  "batch_size": 32,
+  "eval_batch": 32,
+  "validation_windows": 8,
+  "timing_context": "concurrent_development_not_a_speed_comparison",
+  "candidate_basis": "LR1e-7 final E4 slightly improved at actual N16284 while LR1e-6 declined; replicate complete curve before freezing epoch or claiming reliable improvement"
+}

@@ -1,0 +1,11 @@
+{
+  "purpose": "development_full_pool_not_formal_matrix",
+  "inputs": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/development-inputs",
+  "pool_equivalents": 256,
+  "pool_seed": 0,
+  "context_length": 512,
+  "prediction_length": 64,
+  "datasets": ["boomlet_1676", "boomlet_619"],
+  "source_load": "/root/autodl-tmp/TS3/data/src/shard_dataset/profile-10b-segl512s512/load",
+  "reference_root": "/root/autodl-tmp/TS3/data/ref/shard_dataset/profile-10b-segl512s512/fev"
+}

@@ -1,0 +1,21 @@
+# Revision-pinned TimesFM models. Capabilities mirror adapters.foundation.spec.
+models:
+  timesfm-3.0:
+    repo_id: google/timesfm-3.0-pytorch
+    revision: 43046b85ec22d584a13f8098c2ed39c889e129c2
+    max_context: 15360
+    capabilities: [forecast]
+    dependency_profile: timesfm3
+    weights_license: timesfm-non-commercial-license-v1.0
+    status: enabled-inference
+  timesfm-2.5:
+    destination: cache/pretrained_models/google/timesfm-2.5-200m-transformers/5a9806b9b291fad9233b5249d88263f1846304d3
+    architecture: TimesFm2_5ModelForPrediction
+    parameter_count_range: [190000000, 210000000]
+    repo_id: google/timesfm-2.5-200m-transformers
+    revision: 5a9806b9b291fad9233b5249d88263f1846304d3
+    max_context: 16384
+    capabilities: [forecast, training_loss, gradient, fine_tune]
+    dependency_profile: timesfm2_5
+    weights_license: Apache-2.0
+    status: enabled-trainable

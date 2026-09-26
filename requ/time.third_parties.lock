@@ -1,0 +1,3 @@
+# Dedicated TIME environment sources. Do not add these rows to third_parties.lock.
+TIME https://github.com/zqiao11/TIME.git b6e7ba9862acb9233c8c55b314c1777052c420ff
+chronos-forecasting https://github.com/amazon-science/chronos-forecasting.git 7dc4435706a4454feb79df44ca9f33631f3027bf

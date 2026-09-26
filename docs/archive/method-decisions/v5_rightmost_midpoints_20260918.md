@@ -1,0 +1,15 @@
+> LATEST split freeze (2026-09-18): [minimum kappa / full budget](v5_kappa_split_20260918.md), config v5_crb_kappa_protocol.json. V5 has NO P10, endpoint eligibility or score threshold: minimize raw-endpoint kappa, exact ties rightmost, recurse after every split and consume the entire capped budget. Zero/zero kappa is 1. Previous P10 and optional-unused-budget V5 statements below are historical. Frozen ranking/score-tie probabilities and floor/geometric-midpoint definitions are unchanged.
+
+## V5 最终决策：并列优先最右；真实位置 floor、估计几何中点（2026-09-18）
+
+本节覆盖此前“随机并列选择”和“中点建议待决”的 V5 表述，冻结排名概率协议仍保持不变。
+
+1. **第 6 项：确定性最右。** 均布优先最长、误差驱动优先最高风险、分裂优先最小插值代表模长；只有主优先级完全相等时，优先左端位置最大的区间，即最右区间。覆盖阶段整批处理同一最长前沿，预算只够一部分时取最右子集。误差和 V5 分裂逐次更新候选池后重新选择。并列调度不创建 RNG、不依赖 placement_seed。这个规则有明确的近期侧偏好，不宣称时间位置对称。最终分数的并列组仍按冻结规则等分概率，不用最右规则打破。
+2. **第 7 项：区分两个中点。** 真实新增锚点取合法起点序号的整数分裂点 $m=\lfloor(a+b)/2\rfloor$；代表与分裂排序估计取连续线性插值的几何中点 $(a+b)/2$，原始代表恒为 $(g_a+g_b)/2$。几何中点可以是半整数、可以没有对应真实窗口，但它仅由已有端点梯度免费构造，不增加 BP。误差驱动的真值与插值必须在实际取样位置 $m$ 比较，使用 $(1-u)g_a+ug_b$、$u=(m-a)/(b-a)$，不能拿 floor 点真值去减几何中点代表。
+3. **边界。** 若整数分裂点不是严格内部位置，该区间停止分裂，保留为块，不补算端点、不制造预算消耗。单起点轨迹用唯一已有梯度。连续几何代表不宣称等于左闭右开离散块的真实或插值窗口平均。所有代表保留端点范数影响，进入匹配时才归一化；锚点准备结束后不新增任何 BP。
+4. **身份与范围。** 最新独立配置 `configs/rags/v5_crb_rightmost_protocol.json`，身份 `v5-crb-strict-p10-recursive-rightmost-20260918`。新 V5 入口显式声明 `split_policy=closest_zero_v5`、`priority_tie_policy=right`、`initial_placement=longest`、`error_placement=risk`。保留先前 left/random 配置及实现供历史追溯，不能作为当前 V5 默认。核心兼容默认 left 不修改，以保持旧版本精确复现。在跑 V4 不切换、正式 V5 尚未启动。
+
+最右规则确定的是锚点调度及给定梯度资产下的采样概率构造；实际训练随机抽样仍按训练 seed 控制。本次未改变训练采样器。
+
+
+Validation: 120 targeted/regression tests passed (3.47s). tests/test_crb_rightmost.py covers rightmost choices in all three stages, no RNG construction, independence of placement_seed, partial frontier rightmost subsets, and floor probe vs geometric midpoint. Existing random/left revisions and frozen rank mapping also passed regression. No commit/push.

@@ -1,0 +1,34 @@
+# Template only. This file is intentionally not runnable.
+# This is the shared default FEV task declaration template.
+
+tasks:
+  - dataset_path: autogluon/fev_datasets
+    # FEV dataset root or declared dataset source.
+    dataset_config: replace_dataset_config
+    # Dataset-specific configuration name.
+    horizon: 64
+    # Number of future points evaluated per window.
+    num_windows: 20
+    # Number of rolling evaluation windows.
+    seasonality: 1
+    # Seasonal period used by scale-based metrics.
+    eval_metric: SQL
+    # Primary metric. The project RQ3 protocol uses SQL.
+    extra_metrics:
+      - MASE
+      - {name: WAPE, epsilon: 1.0}
+      - {name: WQL, epsilon: 1.0}
+      - MAE
+      - MSE
+    # Additional metrics. Mapping form allows metric-specific parameters.
+    quantile_levels: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    # Quantile levels required for probabilistic metrics such as WQL.
+    target: [target_0]
+    # Target column names selected from the declared FEV dataset.
+
+# Task declaration rules:
+# - The top-level mapping must contain only tasks.
+# - The project RQ3 loader requires exactly 20 tasks and the metric set
+#   {SQL, MASE, WAPE, WQL, MAE, MSE} for the complete RQ3 declaration.
+# - expected_tasks in the parent evaluation YAML may intentionally cap the
+#   number of declared tasks for a minimum engineering experiment.

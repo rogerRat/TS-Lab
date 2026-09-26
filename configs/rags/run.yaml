@@ -1,0 +1,107 @@
+# HISTORICAL hard-delivery suite. Current default is full_pool.yaml, not this file.
+# RAGS former formal suite: _exp-0907.md decision 8, 2026-09-11 epoch protocol.
+# Consumed by: python -m rags.experiments.run --config configs/rags/run.yaml
+#
+# Every value below follows _exp-0907.md's decision table strictly:
+# A1 protocol, A3/A4 full-series native exams, A5 pool=5N, A6 N=4096,
+# B model/probe, C1 4:4:1 densities, C2 B=8 + fill-until-N, C3 calibrated
+# epsilon (frozen), C4 tie seed 5, D1 single stage, D2 four epochs.
+batch: main-0911-three-students
+experiment_document: 001-iclr17/rags-md/_exp-0907.md (2026-09-11 decisions 8 and 9)
+
+steps: [main, mechanism1, mechanism2, ablation, data-curve, time-curve]
+
+# ---- sample protocol (identical across selection, training, evaluation) ----
+context_length: 512
+prediction_length: 64
+pool_stride: 1
+
+# ---- CRB anchor budgets (per-trajectory densities, C1 frozen 4:4:1) ----
+cover_density: 0.02        # K_cover: endpoints + longest-interval bisection
+error_density: 0.02        # K_error: risk-integral-driven placement
+split_density: 0.005       # K_split: one-shot cancellation re-split
+
+# ---- detection and recall ----
+block_budget: 8            # B: source blocks returned per reference query
+mean_epsilon: 0.70388913   # epsilon_mu: C3 calibrated p10 (see provenance)
+endpoint_epsilon: 0.70388913  # epsilon_g: same calibrated value (C3)
+curvature_cap: 1.0         # c-bar: optimistic curvature prior
+epsilon_provenance: >-
+  rags-diag-0907-20260907-1949/mechanism1 full scan on ETT_1H dev subset
+  (2 ref + 4 pool series, slice 4096, projection 1024): p10 over both sides'
+  13,461 real window-gradient sketch norms; Count-Sketch norms are unbiased
+  across projection widths. Recompute: python -m
+  rags.experiments.calibrate_epsilon --scan-dir <mechanism1 out>
+
+# ---- data (A2-A6) ----
+datasets: [boomlet_1676, boomlet_619, boomlet_1282, jena_weather_1H, ETT_1H, ETT_15T]
+series_cap: null            # A3: all available series (100/52/35/21/14/14)
+n_windows: 4096             # native LP-Mirror/LTSV/TSDS may overlap (user-approved)
+pool_equivalents: 20480     # A5: pool = 5N non-overlapping window equivalents
+pool_seed: 0
+
+# ---- model / probe (B) ----
+model_path: null            # default: amazon/chronos-t5-small
+projection_dimension: 4096
+
+# Shared execution only: does not change samples, optimizer batch or precision.
+selection_gradient_batch: 0  # 0: memory-aware; OOM halves and remembers the limit
+selection_inference_batch: 0
+selection_memory_fraction: 0.7
+selection_cpu_threads: 4
+selection_generation: cuda_graph  # eager restores official Python generate
+
+# ---- post-training schedule (D: single stage, all arms identical) ----
+source_epochs: 4           # N=4096, batch=32 -> checkpoints at 128/256/384/512 steps
+students: [chronos-small, timesfm-2.5, timemoe-200m]
+student_parallelism: 3  # Future PRO6000 experiment container only; never launch on dev.
+train_batch: 32
+learning_rate: 1.0e-5
+seeds: [0, 1, 2]
+
+# ---- main-table arms (F) ----
+with_baselines: [less, tsds, lp_mirror, ltsv]
+
+# ---- LESS pool-feature cost adaptation (F1, disclosed) ----
+# LESS/TSDS uniformly sample per trajectory using the three CRB budgets above.
+
+# ---- ablation (S5, dev task ETT_1H per S1.6) ----
+variants: [full, random_cover, no_error, no_split_detect, drop_only,
+           fixed_blocks, window_return, uniform_segments]
+with_grid: true
+
+# ---- curves (S2.2) ----
+n_values: [1024, 2048, 4096, 8192]   # per-task pool 5%/10%/20%/40% (2026-09-09 per-task口径)
+total_budget_seconds: 1800
+
+# ---- mechanism1 (S3 full-scan subset per S1.6) ----
+densities: [0.01, 0.02, 0.05, 0.10, 0.20]
+b_values: [1, 4, 8, 16]
+m_values: [50, 100, 500]
+
+# ---- mechanism2 (S4) ----
+density: 0.05
+cancel_ratio: 0.5
+
+# ---- per-step overrides (merged over the shared values above) ----
+step_overrides:
+  mechanism1:
+    dataset: ETT_1H          # dev task
+    series_cap: 2            # full-scan subset: 2 ref series
+    slice_length: 4096       # dev-subset tail slice
+    pool_series: 4           # dev-subset source series count (legacy flag)
+    pool_slice: 4096
+    stride: 1
+    projection_dimension: 1024
+    rescan: false
+  mechanism2:
+    scan_dir: "{run_dir}/mechanism1"
+    stride: 1
+  data-curve:
+    dataset: ETT_1H
+    arms: [rags, random, trajectory_level]
+  time-curve:
+    dataset: ETT_1H
+    arms: [rags, random]
+  ablation:
+    dataset: ETT_1H

@@ -1,0 +1,22 @@
+{
+ "dataset": "boomlet_1676",
+ "determinism": {
+  "mase_run1": 0.32971237198693054,
+  "mase_run2": 0.32971237198693054,
+  "sql_run1": 0.2647961676444921,
+  "sql_run2": 0.2647961676444921,
+  "identical": true
+ },
+ "reproduce_archived_original": {
+  "mase": 0.32971237198693054,
+  "archived": 0.3297,
+  "abs_diff": 1.2371986930548307e-05,
+  "matches": false
+ },
+ "canary_x10": {
+  "mase": 2.1172184132569765,
+  "sql": 2.1111807409893317,
+  "degraded": true
+ },
+ "verdict": "METER OK"
+}

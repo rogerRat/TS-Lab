@@ -1,0 +1,63 @@
+{
+  "context_length": 512,
+  "prediction_length": 64,
+  "validation_windows": 8,
+  "tasks": [
+    {
+      "id": "fev_epf_np",
+      "benchmark": "fev",
+      "dataset_config": "epf_np",
+      "dataset_file": "/root/autodl-tmp/TS3/data/bench/fev/datasets/autogluon___fev_datasets/epf_np/0.0.0/f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8/fev_datasets-train.arrow",
+      "evaluation_config": "configs/eval/fev/default.yaml",
+      "revision": "f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8"
+    },
+    {
+      "id": "fev_proenfo_gfc14",
+      "benchmark": "fev",
+      "dataset_config": "proenfo_gfc14",
+      "dataset_file": "/root/autodl-tmp/TS3/data/bench/fev/datasets/autogluon___fev_datasets/proenfo_gfc14/0.0.0/f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8/fev_datasets-train.arrow",
+      "evaluation_config": "configs/eval/fev/default.yaml",
+      "revision": "f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8"
+    },
+    {
+      "id": "fev_solar_with_weather_1h",
+      "benchmark": "fev",
+      "dataset_config": "solar_with_weather_1H",
+      "dataset_file": "/root/autodl-tmp/TS3/data/bench/fev/datasets/autogluon___fev_datasets/solar_with_weather_1H/0.0.0/f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8/fev_datasets-train.arrow",
+      "evaluation_config": "configs/eval/fev/default.yaml",
+      "revision": "f71c0fff4cf81283a2c43e7f3a73aa4f9826aef8"
+    },
+    {
+      "id": "time_darwin_water_15t",
+      "benchmark": "time",
+      "dataset": "Water_Quality_Darwin/15T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 96
+    },
+    {
+      "id": "time_ne_china_wind_h",
+      "benchmark": "time",
+      "dataset": "NE_China_Wind/H",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 24
+    },
+    {
+      "id": "time_port_activity_d",
+      "benchmark": "time",
+      "dataset": "Port_Activity/D",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 7
+    },
+    {
+      "id": "time_azure_i_cpu_5t",
+      "benchmark": "time",
+      "dataset": "azure2019_I/5T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 288,
+      "variate_names": [
+        "avg_cpu"
+      ],
+      "variate_name_aliases": {"avg_cpu": ["avg_cpu[sp,rw]"]}
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "inputs": "/root/autodl-tmp/TS3/outputs/probe-20260914/probe-inputs-v2",
+  "parameter_tasks": [
+    "time_finland_15t",
+    "time_cphl_h",
+    "time_eweld_15t"
+  ],
+  "candidate_tasks": [
+    "time_finland_15t",
+    "time_cphl_h",
+    "time_eweld_15t",
+    "time_nem_demand_5t",
+    "time_nem_price_5t",
+    "time_solar_h",
+    "quito_hour",
+    "quito_min"
+  ],
+  "models": {
+    "chronos-base": {
+      "python": "/root/miniconda3/envs/ts3/bin/python",
+      "learning_rates": [
+        0.001,
+        0.0001,
+        0.00001,
+        0.000001
+      ],
+      "model_path": "/root/autodl-tmp/pretrained_models/chronos-t5-base"
+    },
+    "timesfm-2.5": {
+      "python": "/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python",
+      "learning_rates": [
+        0.0001,
+        0.0003,
+        0.00003,
+        0.00001
+      ]
+    },
+    "timemoe-200m": {
+      "python": "/root/autodl-tmp/conda/envs/ts3-timemoe/bin/python",
+      "learning_rates": [
+        0.0001,
+        0.0003,
+        0.00003,
+        0.00001
+      ]
+    }
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "coarse_epochs": [
+    1,
+    2
+  ],
+  "max_search_steps": 4,
+  "task_probe_model": "timemoe-200m",
+  "top_k": 3,
+  "context_length": 512,
+  "prediction_length": 64,
+  "validation_windows": 8,
+  "eval_batch": 32,
+  "device": "cuda"
+}

@@ -1,0 +1,68 @@
+{
+ "key": "full_lr1e-05_b32_wd0.1_const_s1",
+ "mechanism": "full",
+ "lr": 1e-05,
+ "batch": 32,
+ "wd": 0.1,
+ "schedule": "const",
+ "clip": 0.0,
+ "seed": 1,
+ "loss_first": 3.610905170440674,
+ "loss_last": 3.7489137649536133,
+ "marks": {
+  "400": {
+   "mase": 0.334670812660504,
+   "per_dataset": {
+    "boomlet_1676": 0.3293,
+    "boomlet_619": 0.2555,
+    "boomlet_1282": 0.3906,
+    "jena_weather_1H": 0.2792,
+    "ETT_1H": 0.4537,
+    "ETT_15T": 0.2997
+   },
+   "probe_mase": 0.38810948423487357,
+   "probe_ce": 3.7502033710479736
+  },
+  "800": {
+   "mase": 0.33316726041388717,
+   "per_dataset": {
+    "boomlet_1676": 0.3289,
+    "boomlet_619": 0.2478,
+    "boomlet_1282": 0.3901,
+    "jena_weather_1H": 0.2788,
+    "ETT_1H": 0.454,
+    "ETT_15T": 0.2995
+   },
+   "probe_mase": 0.38596390290436994,
+   "probe_ce": 3.729952096939087
+  },
+  "1600": {
+   "mase": 0.33167256698435454,
+   "per_dataset": {
+    "boomlet_1676": 0.3289,
+    "boomlet_619": 0.2403,
+    "boomlet_1282": 0.3894,
+    "jena_weather_1H": 0.2779,
+    "ETT_1H": 0.4543,
+    "ETT_15T": 0.2992
+   },
+   "probe_mase": 0.38323312011837474,
+   "probe_ce": 3.7107832431793213
+  },
+  "3200": {
+   "mase": 0.33070024664092085,
+   "per_dataset": {
+    "boomlet_1676": 0.3294,
+    "boomlet_619": 0.234,
+    "boomlet_1282": 0.3885,
+    "jena_weather_1H": 0.278,
+    "ETT_1H": 0.4551,
+    "ETT_15T": 0.2993
+   },
+   "probe_mase": 0.381561894902746,
+   "probe_ce": 3.696052312850952
+  }
+ },
+ "best_step": 3200,
+ "best_mase": 0.33070024664092085
+}

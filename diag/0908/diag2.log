@@ -1,0 +1,15 @@
+[15:35:28] pool rebuilt: 1365 trajectories; random selection: 4096 windows
+[15:35:28] ids match archive: True
+[15:35:33] range audit: {'train_abs_p50': 6.255967140197754, 'train_abs_p99': 491253.0, 'test_abs_p50': 0.5264580845832825, 'test_abs_p99': 2.500074625015259}
+[15:36:12] step 250: loss 3.604 (39s elapsed)
+[15:36:51] step 500: loss 3.712 (78s elapsed)
+[15:38:09] step 1000: loss 3.513 (157s elapsed)
+[15:40:46] step 2000: loss 3.758 (313s elapsed)
+[15:43:23] step 3000: loss 2.860 (470s elapsed)
+[15:43:26] eval @    0 steps: MASE 0.3297 SQL 0.2648
+[15:43:29] eval @  250 steps: MASE 0.3303 SQL 0.2655
+[15:43:32] eval @  500 steps: MASE 0.3317 SQL 0.2670
+[15:43:35] eval @ 1000 steps: MASE 0.3339 SQL 0.2691
+[15:43:38] eval @ 2000 steps: MASE 0.3415 SQL 0.2758
+[15:43:41] eval @ 3000 steps: MASE 0.3479 SQL 0.2813
+[15:43:41] done -> /root/TS3/diag/0908/diag2_steps.json

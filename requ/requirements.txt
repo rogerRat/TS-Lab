@@ -1,0 +1,50 @@
+# ===========================================================================
+# TS3 Project - Python Dependencies
+# ===========================================================================
+# PyTorch is pinned to the CUDA 12.8 wheel so Blackwell (sm_120) GPUs are
+# supported. The installer resolves Torch and its CUDA dependencies from the
+# official wheel index before installing these ordinary Python dependencies.
+# Direct dependencies for conda environment 'ts3' (Python 3.10).
+# Install:
+#   bash _install.sh --env main
+# ===========================================================================
+
+# -- Core Computation --
+numpy==2.2.6
+scipy==1.15.3
+pot==0.9.7.post1              # Optimal transport used by selection baselines
+faiss-cpu==1.12.0             # TSDS upstream IVF retrieval, including KDE index
+threadpoolctl==3.6.0          # Shared selection BLAS/OpenMP thread budget
+statsmodels==0.14.6
+pandas==2.3.3
+
+# -- Data Acquisition --
+datasets==4.8.5               # HuggingFace datasets (Chronos and FEV)
+fsspec==2026.2.0              # FEV-compatible filesystem backend
+modelscope-hub==0.1.8         # ModelScope Hub client
+pyarrow==24.0.0
+pydantic==2.13.4             # Required by the locked FEV checkout
+
+# -- Visualization --
+plotly==6.8.0
+kaleido==1.3.0                # Static image export (fig.write_image)
+scikit-learn==1.7.2           # PCA dimensionality reduction
+umap-learn==0.5.12            # UMAP dimensionality reduction
+
+# -- CLI & Utilities --
+tqdm==4.68.2                  # Progress bars
+PyYAML==6.0.3                 # YAML experiment configurations
+
+# -- Chronos Training -----------------------------------------------
+# These versions are compatible with the locked Chronos checkout.
+torch==2.7.1+cu128
+transformers==4.57.1
+accelerate==1.11.0
+einops==0.8.1
+gluonts==0.16.3
+hatchling==1.32.0            # build backend for locked Chronos and FEV checkouts
+typer-config==1.5.1
+tensorboard==2.20.0
+
+# -- Local Verification ---------------------------------------------
+pytest==8.4.2

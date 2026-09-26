@@ -1,0 +1,24 @@
+## V5 最新冻结：最小 κ 分裂、并列最右、预算耗尽（2026-09-18）
+
+本节覆盖此前 V5 的 P10 门槛、阈值审计和“候选不足允许剩余预算”定义；当前 V5 完全移除 P10。旧实验与旧协议仅保留历史身份，不回写在跑 V4。
+
+对相邻锚点区间 $I=[a,b]$，以原始端点梯度定义
+
+$$
+\kappa_I=\frac{\|g_a+g_b\|_2}{\|g_a\|_2+\|g_b\|_2}
+=\frac{\|\bar g_I\|_2}{(\|g_a\|_2+\|g_b\|_2)/2}.
+$$
+
+1. **不设资格或停止阈值。** 所有内部仍有未采集合法起点的区间都参与，包括两端为零、相同方向、没有明显抵消的区间。不计算、使用或保存 P10，不载入任何 P10 校准资产。
+2. **当前最小 κ。** 每次选当前 $\kappa_I$ 最小的区间，完全相等时优先最右；在 $m=\lfloor(a+b)/2\rfloor$ 新增一次真实锚点梯度，二分后立即将可分裂子区间放回竞争。不批量处理旧并列前沿来跳过新候选。跨轨迹仍可批量计算各自当前选择。三个阶段并列优先最右，不使用调度 RNG。
+3. **两端都为零。** 将未定义的 $0/0$ 明确定义为 $\kappa_I=1$：没有可判定的抵消，处于最低优先级，但仍参与分裂以耗尽预算。一端为零、另一端非零也为 1。没有 epsilon 加法或隐藏门槛；端点不先单位化，否则会丢掉幅值平衡信息。
+4. **严格消耗预算。** 预算先按不同合法起点容量取整与封顶，再严格使用全部 $K_{\mathrm{split}}$；只计新增不同窗口梯度，不重复算端点、不制造虚假消耗、不跨阶段挪用。端点覆盖全部合法起点范围、所有区间保留，因此剩余未采集合法起点总能提供内部整数分裂点；若实现提前耗尽候选但预算未满，明确报错，不能输出部分预算已完成的产物。
+5. **表示与概率不变。** 真实锚点位置取 floor，免费原始代表取几何中点 $(g_a+g_b)/2$，进入匹配时才归一化。几何代表计算不新增 BP。LESS/RAGS 评分公式、冻结对象排名温度、最终同分组均分及源长度最后只乘一次均不变。锚点准备结束后绝不新增 BP。
+6. **身份与审计。** 新协议 `v5-crb-min-kappa-rightmost-full-budget-20260918`；配置 `configs/rags/v5_crb_kappa_protocol.json`，`split_policy=min_kappa_v5`、`epsilon_policy=none`、`priority_tie_policy=right`、`initial_placement=longest`、`error_placement=risk`。分裂审计为 `split_audit`；资产输出 `crb-splits-<task>.json`，schema `min-kappa-split-v5`。不再输出当前 V5 的阈值文件；历史 P10 代码、配置与结果明确仅用于旧协议复现。
+
+κ 只决定预算优先级，不证明整个块真实梯度发生抵消。必须用满预算意味着没有明显抵消时也会分裂，且全零场最终按最右并列规则使用资源；这是本轮明确决定，不追加评分阈值或回填方案。
+
+正式 V5 完整训练矩阵与排名训练入口仍未启动。本轮不修改在跑 V4，不将通用小型夹具训练当作正式 V5 结果。
+
+
+Validation: 148 CRB/rank targeted and legacy regression tests passed (3.82s); 26 shared assets/run/worker/calibration tests passed (3.80s). New tests/test_crb_kappa_v5.py covers no quantile/RNG construction, zero/constant fields, capped-budget equality, relative rather than absolute priority, scale invariance, independent recursive oracle, multi-fragment equivalence, missing calibration assets and split-only audits. Test worker uses a tiny synthetic fixture with native historical scoring, not a complete formal V5 training entry.

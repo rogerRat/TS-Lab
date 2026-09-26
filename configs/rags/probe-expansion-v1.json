@@ -1,0 +1,29 @@
+{
+  "revision": "additional_safe_history_v1",
+  "prior_candidates": [
+    "time_finland_15t",
+    "time_cphl_h",
+    "time_eweld_15t",
+    "time_nem_demand_5t",
+    "time_nem_price_5t",
+    "time_solar_h",
+    "quito_hour",
+    "quito_min"
+  ],
+  "new_candidates": [
+    "fev_epf_np",
+    "fev_proenfo_gfc14",
+    "fev_solar_with_weather_1h",
+    "time_darwin_water_15t",
+    "time_ne_china_wind_h",
+    "time_port_activity_d",
+    "time_azure_i_cpu_5t"
+  ],
+  "total_candidates": 15,
+  "max_candidates": 20,
+  "models": [
+    "timemoe-200m",
+    "timesfm-2.5"
+  ],
+  "purpose": "development_diagnostic_only_no_private_final_task_selection"
+}

@@ -1,0 +1,138 @@
+sampling:
+  policy: candidate-uniform
+  source_catalog: /root/TS3/configs/catalog/src/profile-10b-segl512s512.yaml
+  reference_catalog_dir: /root/TS3/configs/experiments/chronos46m-cu-rand-l512s512-s2/reference-catalogs-00-01-02-03-04-05-06-07-09-10-12-15-16
+  reference_task_record:
+    benchmark: fev
+    task_indices:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 9
+    - 10
+    - 12
+    - 15
+    - 16
+  ot:
+    solver: pot_sinkhorn_unbalanced
+    feature_metric: squared_euclidean
+    epsilon: 0.1
+    mass_regularization: 1.0
+    max_iterations: 1000
+    tolerance: 1.0e-08
+    neighbor_count: 256
+    support_threshold: 0.5
+  lambda: 1.0
+context_length: 512
+prediction_length: 64
+window_stride: 512
+missing_value_policy: reject
+seed: 2
+batch_size: 64
+training_steps: 10000
+adapter_class: adapters.chronos.train.adapter:ChronosTS3TrainAdapter
+adapter_config:
+  model:
+    architecture_source: /root/TS3/third_parties/chronos-forecasting/test/dummy-chronos-model
+    pretrained_weights: null
+    initialization_mode: from_scratch
+    initializer_factor: 0.05
+    tie_embeddings: true
+    architecture_overrides:
+      d_model: 512
+      d_ff: 2048
+      d_kv: 64
+      num_layers: 6
+      num_decoder_layers: 6
+      num_heads: 8
+      feed_forward_proj: relu
+      dropout_rate: 0.1
+      layer_norm_epsilon: 1.0e-06
+      relative_attention_num_buckets: 32
+      relative_attention_max_distance: 128
+      use_cache: true
+    trainable_parameters: all
+    frozen_module_patterns: []
+    device: cuda
+  chronos:
+    model_type: seq2seq
+    tokenizer_class: MeanScaleUniformBins
+    tokenizer_kwargs:
+      low_limit: -15.0
+      high_limit: 15.0
+    n_tokens: 4096
+    n_special_tokens: 2
+    pad_token_id: 0
+    eos_token_id: 1
+    use_eos_token: true
+  optimizer:
+    name: AdamW
+    kwargs:
+      learning_rate: 0.001
+      betas:
+      - 0.9
+      - 0.999
+      eps: 1.0e-08
+      weight_decay: 0.0
+      amsgrad: false
+      maximize: false
+      foreach: null
+      capturable: false
+      differentiable: false
+      fused: true
+    parameter_groups:
+    - name: all_trainable_parameters
+      include_patterns:
+      - .*
+      learning_rate_multiplier: 1.0
+      weight_decay: 0.0
+  training:
+    drop_prob: 0.2
+    gradient_accumulation_steps: 1
+    max_grad_norm: 1.0
+    lr_scheduler:
+      name: linear
+      warmup_steps: 0
+      end_learning_rate: 0.0
+  execution:
+    train_dtype: float32
+    automatic_mixed_precision: false
+    amp_dtype: null
+    gradient_scaler: false
+    tf32: true
+    torch_compile: true
+    gradient_checkpointing: false
+    deterministic_algorithms: false
+    cudnn_benchmark: false
+    cudnn_deterministic: false
+  objective:
+    loss_name: model_output_cross_entropy
+    label_ignore_index: -100
+    loss_reduction: mean
+    label_smoothing_factor: 0.0
+    auxiliary_losses: []
+gradient_accumulation_steps: 1
+runtime_shard_mmap_cache_capacity: 8
+runtime_dataloader_workers: 8
+runtime_dataloader_prefetch_factor: 4
+runtime_dataloader_persistent_workers: true
+runtime_dataloader_pin_memory: true
+logging_interval_steps: 100
+resume_checkpoint: null
+audit:
+  enabled: false
+  level: standard
+  flush_interval_steps: 100
+  buffer_bytes: 1048576
+  compression: false
+save_checkpoint_steps: 0
+checkpoint_steps:
+- 1000
+- 2000
+- 5000
+- 8000

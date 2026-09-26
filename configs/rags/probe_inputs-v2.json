@@ -1,0 +1,77 @@
+{
+  "context_length": 512,
+  "prediction_length": 64,
+  "validation_windows": 8,
+  "tasks": [
+    {
+      "id": "quito_hour",
+      "benchmark": "quito",
+      "subset": "hour",
+      "root": "/root/autodl-tmp/TS3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87"
+    },
+    {
+      "id": "quito_min",
+      "benchmark": "quito",
+      "subset": "min",
+      "root": "/root/autodl-tmp/TS3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87"
+    },
+    {
+      "id": "time_finland_15t",
+      "benchmark": "time",
+      "dataset": "Finland_Traffic/15T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 96,
+      "require_native_univariate": true
+    },
+    {
+      "id": "time_cphl_h",
+      "benchmark": "time",
+      "dataset": "CPHL/H",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 24,
+      "require_native_univariate": true
+    },
+    {
+      "id": "time_eweld_15t",
+      "benchmark": "time",
+      "dataset": "EWELD_Load/15T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 96
+    },
+    {
+      "id": "time_nem_demand_5t",
+      "benchmark": "time",
+      "dataset": "OpenElectricity_NEM/5T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 288,
+      "variate_names": [
+        "demand__NSW1",
+        "demand__QLD1",
+        "demand__SA1",
+        "demand__TAS1",
+        "demand__VIC1"
+      ]
+    },
+    {
+      "id": "time_nem_price_5t",
+      "benchmark": "time",
+      "dataset": "OpenElectricity_NEM/5T",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 288,
+      "variate_names": [
+        "price__NSW1",
+        "price__QLD1",
+        "price__SA1",
+        "price__TAS1",
+        "price__VIC1"
+      ]
+    },
+    {
+      "id": "time_solar_h",
+      "benchmark": "time",
+      "dataset": "Australia_Solar/H",
+      "evaluation_config": "configs/eval/time/official_all.yaml",
+      "seasonality": 24
+    }
+  ]
+}

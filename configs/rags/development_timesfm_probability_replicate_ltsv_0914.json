@@ -1,0 +1,68 @@
+{
+  "purpose": "independent_seed_replication_equal_budget_probability_candidates",
+  "student": "timesfm-2.5",
+  "model_path": "/root/autodl-tmp/hf-cache/hub/models--google--timesfm-2.5-200m-transformers/snapshots/5a9806b9b291fad9233b5249d88263f1846304d3",
+  "inputs": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/probability-inputs",
+  "datasets": [
+    "boomlet_1676"
+  ],
+  "training_data": "source_probability",
+  "epsilon_calibration": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/epsilon-timesfm-2.5/epsilon.json",
+  "selection_cache": "/root/autodl-tmp/TS3/outputs/full-pool-exp-0914/probability-timesfm-cache",
+  "crb": {
+    "cover_density": 0.02,
+    "error_density": 0.02,
+    "split_density": 0.005,
+    "curvature_cap": 1
+  },
+  "selection_execution": {
+    "gradient_batch": 1,
+    "inference_batch": 32,
+    "cpu_threads": 4,
+    "generation": "eager"
+  },
+  "learning_rates": [
+    0.000001
+  ],
+  "epochs": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.5,
+    3,
+    4,
+    8,
+    16,
+    32
+  ],
+  "seeds": [
+    1,
+    2
+  ],
+  "batch_size": 32,
+  "eval_batch": 32,
+  "validation_windows": 8,
+  "timing_context": "concurrent_development_not_a_speed_comparison",
+  "equal_budget_grid": {
+    "arms": [
+      "rags",
+      "trajectory_level",
+      "less",
+      "lp_mirror",
+      "ltsv"
+    ],
+    "temperatures": [
+      0.1,
+      1
+    ],
+    "learning_rate": 0.000001,
+    "final_sample_exposures": 8192,
+    "selection_rule": "complete both temperatures for every arm before freezing; never use formal exam"
+  },
+  "exposure_basis": "same fixed 8 reference series, N256 and 8192 final draws; do not transfer E32 to formal N",
+  "arm": "ltsv",
+  "temperature": 0.1,
+  "replication_basis": "all seven arms receive two independent seeds; candidate temperature chosen by final E32 mean development MASE in completed seed0 two-temperature grid; formal exam unused",
+  "probability_reuse": "copy unchanged saved static selection from corresponding seed0 run; no new scoring or temperature tuning"
+}

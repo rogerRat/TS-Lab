@@ -1,0 +1,198 @@
+{
+ "regime": {
+  "mechanism": "full",
+  "lr": 1e-05,
+  "batch": 32,
+  "wd": 0.1,
+  "schedule": "const",
+  "clip": 0.0
+ },
+ "champion_key": "full_lr1e-05_b32_wd0.1_const",
+ "n_total": 24576,
+ "candidates": 200044,
+ "diversity": {
+  "sim_max": {
+   "unique_fragments": 36,
+   "score_p50_p95_max": [
+    0.958984375,
+    0.99951171875
+   ]
+  },
+  "sim_cent": {
+   "unique_fragments": 36,
+   "score_p50_p95_max": [
+    0.8916015625,
+    0.94873046875
+   ]
+  }
+ },
+ "references": {
+  "diag6_random_lr3e-5": 0.3398,
+  "diag5_indomain_best": 0.3311,
+  "baseline": 0.3409
+ },
+ "selections": {
+  "sim_max": {
+   "loss_first": 4.198601722717285,
+   "loss_last": 4.453113555908203,
+   "marks": {
+    "400": {
+     "mase": 0.34141316161545965,
+     "per_dataset": {
+      "boomlet_1676": 0.3298,
+      "boomlet_619": 0.2873,
+      "boomlet_1282": 0.3957,
+      "jena_weather_1H": 0.2801,
+      "ETT_1H": 0.4564,
+      "ETT_15T": 0.2993
+     },
+     "probe_ce": 3.864978313446045
+    },
+    "800": {
+     "mase": 0.34178355271406713,
+     "per_dataset": {
+      "boomlet_1676": 0.3303,
+      "boomlet_619": 0.2879,
+      "boomlet_1282": 0.3955,
+      "jena_weather_1H": 0.2797,
+      "ETT_1H": 0.4582,
+      "ETT_15T": 0.299
+     },
+     "probe_ce": 3.865929365158081
+    },
+    "1600": {
+     "mase": 0.3428601615546609,
+     "per_dataset": {
+      "boomlet_1676": 0.331,
+      "boomlet_619": 0.291,
+      "boomlet_1282": 0.3952,
+      "jena_weather_1H": 0.2803,
+      "ETT_1H": 0.4598,
+      "ETT_15T": 0.2998
+     },
+     "probe_ce": 3.8797898292541504
+    },
+    "3200": {
+     "mase": 0.3457732643802034,
+     "per_dataset": {
+      "boomlet_1676": 0.3331,
+      "boomlet_619": 0.2974,
+      "boomlet_1282": 0.3969,
+      "jena_weather_1H": 0.2813,
+      "ETT_1H": 0.4643,
+      "ETT_15T": 0.3017
+     },
+     "probe_ce": 3.902798652648926
+    }
+   }
+  },
+  "sim_cent": {
+   "loss_first": 4.387578010559082,
+   "loss_last": 4.864902973175049,
+   "marks": {
+    "400": {
+     "mase": 0.34149743236499636,
+     "per_dataset": {
+      "boomlet_1676": 0.3299,
+      "boomlet_619": 0.2889,
+      "boomlet_1282": 0.396,
+      "jena_weather_1H": 0.2793,
+      "ETT_1H": 0.4556,
+      "ETT_15T": 0.2993
+     },
+     "probe_ce": 3.8633978366851807
+    },
+    "800": {
+     "mase": 0.34207571991913605,
+     "per_dataset": {
+      "boomlet_1676": 0.3302,
+      "boomlet_619": 0.2913,
+      "boomlet_1282": 0.3964,
+      "jena_weather_1H": 0.2789,
+      "ETT_1H": 0.4564,
+      "ETT_15T": 0.2992
+     },
+     "probe_ce": 3.869154930114746
+    },
+    "1600": {
+     "mase": 0.3430634378135105,
+     "per_dataset": {
+      "boomlet_1676": 0.3307,
+      "boomlet_619": 0.2931,
+      "boomlet_1282": 0.3973,
+      "jena_weather_1H": 0.279,
+      "ETT_1H": 0.4586,
+      "ETT_15T": 0.2997
+     },
+     "probe_ce": 3.874053478240967
+    },
+    "3200": {
+     "mase": 0.34502791628371415,
+     "per_dataset": {
+      "boomlet_1676": 0.3319,
+      "boomlet_619": 0.2984,
+      "boomlet_1282": 0.3975,
+      "jena_weather_1H": 0.2794,
+      "ETT_1H": 0.4615,
+      "ETT_15T": 0.3015
+     },
+     "probe_ce": 3.8928561210632324
+    }
+   }
+  },
+  "random": {
+   "loss_first": 3.830061435699463,
+   "loss_last": 3.5279178619384766,
+   "marks": {
+    "400": {
+     "mase": 0.340564686198685,
+     "per_dataset": {
+      "boomlet_1676": 0.3297,
+      "boomlet_619": 0.2852,
+      "boomlet_1282": 0.3957,
+      "jena_weather_1H": 0.2787,
+      "ETT_1H": 0.4557,
+      "ETT_15T": 0.2985
+     },
+     "probe_ce": 3.8525915145874023
+    },
+    "800": {
+     "mase": 0.34041355305934995,
+     "per_dataset": {
+      "boomlet_1676": 0.3297,
+      "boomlet_619": 0.2841,
+      "boomlet_1282": 0.3955,
+      "jena_weather_1H": 0.2788,
+      "ETT_1H": 0.4558,
+      "ETT_15T": 0.2986
+     },
+     "probe_ce": 3.847738027572632
+    },
+    "1600": {
+     "mase": 0.3401187329728661,
+     "per_dataset": {
+      "boomlet_1676": 0.3299,
+      "boomlet_619": 0.2832,
+      "boomlet_1282": 0.3954,
+      "jena_weather_1H": 0.2791,
+      "ETT_1H": 0.4551,
+      "ETT_15T": 0.2981
+     },
+     "probe_ce": 3.8456733226776123
+    },
+    "3200": {
+     "mase": 0.33969534828615827,
+     "per_dataset": {
+      "boomlet_1676": 0.33,
+      "boomlet_619": 0.2824,
+      "boomlet_1282": 0.3948,
+      "jena_weather_1H": 0.2788,
+      "ETT_1H": 0.4539,
+      "ETT_15T": 0.2983
+     },
+     "probe_ce": 3.83792781829834
+    }
+   }
+  }
+ }
+}

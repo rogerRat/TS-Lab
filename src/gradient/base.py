@@ -1,0 +1,284 @@
+"""Shared full-parameter projection and native-loss gradient interface."""
+from __future__ import annotations
+from typing import Protocol
+from types import SimpleNamespace
+import numpy as np
+import torch
+from torch import nn
+from gradient.projection import ParameterHashProjector
+from gradient.count_sketch import add_count_sketch
+
+_worker_probe = None
+
+
+def _init_gradient_worker(student, checkpoint_path, device, dimension, seed):
+    global _worker_probe
+    import os
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    from rags.experiments.full_pool_models import build_model
+    torch.set_num_threads(2)
+    _, _worker_probe, _ = build_model(student, model_path=checkpoint_path, device=device)
+    if (_worker_probe.config.projection_dimension, _worker_probe.config.projection_seed) != (dimension, seed):
+        raise ValueError("worker projection must match parent")
+
+
+def _worker_gradients(windows):
+    import os
+    losses, values = _worker_probe.batch_gradient_sketch(windows, batch_size=1)
+    return losses, values, os.getpid(), torch.cuda.max_memory_allocated() / 2**30
+
+
+class IndependentGradientWorkers:
+    """Persistent single-window GPU processes; only the caller owns cache writes.
+
+    The pool is sized once from the configured worker count and the VRAM
+    budget, never from the request size: small or tail batches reuse the warm
+    pool with fewer non-empty chunks instead of tearing it down and respawning
+    model-loading workers per call. OOM and explicit release still free it.
+    """
+    _gradient_pool = None
+    _pool_size = 0
+
+    def release_gradient_workers(self):
+        if self._gradient_pool is not None:
+            self._gradient_pool.shutdown(wait=True, cancel_futures=True)
+            self._gradient_pool = None
+            self._pool_size = 0
+
+    def _pool_worker_target(self):
+        from rags.execution import execution_policy
+        parameters = list(self.model.parameters())
+        parameter_bytes = sum(p.numel() * p.element_size() for p in parameters)
+        required = 3 * parameter_bytes + 5 * self.projector.total_parameters + 2 * 2**30
+        free, _ = torch.cuda.mem_get_info(self.device)
+        budget = free * execution_policy(self).memory_fraction + self._pool_size * required
+        return max(1, min(execution_policy(self).gradient_workers,
+                          max(1, int(budget // required))))
+
+    def _process_gradients(self, values, size):
+        from concurrent.futures import ProcessPoolExecutor
+        import multiprocessing
+        if self._gradient_pool is None:
+            workers = self._pool_worker_target()
+            if workers <= 1:
+                # Not even one worker fits the VRAM budget; parent-only path.
+                return self.batch_gradient_sketch(values, batch_size=1)
+            self._gradient_pool = ProcessPoolExecutor(max_workers=workers,
+                mp_context=multiprocessing.get_context("spawn"), initializer=_init_gradient_worker,
+                initargs=(self.worker_student, self.checkpoint_path, str(self.device),
+                          self.config.projection_dimension, self.config.projection_seed))
+            self._pool_size = workers
+        parts = max(1, min(self._pool_size, len(values)))
+        chunks = [part for part in np.array_split(values, parts) if len(part)]
+        try:
+            results = list(self._gradient_pool.map(_worker_gradients, chunks))
+        except torch.cuda.OutOfMemoryError:
+            self.release_gradient_workers()
+            torch.cuda.empty_cache()
+            result = self.batch_gradient_sketch(values, batch_size=1)
+            self.last_gradient_execution["oom_retries"] = 1
+            return result
+        except BaseException:
+            self.release_gradient_workers()
+            raise
+        self.last_gradient_execution = dict(batch_size=size, workers=len(chunks),
+            pool_size=self._pool_size,
+            backend="independent-cuda-processes", oom_retries=0,
+            worker_peak_gpu_gib={str(pid): peak for _, _, pid, peak in results})
+        return np.concatenate([r[0] for r in results]), np.concatenate([r[1] for r in results])
+
+class GradientEngine(Protocol):
+    def batch_gradient_sketch(self, windows: np.ndarray) -> tuple[np.ndarray, np.ndarray]: ...
+
+class _FullModelProjector:
+    """Hash-project the concatenated gradients of all trainable parameters.
+
+    Each parameter tensor gets a fixed slice of the global index space; the
+    hash/sign tables are derived from one seed so every caller shares the
+    same random projection matrix.
+    """
+
+    def __init__(self, named_parameters: list[tuple[str, nn.Parameter]],
+                 projection_dimension: int, seed: int,
+                 device: torch.device) -> None:
+        self.names: list[str] = []
+        self.sizes: list[int] = []
+        self.hashers: list[ParameterHashProjector] = []
+        offsets = np.cumsum([0] + [p.numel() for _n, p in named_parameters])
+        # Per-tensor hash/sign tables are generated by one global stream so
+        # the composite projection equals hashing the flattened concatenation.
+        rng = np.random.default_rng(seed)
+        total = int(offsets[-1])
+        all_hashes = rng.integers(0, projection_dimension, size=total)
+        all_signs = rng.choice((-1.0, 1.0), size=total)
+        for index, (name, parameter) in enumerate(named_parameters):
+            start, stop = int(offsets[index]), int(offsets[index + 1])
+            self.names.append(name)
+            self.sizes.append(int(stop - start))
+            self.hashers.append(ParameterHashProjector(
+                self.sizes[-1],
+                projection_dimension=projection_dimension,
+                seed=seed,
+                device=device,
+                hashes=all_hashes[start:stop], signs=all_signs[start:stop],
+            ))
+        self.total_parameters = total
+        self.dimension = projection_dimension
+
+    @torch.no_grad()
+    def project(self, gradients: list[torch.Tensor]) -> torch.Tensor:
+        if len(gradients) != len(self.hashers):
+            raise ValueError("gradient list does not match parameter list")
+        result = torch.zeros((1, self.dimension), dtype=torch.float32,
+                             device=gradients[0].device)
+        for gradient, hasher in zip(gradients, self.hashers):
+            add_count_sketch(result, gradient.reshape(1, -1), hasher.hashes, hasher.signs)
+        return result[0]
+
+
+class NativeProbe:
+    max_gradient_batch = 128
+    power_of_two_batches = False
+
+    def __init__(self, engine, *, model_key, projection_dimension=4096, projection_seed=42):
+        from rags.execution import SelectionExecution
+        self.engine, self.model = engine, engine.model
+        self.device = torch.device(engine.device)
+        self.model.eval()
+        self.named_parameters = [(name, p) for name, p in self.model.named_parameters() if p.requires_grad]
+        self.parameters = [p for _, p in self.named_parameters]
+        self.config = SimpleNamespace(model_path=model_key, context_length=512, prediction_length=64,
+            projection_dimension=projection_dimension, projection_seed=projection_seed)
+        self.execution = SelectionExecution()
+        self.vjp_batch_size = 4
+        self.projector = _FullModelProjector(self.named_parameters, projection_dimension,
+                                            projection_seed, self.device)
+
+    def training_loss(self, windows):
+        return self.engine.training_loss(windows)
+
+    def forecast(self, contexts):
+        return self.engine.forecast(contexts)
+
+    def encoder_embeddings(self, windows, *, batch_size=32):
+        contexts = np.asarray(windows, dtype=np.float32)[:, :self.config.context_length]
+        return np.concatenate([self.engine.context_embeddings(contexts[start:start + batch_size])
+                               for start in range(0, len(contexts), batch_size)])
+
+    def raw_gradient(self, window):
+        loss = self.engine.training_loss(np.asarray(window, dtype=np.float32)[None])
+        gradients = torch.autograd.grad(loss, self.parameters, allow_unused=True)
+        return float(loss.detach()), [torch.zeros_like(p) if g is None else g.detach()
+                                      for p, g in zip(self.parameters, gradients)]
+
+    def per_window_losses(self, windows):
+        """Generic fallback; family adapters provide one genuinely batched forward."""
+        return torch.stack([self.engine.training_loss(row[None]) for row in windows])
+
+    def _batched_gradient_sketch(self, windows):
+        from rags.execution import execution_policy
+        vjp_batch = execution_policy(self).gradient_vjp_batch or self.vjp_batch_size
+        losses = self.per_window_losses(windows)
+        count = len(windows)
+        if losses.shape != (count,):
+            raise ValueError("per_window_losses must return one independent loss per window")
+        projected = torch.zeros(count, self.config.projection_dimension, device=self.device)
+        # Chunk the VJP basis so activation/parameter Jacobians do not scale
+        # quadratically with the entire forward batch. Each row is d loss_i/d theta.
+        for begin in range(0, count, vjp_batch):
+            stop = min(begin + vjp_batch, count)
+            basis = torch.zeros(stop - begin, count, dtype=losses.dtype, device=losses.device)
+            basis[torch.arange(stop - begin), torch.arange(begin, stop)] = 1
+            gradients = torch.autograd.grad(losses, self.parameters, grad_outputs=basis,
+                is_grads_batched=True, allow_unused=True, retain_graph=stop < count)
+            for gradient, hasher in zip(gradients, self.projector.hashers):
+                if gradient is not None:
+                    add_count_sketch(projected[begin:stop], gradient.reshape(stop - begin, -1),
+                                     hasher.hashes, hasher.signs)
+            del gradients
+        return losses.detach().float().cpu().numpy(), projected.cpu().numpy()
+
+    def batch_gradient_sketch(self, windows, batch_size=None):
+        from rags.execution import execution_policy
+        values = np.asarray(windows, dtype=np.float32)
+        if values.ndim != 2 or not len(values) or not np.isfinite(values).all():
+            raise ValueError("gradient windows must be a non-empty finite matrix")
+        if batch_size is not None and batch_size < 1:
+            raise ValueError("batch_size must be positive")
+        size = min(batch_size or execution_policy(self).batch_size(self, "gradient", fallback=8, count=len(values)),
+                   self.max_gradient_batch)
+        losses, sketches = [], []
+        begin, retries = 0, 0
+        self.model.eval()
+        while begin < len(values):
+            count = min(size, len(values) - begin)
+            if self.power_of_two_batches:
+                count = 1 << (count.bit_length() - 1)
+            chunk = values[begin:begin + count]
+            try:
+                if len(chunk) == 1:
+                    loss, gradients = self.raw_gradient(chunk[0])
+                    loss = np.array([loss])
+                    sketch = self.projector.project(gradients)[None].cpu().numpy()
+                    del gradients
+                else:
+                    loss, sketch = self._batched_gradient_sketch(chunk)
+            except torch.cuda.OutOfMemoryError:
+                if size <= 1:
+                    raise
+                size = max(1, size // 2)
+                retries += 1
+                torch.cuda.empty_cache()
+                continue
+            losses.append(loss)
+            sketches.append(sketch)
+            begin += len(chunk)
+        self.last_gradient_execution = dict(batch_size=size,
+            vjp_batch=execution_policy(self).gradient_vjp_batch or self.vjp_batch_size,
+            oom_retries=retries, backend="batched-vjp" if size > 1 else "sequential")
+        return np.concatenate(losses), np.concatenate(sketches)
+
+    def finite_difference(self, window, *, steps=(1e-2, 3e-3, 1e-3),
+                          parameter_prefix=None, forward_observer=None):
+        """Compare native autograd against central differences along unit gradient.
+
+        Restore exact original weights after each perturbation, not approximate
+        add/subtract cancellation. Original tensors stay on CPU, not disk.
+        """
+        initial, gradients = self.raw_gradient(window)
+        initial_observation = forward_observer() if forward_observer else None
+        if parameter_prefix is not None:
+            if not any(name.startswith(parameter_prefix) for name, _ in self.named_parameters):
+                raise ValueError(f"No parameters match {parameter_prefix}")
+            for (name, _), gradient in zip(self.named_parameters, gradients):
+                if not name.startswith(parameter_prefix):
+                    gradient.zero_()
+        norm = float(torch.sqrt(sum(g.double().square().sum() for g in gradients)))
+        original = [p.detach().cpu().clone() for p in self.parameters]
+        rows = []
+        try:
+            for step in steps:
+                values = []
+                observations = []
+                for sign in (-1, 1):
+                    with torch.no_grad():
+                        for p, old, g in zip(self.parameters, original, gradients):
+                            p.copy_(old)
+                            p.add_(g, alpha=sign * step / max(norm, 1e-30))
+                        values.append(float(self.engine.training_loss(np.asarray(window)[None])))
+                    if forward_observer:
+                        observations.append(forward_observer())
+                estimate = (values[1] - values[0]) / (2 * step)
+                rows.append(dict(step=step, minus_loss=values[0], plus_loss=values[1],
+                    directional_derivative=estimate, autograd_derivative=norm,
+                    relative_error=abs(estimate - norm) / max(norm, 1e-30)))
+                if forward_observer:
+                    rows[-1]["forward_observations_minus_plus"] = observations
+        finally:
+            with torch.no_grad():
+                for p, old in zip(self.parameters, original):
+                    p.copy_(old)
+        return dict(loss=initial, gradient_norm=norm, finite_differences=rows,
+                    parameters=sum(p.numel() for p in self.parameters),
+                    direction_parameter_prefix=parameter_prefix,
+                    initial_forward_observation=initial_observation)
