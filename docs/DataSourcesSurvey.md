@@ -1,60 +1,55 @@
-# TSFM 公开语料、配置清单与 TS3 数据集补充建议
+# 通用时序数据集来源与获取指南
 
-> 更新日期：2026 年 7 月 20 日。  
+> 最后修改日期：2026 年 11 月 7 日。
 > 本文优先采用项目论文、官方 GitHub、官方 Hugging Face 数据仓库和原始数据发布页。大型聚合仓库的目录可能继续更新，因此本文同时提供静态分类和自动枚举方法。
 
 ## 1. 目标与口径
 
-本文面向 TS3 的语料扩展，回答四个问题：
+本文整理可用于时序分析、预测、分类、异常检测及其他任务的公开数据集来源，覆盖专题数据库、基准集合、聚合语料、派生数据和合成数据。内容重点是识别权威入口、理解数据组织方式、评估适用条件，并为可复现的数据获取和登记提供参考。
 
-1. 每个公开 TSFM 语料的权威获取源头是什么；
-2. 仓库包含哪些配置、子数据集、领域分组或版本；
-3. 哪些配置适合优先作为稳定数据源纳入 TS3；
-4. 哪些配置更适合留作后续大规模实验，而不是立即并入主语料。
+不同项目使用 `observations`、`time points`、`timesteps`、`timestamps`、`tokens` 等不同计量口径。数据点数量不能直接代表独立序列数、有效样本数或任务难度，应结合来源、变量、频率、时间范围和切分方式理解。
 
-需要区分以下概念：
+本文使用以下术语：
 
-- **配置（configuration）**：Hugging Face `load_dataset(repo_id, config_name)` 中可选择的配置。
-- **子数据集（sub-dataset）**：聚合语料内部具有独立来源、独立许可证或独立语义的数据集。
-- **目录分组（folder/domain shard）**：仓库按领域、年份或来源组织的文件夹；它不一定等价于 Hugging Face 配置。
-- **派生语料**：由真实数据切窗、重采样、插值、混合或增强产生的数据。
-- **合成语料**：由核函数、状态空间模型、规则系统或其他生成机制产生的数据。
-- **评测配置**：用于验证或测试的配置，不应默认并入预训练语料。
+- **配置（configuration）**：数据仓库中可单独选择的数据子集、版本或任务配置。
+- **子数据集（sub-dataset）**：聚合语料内部具有独立来源、许可或语义的数据集。
+- **目录分组（folder/domain shard）**：仓库按领域、年份或来源组织的目录；它不一定等价于可加载配置。
+- **派生数据**：由真实数据切窗、重采样、插值、缩放、混合或增强产生的数据。
+- **合成数据**：由规则、统计模型、仿真器或其他生成机制构造的数据。
+- **评测切分**：用于验证或测试的数据部分；其用途和访问边界应与训练数据区分。
 
-不同项目使用 `observations`、`time points`、`timesteps`、`timestamps`、`tokens` 等不同口径。本文不把这些数字视为严格可比。
+## 2. 来源类型与适用性
 
-## 2. 推荐等级
+下表用于描述来源的使用条件，不代表数据质量的绝对排名。
 
-本文使用四级标记：
-
-| 等级 | 含义 | TS3 中的建议 |
+| 标记 | 一般含义 | 使用时重点检查 |
 | --- | --- | --- |
-| **A：优先稳定源** | 来源清晰、真实数据、获取稳定、结构增量明显、许可证可追踪 | 可进入当前主语料候选池 |
-| **B：大规模扩展源** | 数据量大或覆盖广，但下载、去重、授权或质量核验成本较高 | 留作第二阶段扩展实验 |
-| **C：条件性使用** | 仅在特定评测、领域偏斜、合成数据或多变量研究中有明确价值 | 单独建实验分支，不默认并入 |
-| **D：不进入训练主池** | 评测数据、测试切分、泄漏风险、来源不清或纯派生重复 | 只作评测、审计或消融 |
+| **A：稳定来源** | 来源清晰、文档完整、获取方式稳定，元数据和许可可追踪 | 固定版本，确认字段、时间范围和许可条款 |
+| **B：大规模或多来源集合** | 覆盖广或规模大，但下载、存储、来源核验或处理成本较高 | 先按来源和目录抽样，估算资源并核验重叠 |
+| **C：条件性来源** | 专用领域、派生、合成或任务混合数据 | 明确研究问题，记录生成链和适用边界 |
+| **D：仅作评测或审计** | 测试集、泄漏风险较高的数据，或来源与许可不清的数据 | 隔离评测切分，避免未经核实地用于训练或汇总规模 |
 
-等级针对 TS3 当前目标，而不是对数据集质量作一般性评价。
+等级针对数据使用场景和处理成本，不表示数据集本身优劣。
 
----
+## 3. 来源总览
 
-## 3. 总览
+下表列出本文涉及的主要公开时序数据仓库与基准集合。入口、配置和仓库内容可能更新；实际使用前应检查原始发布页和当前版本说明。
 
-| 语料 | 官方主入口 | 配置形态 | 当前建议 |
+| 数据源 | 权威入口 | 组织方式 | 使用提示 |
 | --- | --- | --- | --- |
-| LOTSA / Moirai | [HF: Salesforce/lotsa_data](https://huggingface.co/datasets/Salesforce/lotsa_data)；[GitHub: uni2ts](https://github.com/SalesforceAIResearch/uni2ts) | 大量来源级目录/配置 | **B**，先做源级差集 |
-| GIFT-Eval Pretrain | [HF: Salesforce/GiftEvalPretrain](https://huggingface.co/datasets/Salesforce/GiftEvalPretrain)；[GitHub: gift-eval](https://github.com/SalesforceAIResearch/gift-eval) | 88 个来源数据集，仓库中可出现更多按年份或处理方式拆分的配置 | **C/B**，采用 GIFT-Eval 时升为 B |
-| Time-300B | [HF: Maple728/Time-300B](https://huggingface.co/datasets/Maple728/Time-300B)；[GitHub: Time-MoE](https://github.com/Time-MoE/Time-MoE) | 领域目录、来源目录和大文件分片 | **B/C**，适合偏斜和 scaling 实验 |
-| RMISC | [HF: nju-zhangsq/RMISC](https://huggingface.co/datasets/nju-zhangsq/RMISC)；[GitHub](https://github.com/zhangsq-nju/RMISC) | 分支版本 + 约 200 个来源级子数据集 | 推荐分支 **A**，全量 **B** |
-| Chronos datasets | [HF: autogluon/chronos_datasets](https://huggingface.co/datasets/autogluon/chronos_datasets)；[extra](https://huggingface.co/datasets/autogluon/chronos_datasets_extra)；[GitHub](https://github.com/amazon-science/chronos-forecasting) | 原始来源、增强语料、合成语料和评测配置并存 | 分类型处理 |
-| UTSD | [HF: thuml/UTSD](https://huggingface.co/datasets/thuml/UTSD)；[GitHub: OpenLTM](https://github.com/thuml/OpenLTM) | 1G、2G、4G、12G 四个规模版本 | 已纳入；保持版本记录 |
-| Time Series PILE | [HF: AutonLab/Timeseries-PILE](https://huggingface.co/datasets/AutonLab/Timeseries-PILE)；[MOMENT GitHub](https://github.com/moment-timeseries-foundation-model/moment) | 任务和来源混合的聚合语料 | **C**，更适合跨任务分析 |
-| Monash | [HF: Monash-University/monash_tsf](https://huggingface.co/datasets/Monash-University/monash_tsf)；[官方站](https://forecastingdata.org/) | 频率、来源和缺失值版本构成的配置 | 已纳入；作为稳定基准源 |
-| Quito Corpus / QuitoBench | [Corpus](https://huggingface.co/datasets/hq-bench/quito-corpus)；[Bench](https://huggingface.co/datasets/hq-bench/quitobench)；[GitHub](https://github.com/alipay/quito) | `hour`、`min` 两个配置 | Corpus **A**；Bench **D** |
+| LOTSA / Moirai | [HF: Salesforce/lotsa_data](https://huggingface.co/datasets/Salesforce/lotsa_data)；[GitHub: uni2ts](https://github.com/SalesforceAIResearch/uni2ts) | 大量来源级目录和配置 | 按原始来源、领域和版本筛选 |
+| GIFT-Eval Pretrain | [HF: Salesforce/GiftEvalPretrain](https://huggingface.co/datasets/Salesforce/GiftEvalPretrain)；[GitHub: gift-eval](https://github.com/SalesforceAIResearch/gift-eval) | 多个来源，部分按年份或处理方式拆分 | 区分训练来源与评测切分 |
+| Time-300B | [HF: Maple728/Time-300B](https://huggingface.co/datasets/Maple728/Time-300B)；[GitHub: Time-MoE](https://github.com/Time-MoE/Time-MoE) | 领域目录、来源目录和大文件分片 | 先估算存储及处理成本 |
+| RMISC | [HF: nju-zhangsq/RMISC](https://huggingface.co/datasets/nju-zhangsq/RMISC)；[GitHub](https://github.com/zhangsq-nju/RMISC) | 版本分支及来源级子数据集 | 核对版本差异、元数据和多变量结构 |
+| Chronos datasets | [HF: chronos_datasets](https://huggingface.co/datasets/autogluon/chronos_datasets)；[extra](https://huggingface.co/datasets/autogluon/chronos_datasets_extra)；[GitHub](https://github.com/amazon-science/chronos-forecasting) | 原始、增强、合成和评测配置并存 | 按数据生成方式和任务切分区分 |
+| UTSD | [HF: thuml/UTSD](https://huggingface.co/datasets/thuml/UTSD)；[GitHub: OpenLTM](https://github.com/thuml/OpenLTM) | 多种规模版本 | 核对规模版本之间是否嵌套或重叠 |
+| Time Series PILE | [HF: AutonLab/Timeseries-PILE](https://huggingface.co/datasets/AutonLab/Timeseries-PILE)；[MOMENT GitHub](https://github.com/moment-timeseries-foundation-model/moment) | 多任务、多来源聚合语料 | 先审查任务类型、来源与切分 |
+| Monash | [HF: Monash-University/monash_tsf](https://huggingface.co/datasets/Monash-University/monash_tsf)；[官方站](https://forecastingdata.org/) | 频率、来源和缺失值版本构成的配置 | 核对基准版本及标准切分 |
+| Quito Corpus / QuitoBench | [Corpus](https://huggingface.co/datasets/hq-bench/quito-corpus)；[Bench](https://huggingface.co/datasets/hq-bench/quitobench)；[GitHub](https://github.com/alipay/quito) | `hour`、`min` 两种配置及独立 benchmark | 区分原始语料和评测基准 |
 
 ---
 
-# 4. 各语料配置与选择建议
+# 4. 主要时序数据来源
 
 ## 4.1 LOTSA / Moirai
 
@@ -68,16 +63,16 @@ LOTSA 是 Moirai 的公开预训练归档，论文报告超过 270 亿 observati
 
 ### 4.1.2 配置与子数据集分组
 
-LOTSA 的根目录数量较多，而且可能随仓库维护发生变化。对 TS3 更有意义的不是复制一份静态目录截图，而是把配置按原始来源和领域登记。当前可识别的主要类别如下。
+LOTSA 的根目录数量较多，而且可能随仓库维护发生变化。与其依赖静态目录截图，不如按原始来源和领域登记配置。当前可识别的主要类别如下。
 
-| 领域 | 代表性目录或来源家族 | TS3 等级 | 说明 |
+| 领域 | 代表性目录或来源家族 | 适用性 | 说明 |
 | --- | --- | --- | --- |
 | 能源 | `australian_electricity_demand`、电力负荷、电价、太阳能、风电、建筑能耗类 | **A/B** | 优先保留现有语料中未覆盖的国家、频率和测量对象 |
 | 交通 | `PEMS03`、其他 PEMS、`BEIJING_SUBWAY_30MIN`、`HZMETRO`、出租车和道路流量类 | **B** | 与 UTSD、Monash、Chronos 重叠概率高，必须做源级排除 |
 | 气象与气候 | ERA5 年份目录、CMIP6 年份目录、WeatherBench/气象站类 | **B/C** | 数据量极大；适合后续 scaling，不适合当前全量处理 |
 | 零售与销售 | 商店销售、产品需求、竞赛销售类 | **A/B** | 若能确认未被 Monash/Chronos 收录，可补充非物理过程 |
 | 金融与经济 | 汇率、宏观经济、股票、银行和竞赛数据 | **A/B** | 高频金融数据需单独处理非平稳性和交易日历 |
-| Web 与云服务 | Web traffic、服务器、请求量、云指标类 | **A** | 对 TS3 的结构覆盖通常比继续增加气象数据更有增量 |
+| Web 与云服务 | Web traffic、服务器、请求量、云指标类 | **A** | 可补充不同于气象数据的业务与过程类型 |
 | 健康 | 医疗监测、疾病统计、生命体征类 | **A/C** | 价值较高，但需逐项核验使用许可和隐私处理 |
 | 自然科学 | 海洋、地球科学、天文或环境监测类 | **B** | 适合长周期和多尺度结构扩展 |
 | 竞赛数据 | M 系列、Tourism、NN5、Kaggle 等 | **D/B** | 与 Monash 等聚合库高度重叠；默认不重复纳入 |
@@ -158,7 +153,7 @@ manifests/lotsa_<commit_sha>.csv
 
 ### 4.2.2 配置家族
 
-| 配置家族 | 常见命名形式或代表来源 | TS3 等级 | 处理建议 |
+| 配置家族 | 常见命名形式或代表来源 | 适用性 | 处理建议 |
 | --- | --- | --- | --- |
 | 经典竞赛 | `m1_*`、`m3_*`、`m4_*`、Tourism、NN5 等 | **D/B** | 与 Monash 高度重叠，原则上源级排除 |
 | 电力与能源 | electricity、solar、wind、load、price、building energy | **A/B** | 只保留未覆盖地区和不同测量对象 |
@@ -169,7 +164,7 @@ manifests/lotsa_<commit_sha>.csv
 | Web 与 IT | web traffic、server、cloud、requests | **A** | 对结构覆盖有较高增量价值 |
 | 健康与人口 | hospital、medical、mortality、epidemic 类 | **A/C** | 逐项核验许可与时间切分 |
 | 零售与需求 | sales、retail、product demand | **A/B** | 可补充非物理过程结构 |
-| 多变量环境与工业 | 多传感器、环境、工业控制类 | **A/B** | 对 TS3 多变量扩展有价值 |
+| 多变量环境与工业 | 多传感器、环境、工业控制类 | **A/B** | 可用于多变量数据分析 |
 
 官方仓库中可观察到的配置示例包括：
 
@@ -188,7 +183,7 @@ era5_1996
 
 ### 4.2.3 推荐策略
 
-当 TS3 采用 GIFT-Eval 作为正式下游评测时，GIFT-Eval Pretrain 的主要优势是官方设计的非泄漏关系，此时可将其提升为 **B 级核心候选**。
+若使用 GIFT-Eval 评测，应核对其官方训练数据与评测切分说明，避免训练和评测来源交叉。
 
 否则：
 
@@ -242,7 +237,7 @@ Time-300B 是按领域和来源组织的大规模语料。论文报告超过 300
 
 ### 4.3.2 领域配置
 
-| 领域 | 内容 | TS3 等级 | 建议 |
+| 领域 | 内容 | 适用性 | 建议 |
 | --- | --- | --- | --- |
 | `Nature` / 自然环境 | 气象、气候、地球与环境过程 | **B/C** | 占比极高，适合研究偏斜；不宜直接按原比例进入主池 |
 | `Energy` | 负荷、发电、价格、设备与建筑能耗 | **A/B** | 优先选取未覆盖国家、设备和频率 |
@@ -250,7 +245,7 @@ Time-300B 是按领域和来源组织的大规模语料。论文报告超过 300
 | `Web` | 网站访问、云服务、请求量和系统指标 | **A** | 建议优先，通常能补充不同于物理传感器的结构 |
 | `Finance` / `Economics` | 市场、汇率、宏观与业务指标 | **A/B** | 建议按来源分层抽样 |
 | `Health` | 医疗、人口和生理数据 | **A/C** | 许可明确时优先 |
-| `Sales` / `Retail` | 商品、门店和需求 | **A/B** | 对 TS3 结构多样性有价值 |
+| `Sales` / `Retail` | 商品、门店和需求 | **A/B** | 可增加零售、门店和需求类序列 |
 | `Industrial` / IoT | 机器、设备和工业传感器 | **A** | 若源信息可追踪，应优先 |
 | `Synthetic` | 项目生成或汇总的合成序列 | **C** | 与真实数据分开建库，用于消融 |
 | 其他/Misc | 无法直接归入主要领域的数据 | **C** | 必须先恢复原始来源 |
@@ -276,7 +271,7 @@ Nature
 -> 全量 Transport
 ```
 
-Time-300B 的 Nature 占比很高。TS3 可利用这一点设计两个独立实验：
+Time-300B 的 Nature 数据占比较高。使用这类大规模领域数据时，可分别评估领域构成和数据规模的影响：
 
 1. 保持原始分布，验证结构调度是否能纠正极端来源偏斜；
 2. 在相同数据预算下进行领域均衡或结构均衡采样。
@@ -339,9 +334,9 @@ RMISC 是较新的真实世界多变量语料，官方报告约 200 个子数据
 
 ### 4.4.2 官方版本/分支
 
-| 分支或版本 | 含义 | TS3 等级 | 建议 |
+| 分支或版本 | 含义 | 适用性 | 建议 |
 | --- | --- | --- | --- |
-| `recommended_corpus` | 项目方推荐用于训练和复现实验的语料组合 | **A** | TS3 首选 |
+| `recommended_corpus` | 项目方推荐用于训练和复现实验的语料组合 | **A** | 可优先评估的版本 |
 | `smaller_version` | 更小、便于验证管线的版本 | **A** | 先用于格式、速度和特征抽取测试 |
 | `main` | 完整来源组织或主版本 | **B** | 仅按子数据集选择性下载 |
 | `zipped_version` | 压缩归档版本 | **B/C** | 适合批量归档，不利于流式和选择性读取 |
@@ -351,7 +346,7 @@ RMISC 是较新的真实世界多变量语料，官方报告约 200 个子数据
 
 RMISC 的约 200 个子数据集不应被压缩成几个 Hugging Face 配置名。应按原始数据源登记。官方描述覆盖的主要领域包括：
 
-| 领域 | 典型内容 | TS3 等级 |
+| 领域 | 典型内容 | 适用性 |
 | --- | --- | --- |
 | Energy | 建筑能耗、电网、发电、储能和设备 | **A** |
 | Industry | 机器、多传感器、生产过程和状态监控 | **A** |
@@ -372,7 +367,7 @@ ApplianceEnergy
 
 ### 4.4.4 推荐策略
 
-当前 TS3 应按以下顺序：
+比较不同版本时，可按以下顺序核验：
 
 ```text
 smaller_version
@@ -439,7 +434,7 @@ for revision in [
 
 ### 4.5.2 配置类型
 
-| 类型 | 代表配置 | TS3 等级 | 说明 |
+| 类型 | 代表配置 | 适用性 | 说明 |
 | --- | --- | --- | --- |
 | Chronos 增强训练语料 | `training_corpus_tsmixup_10m` | **C** | 1000 万条 TSMixup 增强序列；不是独立真实来源 |
 | Chronos 合成训练语料 | `training_corpus_kernel_synth_1m` | **C** | 100 万条 KernelSynth 序列；单独用于合成消融 |
@@ -474,7 +469,7 @@ Wind farms
 
 ### 4.5.4 推荐策略
 
-TS3 已经纳入部分 Chronos，因此下一步不应继续以“Chronos 仓库”为来源单位，而应拆成：
+Chronos 仓库包含多类内容，整理时应按实际来源拆分，而不要只以仓库名称作为来源单位：
 
 ```text
 chronos_real_source
@@ -520,14 +515,14 @@ find chronos-forecasting -type f \( -name "*.yaml" -o -name "*.yml" \) -print
 
 ### 4.6.2 官方规模配置
 
-| 配置/目录 | 近似规模 | TS3 等级 | 建议 |
+| 配置/目录 | 近似规模 | 适用性 | 建议 |
 | --- | ---: | --- | --- |
 | `UTSD-1G` | 约 10 亿点 | **A** | 最适合快速复现和小规模对照 |
 | `UTSD-2G` | 约 20 亿点 | **A/B** | 用于中等规模扩展 |
 | `UTSD-4G` | 约 40 亿点 | **B** | 用于 scaling 研究 |
 | `UTSD-12G` | 约 120 亿点 | **B** | 最大版本，处理前先检查与小版本的包含关系 |
 
-这些版本大概率是层级或抽样版本，而不是四套完全独立来源。TS3 必须记录：
+这些版本可能是层级或抽样版本，而不是四套完全独立的来源。使用时应记录：
 
 ```text
 utsd_version
@@ -555,7 +550,7 @@ Web
 
 ### 4.6.4 推荐策略
 
-TS3 已经纳入 UTSD，因此：
+使用 UTSD 时：
 
 - 当前主语料固定一个明确版本；
 - 若已有数据来自多个版本，先核验是否存在层级包含；
@@ -605,7 +600,7 @@ long-horizon forecasting benchmarks
 
 ### 4.7.3 推荐策略
 
-**不建议**把 Time Series PILE 全量直接并入 TS3 当前预测主语料，原因是：
+Time Series PILE 是任务和来源混合的集合。用于预测任务前，应检查其任务组成、来源和切分，避免将不适用的数据直接混入训练集：
 
 1. 与 Monash 和其他经典 benchmark 重叠明显；
 2. 分类和异常检测数据的样本定义与 forecasting trajectory 不同；
@@ -617,7 +612,7 @@ long-horizon forecasting benchmarks
 | --- | --- |
 | 纯 forecasting 主实验 | 只取未重复的预测来源，等级 **C** |
 | 跨任务结构分析 | 保留分类、异常检测和预测来源，等级 **A/C** |
-| 特征空间覆盖检查 | 很适合验证 TS3 六维结构是否跨任务稳定 |
+| 特征空间覆盖检查 | 可用于检查所选结构特征是否跨任务稳定 |
 | 训练规模扩展 | 优先级低于 RMISC、LOTSA 差集和 Time-300B 特定领域 |
 
 ### 4.7.4 枚举配置
@@ -756,9 +751,9 @@ kdd_cup_2018
 | KDD Cup 2018、Kaggle Web Traffic | **B** | 规模或处理成本较高 |
 | `*_with_missing` 与 `*_without_missing` 同时使用 | **C** | 属于同源变体，不应作为独立来源重复计数 |
 
-### 4.8.4 TS3 建议
+### 4.8.4 数据集使用提示
 
-Monash 已纳入 TS3，应把它视为稳定来源注册表，而不是继续扩容对象。重点工作是：
+Monash 是常用的预测基准集合。使用时应优先核对数据集版本、来源登记和标准切分：
 
 - 明确当前使用了哪些配置；
 - 缺失值版本是否重复纳入；
@@ -794,7 +789,7 @@ Quito Corpus 是单一真实业务来源的多变量长序列语料。QuitoBench
 
 ### 4.9.2 配置
 
-| 仓库 | 配置 | 数据粒度 | TS3 等级 |
+| 仓库 | 配置 | 数据粒度 | 适用性 |
 | --- | --- | --- | --- |
 | `hq-bench/quito-corpus` | `hour` | 小时级五变量序列 | **A** |
 | `hq-bench/quito-corpus` | `min` | 十分钟级五变量序列 | **A** |
@@ -814,7 +809,7 @@ quito-corpus/hour
 
 - `hour` 规模更易管理，适合先做特征一致性和多变量处理验证；
 - `min` 提供更高频、更长的局部结构，适合后续扩展；
-- QuitoBench 只用于验证 TS3 特征是否对应 trend、seasonality、forecastability 等结构 regime，不进入训练。
+- QuitoBench 属于评测基准；应按其发布说明用于评测，不要与 Quito Corpus 的训练数据角色混淆。
 
 建议设置：
 
@@ -846,77 +841,27 @@ quito_min = load_dataset(
 
 ---
 
-# 5. TS3 推荐新增路线
+# 5. 数据集发现与选择流程
 
-## 5.1 当前阶段：稳定增量
+## 5.1 明确用途和边界
 
-建议当前只增加能够明显改变来源或结构分布的数据。
+获取数据前先确定任务类型、目标领域、时间频率、变量结构、所需时间跨度、数据许可和评测边界。预测、分类、异常检测、插补和表示学习对标签、切分和数据形态的要求不同；不要只按仓库规模选源。
 
-| 顺序 | 数据 | 配置 | 原因 |
-| ---: | --- | --- | --- |
-| 1 | Quito Corpus | `hour` | 下载和处理成本较低；单一真实来源；可与 QuitoBench 对照 |
-| 2 | Quito Corpus | `min` | 增加高频局部结构和长序列 |
-| 3 | RMISC | `smaller_version` | 快速验证多变量入库和特征管线 |
-| 4 | RMISC | `recommended_corpus` | 增加真实多变量、工业和 IoT 来源 |
-| 5 | LOTSA | Web、工业、健康等未重复子集 | 补充与现有物理传感器不同的过程 |
+## 5.2 分阶段核验
 
-## 5.2 第二阶段：中等规模扩展
+| 阶段 | 核验内容 | 记录项 |
+| --- | --- | --- |
+| 来源确认 | 原始发布方、聚合仓库、配置和版本之间的关系 | 来源标识、仓库地址、revision、配置名 |
+| 小样本检查 | 字段结构、时间戳、频率、缺失值、变量数和序列长度 | schema、抽样范围、已知异常 |
+| 用途检查 | 任务标签、训练/验证/测试切分、许可和潜在泄漏 | 允许用途、切分规则、排除项 |
+| 成本评估 | 下载体积、处理时间、存储需求和依赖 | 估算值、机器环境、获取命令 |
+| 固定版本 | 保存可复现清单并记录转换步骤 | revision、文件清单、转换链和日期 |
 
-```text
-LOTSA 源级差集
--> RMISC main 中未覆盖来源
--> Time-300B Web / Industry / Health / Sales
--> GIFT-Eval Pretrain 中未重复且非评测的数据
-```
+先检查少量配置或样本，再决定是否获取完整数据。对于大型仓库，优先按来源目录、年份、领域或明确配置筛选，并核验仓库当前实际目录后再使用下载模式。
 
-该阶段应固定新增数据预算，例如：
+## 5.3 区分数据角色
 
-```text
-+1B
-+3B
-+10B observations
-```
-
-而不是无上限抓取。
-
-## 5.3 第三阶段：大规模与偏斜实验
-
-```text
-Time-300B Nature
-LOTSA ERA5 / CMIP6
-GIFT-Eval Pretrain ERA5 / CMIP6
-RMISC full
-```
-
-这些数据更适合回答：
-
-- 结构调度能否在极端领域偏斜下优于随机采样；
-- 增加同质数据规模是否仍然提高结构覆盖；
-- 固定训练预算下，结构覆盖与原始 observations 的贡献如何分离。
-
-## 5.4 独立实验分支
-
-以下数据不进入“真实去重主语料”，而进入独立分支：
-
-```text
-Chronos TSMixup
-Chronos KernelSynth
-Time-300B Synthetic
-其他合成或增强语料
-```
-
-建议目录：
-
-```text
-ts3_dataset/
-├── real/
-├── augmented/
-├── synthetic/
-├── evaluation/
-└── manifests/
-```
-
----
+原始观测、重采样数据、增强数据、合成数据和评测数据应分别标记。聚合仓库的名称不等于原始来源；同一原始数据可能通过多个仓库和不同处理版本发布。汇总数据规模时，应说明计量单位、处理阶段和切分范围。
 
 # 6. 数据源注册与去重
 
@@ -1019,7 +964,7 @@ canonical_series_hash
 
 ### L5：窗口曝光
 
-即使原始轨迹没有重复，同一长序列也可能产生大量高度重叠窗口。TS3 应分别报告：
+即使原始轨迹没有重复，同一长序列也可能产生大量高度重叠窗口。数据处理报告应分别列出：
 
 ```text
 unique source series
@@ -1222,63 +1167,13 @@ for sample in dataset.take(5):
 - 检查 schema；
 - 估计长度分布；
 - 读取来源字段；
-- 小规模抽样计算 TS3 特征；
+- 小规模抽样计算目标分析特征；
 - 判断是否值得完整下载。
 
 ---
 
-# 9. 最终建议
+# 9. 使用建议
 
-TS3 当前已有约 5.73B 去重数据，来自 Monash、UTSD 和部分 Chronos。下一阶段的目标不应是追求最大的公开数字，而应是增加下列三类增量：
+选择时序数据来源时，应优先确认原始发布方、版本、许可、配置结构、变量组织、采样频率、时间覆盖和任务切分。对聚合仓库，按其原始来源清单理解数据组成，不要把仓库名直接当成来源标识。
 
-1. **新来源**：当前语料没有覆盖的业务、工业、Web、健康和多变量过程；
-2. **新变量结构**：保留真实多变量组，而不是只增加更多单变量切片；
-3. **新结构分布**：能够填补当前 temporal structure space 稀疏区域的数据。
-
-当前推荐顺序：
-
-```text
-Quito Corpus / hour
--> Quito Corpus / min
--> RMISC smaller_version
--> RMISC recommended_corpus
--> LOTSA 中未重复的 Web / Industry / Health 子集
--> Time-300B 特定领域
--> GIFT-Eval Pretrain 的源级差集
-```
-
-后续大规模实验顺序：
-
-```text
-LOTSA 大型气象与交通分片
--> Time-300B Nature
--> GIFT-Eval Pretrain ERA5 / CMIP6
--> RMISC full
-```
-
-独立合成/增强分支：
-
-```text
-Chronos TSMixup
-Chronos KernelSynth
-Time-300B Synthetic
-```
-
-最终应避免使用如下表述：
-
-```text
-“TS3 包含 X 亿独立真实 observations”
-```
-
-除非已经完成源级、轨迹级和派生级审计。更稳妥的报告方式是同时给出：
-
-```text
-raw observations
-post-source-dedup observations
-post-series-dedup observations
-canonical windows
-number of canonical sources
-number of occupied structure grids
-```
-
-这会使 TS3 的数据规模、结构覆盖和去重主张可以被独立复核。
+下载前先做小规模 schema 和数据质量检查，再估算完整获取与处理成本。保留固定版本清单和转换记录，并区分原始数据、派生数据、合成数据及评测数据。若报告数据规模，应同时说明统计单位与处理口径；只有经过相应核验后，才报告独立来源、独立序列或去重规模。
