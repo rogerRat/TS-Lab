@@ -47,7 +47,7 @@
 /third_parties/
 /cache/
 tokens.txt
-/scripts/temp/*
+/scripts/temp/
 /configs/experiments/*
 
 # AutoDL data-disk mounts; keep large runtime trees out of Git.
