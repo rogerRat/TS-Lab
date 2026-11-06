@@ -15,7 +15,7 @@ def _init_gradient_worker(student, checkpoint_path, device, dimension, seed):
     global _worker_probe
     import os
     os.environ["HF_HUB_OFFLINE"] = "1"
-    from rags.experiments.full_pool_models import build_model
+    from rage.experiments.full_pool_models import build_model
     torch.set_num_threads(2)
     _, _worker_probe, _ = build_model(student, model_path=checkpoint_path, device=device)
     if (_worker_probe.config.projection_dimension, _worker_probe.config.projection_seed) != (dimension, seed):
@@ -46,7 +46,7 @@ class IndependentGradientWorkers:
             self._pool_size = 0
 
     def _pool_worker_target(self):
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         parameters = list(self.model.parameters())
         parameter_bytes = sum(p.numel() * p.element_size() for p in parameters)
         required = 3 * parameter_bytes + 5 * self.projector.total_parameters + 2 * 2**30
@@ -141,7 +141,7 @@ class NativeProbe:
     power_of_two_batches = False
 
     def __init__(self, engine, *, model_key, projection_dimension=4096, projection_seed=42):
-        from rags.execution import SelectionExecution
+        from rage.execution import SelectionExecution
         self.engine, self.model = engine, engine.model
         self.device = torch.device(engine.device)
         self.model.eval()
@@ -176,7 +176,7 @@ class NativeProbe:
         return torch.stack([self.engine.training_loss(row[None]) for row in windows])
 
     def _batched_gradient_sketch(self, windows):
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         vjp_batch = execution_policy(self).gradient_vjp_batch or self.vjp_batch_size
         losses = self.per_window_losses(windows)
         count = len(windows)
@@ -199,7 +199,7 @@ class NativeProbe:
         return losses.detach().float().cpu().numpy(), projected.cpu().numpy()
 
     def batch_gradient_sketch(self, windows, batch_size=None):
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         values = np.asarray(windows, dtype=np.float32)
         if values.ndim != 2 or not len(values) or not np.isfinite(values).all():
             raise ValueError("gradient windows must be a non-empty finite matrix")

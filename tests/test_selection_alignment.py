@@ -1,5 +1,5 @@
 import numpy as np
-from rags.experiments.selection_alignment import alignment_metrics
+from rage.experiments.selection_alignment import alignment_metrics
 
 
 def test_alignment_detects_gain_and_reports_zero_vectors():
@@ -24,7 +24,7 @@ def test_cosine_is_scale_invariant_for_tiny_nonzero_gradients():
 
 
 def test_direction_mixture_detects_shift_despite_perfect_local_matching():
-    from rags.experiments.selection_alignment import direction_groups, mixture_metrics
+    from rage.experiments.selection_alignment import direction_groups, mixture_metrics
     ref = np.repeat(np.eye(3), [50,25,25], axis=0)
     selected = np.repeat(np.eye(3), [10,80,10], axis=0)
     centers = direction_groups(ref, 3)
@@ -37,8 +37,8 @@ def test_direction_mixture_detects_shift_despite_perfect_local_matching():
     assert zero['source_shares'][-1] == 1
 
 
-def test_rags_max_score_recall_does_not_preserve_query_frequency():
-    from rags.experiments.arms import _streamed_top_b
+def test_rage_max_score_recall_does_not_preserve_query_frequency():
+    from rage.experiments.arms import _streamed_top_b
     reference = np.repeat(np.eye(4, dtype=np.float32)[:3], [50,25,25], axis=0)
     candidates = np.array([[.8,0,0,.6], [0,1,0,0], [0,0,.9,np.sqrt(.19)]], dtype=np.float32)
     scores, indices = _streamed_top_b(reference, lambda lo, hi: candidates[lo:hi], 3, 1, device='cpu')

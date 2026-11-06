@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from scripts.quick_crb_ratio_ref import TruthComputer, phase_allocation
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex
 
 
 @pytest.mark.parametrize("total,expected", [

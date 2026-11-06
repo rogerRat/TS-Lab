@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from rags.experiments.rank_v5 import (DEFAULT_TEMPERATURE, rank_mass_v5,
+from rage.experiments.rank_v5 import (DEFAULT_TEMPERATURE, rank_mass_v5,
     rank_resampled_windows_v5, frozen_rank_protocol_v5, validate_frozen_rank_protocol_v5,
     apply_frozen_rank_v5)
 
@@ -66,7 +66,7 @@ def test_singleton():
 
 
 def test_trainable_view_roundtrip_keeps_parent_and_forbids_missing_scores():
-    from rags.experiments.resampling import ResampledWindows
+    from rage.experiments.resampling import ResampledWindows
     parent = ResampledWindows(np.arange(8, dtype=np.float32),
         np.array([[0, 0], [0, 1], [0, 2], [0, 3]]), np.arange(4),
         [0, 1, 4], np.arange(4), [.7, .3], window_length=2, pool_n=4,
@@ -98,7 +98,7 @@ def test_invalid_inputs(scores, counts, temperature):
 def test_frozen_config_rejects_silent_temperature_and_prior_changes():
     import json
     from pathlib import Path
-    protocol = json.loads(Path('configs/rags/v5_rank_probability_protocol.json').read_text())
+    protocol = json.loads(Path('configs/rage/v5_rank_probability_protocol.json').read_text())
     validate_frozen_rank_protocol_v5(protocol)
     for key, value in [('temperature', .05), ('source_length_enters_ranking', True),
                        ('additional_bp_allowed', True), ('tie_policy', 'break_by_id')]:
@@ -108,7 +108,7 @@ def test_frozen_config_rejects_silent_temperature_and_prior_changes():
 
 
 def test_formal_view_persists_frozen_identity_across_serialization():
-    from rags.experiments.resampling import ResampledWindows
+    from rage.experiments.resampling import ResampledWindows
     parent = ResampledWindows(np.arange(8, dtype=np.float32),
         np.array([[0, 0], [0, 1], [0, 2], [0, 3]]), np.arange(4),
         [0, 1, 4], np.arange(4), [.7, .3], window_length=2, pool_n=4,

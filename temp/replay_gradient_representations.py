@@ -7,9 +7,9 @@ from dataclasses import asdict
 
 import numpy as np
 
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine
-from rags.experiments.anchor_budget_simulate import ArrayGradientComputer
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine
+from rage.experiments.anchor_budget_simulate import ArrayGradientComputer
 from assets.gradient.dataset import GradientDataset
 from assets.gradient.variants import aggregate_retained
 

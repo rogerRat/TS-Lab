@@ -12,7 +12,7 @@ from adapters.foundation import build_adapter, list_model_specs
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Inspect revision-pinned TS3 model adapters")
+    parser = argparse.ArgumentParser(description="Inspect revision-pinned RAGE model adapters")
     parser.add_argument("--model", choices=[spec.key for spec in list_model_specs()])
     parser.add_argument("--device", default="auto")
     parser.add_argument("--smoke-forecast", action="store_true")

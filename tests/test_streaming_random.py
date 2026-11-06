@@ -2,9 +2,9 @@ from types import SimpleNamespace
 import numpy as np
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex, streaming_random_select, RANDOM_SAMPLING_REVISION
-from rags.experiments.train_eval import fine_tune
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex, streaming_random_select, RANDOM_SAMPLING_REVISION
+from rage.experiments.train_eval import fine_tune
 
 
 def test_random_training_draws_from_supplied_pool_with_replacement():
@@ -31,9 +31,9 @@ def test_random_training_draws_from_supplied_pool_with_replacement():
 
 
 def test_formal_random_artifact_retains_full_pool_and_training_budget(tmp_path):
-    from rags.experiments import main_table
-    from rags.experiments.regions import load_selection, save_selection
-    from rags.experiments.schedule import epoch_checkpoints
+    from rage.experiments import main_table
+    from rage.experiments.regions import load_selection, save_selection
+    from rage.experiments.schedule import epoch_checkpoints
     pool = [TimeSeriesFragment(np.arange(n, dtype=np.float32),
             entity_id=str(i), fragment_id=i) for i, n in enumerate([10, 12])]
     index = WindowIndex(pool, context_length=4, prediction_length=2, stride=3)
@@ -50,8 +50,8 @@ def test_formal_random_artifact_retains_full_pool_and_training_budget(tmp_path):
 def test_formal_resume_rejects_old_random(tmp_path):
     import json
     import pytest
-    from rags.experiments.main_table import parse_args, check_baseline_resume
-    from rags.experiments.regions import REVISION
+    from rage.experiments.main_table import parse_args, check_baseline_resume
+    from rage.experiments.regions import REVISION
     from baselines.trajectory import REVISION as BASELINE_REVISION
     args = parse_args([])
     protocol = dict(vars(args), delivery_revision=REVISION,

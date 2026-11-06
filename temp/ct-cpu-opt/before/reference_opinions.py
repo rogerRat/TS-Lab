@@ -4,20 +4,20 @@ import numpy as np
 
 AGGREGATIONS = ('linearSum', 'zeroClipSum', 'maxSum', 'expSum')
 REVISION = 'reference-weighted-scores-v5'
-FAMILIES = {'less-main': 'less', 'rags-block': 'rags', 'rags-traj': 'rags_traj'}
+FAMILIES = {'less-main': 'less', 'rage-block': 'rage', 'rage-traj': 'rage_traj'}
 # Intra-trajectory uniformized variants of the two strongest block aggregations.
 # Scoring is identical to the base block arm; only the final block probability
 # vector is transformed (trajectory mass = sum of its blocks, uniform interior).
 UNI_MODES = ('expSum', 'linearSum')
-BLOCK_UNI_ARMS = tuple(f'rags-block-{mode}-block-uni' for mode in UNI_MODES)
-WIN_UNI_ARMS = tuple(f'rags-block-{mode}-win-uni' for mode in UNI_MODES)
-LEGACY_UNI_ARMS = tuple(f'rags-block-{mode}-uni' for mode in UNI_MODES)
+BLOCK_UNI_ARMS = tuple(f'rage-block-{mode}-block-uni' for mode in UNI_MODES)
+WIN_UNI_ARMS = tuple(f'rage-block-{mode}-win-uni' for mode in UNI_MODES)
+LEGACY_UNI_ARMS = tuple(f'rage-block-{mode}-uni' for mode in UNI_MODES)
 UNI_ARMS = LEGACY_UNI_ARMS + BLOCK_UNI_ARMS + WIN_UNI_ARMS
-OPINION_ARMS = (tuple(f'{family}-{mode}' for family in ('rags-block','rags-traj') for mode in AGGREGATIONS)
+OPINION_ARMS = (tuple(f'{family}-{mode}' for family in ('rage-block','rage-traj') for mode in AGGREGATIONS)
                 + UNI_ARMS)
 OPINION_BASES = {f'{family}-{mode}': base for family,base in FAMILIES.items()
                 if family != 'less-main' for mode in AGGREGATIONS}
-OPINION_BASES.update({arm: 'rags' for arm in UNI_ARMS})
+OPINION_BASES.update({arm: 'rage' for arm in UNI_ARMS})
 OPINION_BASES['less-main'] = 'less'
 
 
@@ -37,10 +37,10 @@ def selection_options(name, config=None):
     if name == 'less-main':
         return dict(aggregation='maxSum', competition='global')
     for mode in UNI_MODES:
-        if name in (f'rags-block-{mode}-uni', f'rags-block-{mode}-block-uni',
-                    f'rags-block-{mode}-win-uni'):
+        if name in (f'rage-block-{mode}-uni', f'rage-block-{mode}-block-uni',
+                    f'rage-block-{mode}-win-uni'):
             return dict(aggregation=mode, competition='global')
-    for family in ('rags-block','rags-traj'):
+    for family in ('rage-block','rage-traj'):
         if name.startswith(family+'-') and name[len(family)+1:] in AGGREGATIONS:
             return dict(aggregation=name[len(family)+1:], competition='global')
     return dict(aggregation='linearSum', competition='global')

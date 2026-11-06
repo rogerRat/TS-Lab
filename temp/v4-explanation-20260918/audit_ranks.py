@@ -10,7 +10,7 @@ def ranks(x):
 for model in ["chronos-base","timesfm-2.5"]:
  for task in ["time_nem_demand_5t","time_finland_15t","time_eweld_15t","time_azure_i_cpu_5t"]:
   arrays=[];ids=[]
-  for method in ["less-main","rags-traj-maxSum"]:
+  for method in ["less-main","rage-traj-maxSum"]:
    with np.load(run/"students"/model/"selections"/(task+"__"+method+".npz")) as d:
     meta=json.loads(str(d["resampling_metadata"]));diag=json.loads(str(d["diagnostics"]))
    audit=meta.get("reference_audit",{})

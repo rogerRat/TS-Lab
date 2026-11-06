@@ -8,7 +8,7 @@ import argparse
 import json
 from pathlib import Path
 
-STAGE2_PATH = Path("/root/TS3/configs/rags/development_timerxl_history_early_0920.json")
+STAGE2_PATH = Path("/root/TS3/configs/rage/development_timerxl_history_early_0920.json")
 
 
 def macro_score(trial, datasets, original_by, epoch):

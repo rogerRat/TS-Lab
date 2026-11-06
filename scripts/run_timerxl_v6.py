@@ -3,13 +3,13 @@ import json
 import os
 from pathlib import Path
 
-from rags.experiments.seed_rounds import run_rounds
-from rags.experiments.full_pool_run import run_suite
-from rags.experiments.students import atomic_json
+from rage.experiments.seed_rounds import run_rounds
+from rage.experiments.full_pool_run import run_suite
+from rage.experiments.students import atomic_json
 
 
-CONFIG = Path(os.environ.get("TS3_TIMER_V6_CONFIG", "/root/TS3/configs/rags/main_v6_timerxl.json"))
-RUN = Path(os.environ.get("TS3_TIMER_V6_RUN", "/root/autodl-tmp/TS3/outputs/main-rank-volume-timerxl-v6-20260921"))
+CONFIG = Path(os.environ.get("RAGE_TIMER_V6_CONFIG", "/root/TS-Lab/configs/rage/main_v6_timerxl.json"))
+RUN = Path(os.environ.get("RAGE_TIMER_V6_RUN", "/root/autodl-tmp/rage/outputs/main-rank-volume-timerxl-v6-20260921"))
 
 
 def main():

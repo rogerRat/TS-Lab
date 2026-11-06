@@ -2,8 +2,8 @@ import json
 from types import SimpleNamespace
 import numpy as np
 import pytest
-from rags.window_reconstruction import interpolate_window_gradients
-from rags.epsilon_protocol import load_p10_calibration
+from rage.window_reconstruction import interpolate_window_gradients
+from rage.epsilon_protocol import load_p10_calibration
 
 
 def test_linear_raw_vectors_not_block_mean_or_unit_vectors():

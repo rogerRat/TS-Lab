@@ -1,12 +1,12 @@
 import json, glob, os, datetime, statistics
-R="/root/autodl-tmp/TS3/outputs/main-v7-20260923"
+R="/root/autodl-tmp/rage/outputs/main-v7-20260923"
 MODELS=["chronos-base","timerxl-84m","timesfm-2.5"]
 TASKS=["time_nem_demand_5t","time_azure_i_cpu_5t","time_nem_price_5t","time_cphl_h","time_darwin_water_15t","time_solar_h","time_port_activity_d"]  # 2026-09-24 踢除 time_finland_15t/time_eweld_15t（commit 9f6538e）
 CHRONOS_EPOCH=3.0  # Codex 修正：主表 Chronos 取 test_curve epoch=3.0（非 raw mase/非 best）
 FORMAL_SEEDS=(0,1)  # 2026-09-25 用户定稿：正式结果只含 seed0/1；seed2 仅末尾存档
 PER_SEED_GOAL=140; PER_MODEL_GOAL=280; TOTAL_GOAL=840
 # 协议修订记录
-AMEND=["2026-09-24 踢除 time_finland_15t 与 time_eweld_15t（V6 证据：Chronos 上 RAGS 分别弱 12.0%/4.3%；用户批准，已生效 commit 9f6538e）",
+AMEND=["2026-09-24 踢除 time_finland_15t 与 time_eweld_15t（V6 证据：Chronos 上 RAGE 分别弱 12.0%/4.3%；用户批准，已生效 commit 9f6538e）",
        "2026-09-24 Chronos max_epochs 4→3（用户批准，已生效 commit 9f6538e；旧 4ep cell 保留，主表 Chronos 取 3.0 非 best）",
        "2026-09-25 扩展探索三任务：Wind/SG_PM25/Coastal（MetroPT/Smart_Mfg exam=0 被门禁拒；探索口径，非主验证集）",
        "2026-09-25 shape 补做（中点+斜率臂，31b8539，严格全局臂序，用户批准）",
@@ -70,7 +70,7 @@ def main():
     L=[]
     L.append("# V7 main-rank-volume 结果记录（v7.md）")
     L.append("")
-    L.append("实验身份：configs/rags/main_v7_curve4.json（v7-seeded-quarter-pools-20260923 + 曲线协议）；run=%s"%R)
+    L.append("实验身份：configs/rage/main_v7_curve4.json（v7-seeded-quarter-pools-20260923 + 曲线协议）；run=%s"%R)
     L.append("池协议：可行池65136/每seed精确16284，源+REF CRB 0.5%/0.5%/0.5%，20臂，零BP选择，rolling resume。正式结果仅 seed0/1。")
     L.append("硬件：双 RTX PRO 6000 96G。MASE：Chronos 取 test_curve 3.0；其余取最终 epoch；逐 cell 曲线在 seeds/seedN/<model>/ 与 cells json。")
     L.append("")
@@ -114,6 +114,6 @@ def main():
         L.append("")
         agg_table(L, s2, "TimerXL seed2 存档", "n=七任务×1seed（存档口径）")
     out="\n".join(L)+"\n"
-    open("/root/TS3/docs/results/v7.md","w").write(out)
+    open("/root/TS-Lab/docs/results/v7.md","w").write(out)
     print("v7.md written: %d chars, formal_cells=%d"%(len(out),total))
 main()

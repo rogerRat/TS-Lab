@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments.resampling import rags_marginal, InfeasibleReference
+from rage.experiments.resampling import rage_marginal, InfeasibleReference
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA')
@@ -15,8 +15,8 @@ def test_gpu_softmax_audits_match_cpu(gating, row_batch):
     sources /= np.linalg.norm(sources, axis=1, keepdims=True)
     n, m = rng.integers(1, 100, 19), rng.integers(1, 100, 103)
     args = (refs, sources, n, m)
-    expected, cpu = rags_marginal(*args, device='cpu', gating=gating, temperature=.25)
-    actual, gpu = rags_marginal(*args, device='cuda', gating=gating,
+    expected, cpu = rage_marginal(*args, device='cpu', gating=gating, temperature=.25)
+    actual, gpu = rage_marginal(*args, device='cuda', gating=gating,
                                temperature=.25, row_batch=row_batch)
     np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-15)
     for c, g in zip(cpu['rows'], gpu['rows']):
@@ -31,7 +31,7 @@ def test_gpu_rejects_infeasible_and_underflow():
     refs = np.array([[1., 0.]])
     sources = np.array([[-1., 0.], [-.5, .5]])
     with pytest.raises(InfeasibleReference):
-        rags_marginal(refs, sources, [1], [1, 1], device='cuda', gating=True)
+        rage_marginal(refs, sources, [1], [1, 1], device='cuda', gating=True)
     with pytest.raises(ValueError, match='underflows alignment mass'):
-        rags_marginal(refs, np.array([[1., 0.], [-1., 0.]]), [1], [1, 1],
+        rage_marginal(refs, np.array([[1., 0.], [-1., 0.]]), [1], [1, 1],
                       device='cuda', gating=False, temperature=1e-9)

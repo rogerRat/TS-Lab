@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Callable, Mapping
 
-from ts3.spec.ref_extraction import ReferenceExtractionSpecification
+from tsl.spec.ref_extraction import ReferenceExtractionSpecification
 
 
 def _save_records(records, destination: Path) -> tuple[int, int]:

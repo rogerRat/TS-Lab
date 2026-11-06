@@ -15,7 +15,7 @@ from .exceptions import ModelNotFoundError
 from .projection import ParameterHashProjector, TensorSketchProjector
 from .base import _FullModelProjector, IndependentGradientWorkers
 from gradient.count_sketch import add_count_sketch
-from rags.execution import SelectionExecution
+from rage.execution import SelectionExecution
 
 
 DEFAULT_CHRONOS_T5_SMALL = (

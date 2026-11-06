@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from ts3.spec.load_dataframe import DataContractError, validate_series_rows
+from tsl.spec.load_dataframe import DataContractError, validate_series_rows
 
 
 def _series_table():

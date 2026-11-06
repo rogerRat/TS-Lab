@@ -1,4 +1,4 @@
-schema_version: ts3.reference-extraction-spec.v1
+schema_version: tsl.reference-extraction-spec.v1
 benchmark: fev
 evaluation_declaration:
   path: ../../eval/fev/profile-10b-local.yaml

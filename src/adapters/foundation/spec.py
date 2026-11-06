@@ -36,7 +36,7 @@ class ModelSpec:
         requested = ModelCapability(capability)
         if requested not in self.capabilities:
             raise NotImplementedError(
-                "%s (%s) does not support %s in TS3" % (
+                "%s (%s) does not support %s in RAGE" % (
                     self.key, self.version, requested.value,
                 )
             )
@@ -111,7 +111,7 @@ _SPECS: Mapping[str, ModelSpec] = MappingProxyType({
         official_training_recipe=False,
         weights_license="Apache-2.0",
         notes=(
-            "No released official fine-tuning recipe; TS3 assembles the "
+            "No released official fine-tuning recipe; RAGE assembles the "
             "checkpoint-native TimeFlow components (flow_loss.py inside the "
             "pinned snapshot) on raw values, matching official inference "
             "(revin off). Probe losses use content-seeded noise for "

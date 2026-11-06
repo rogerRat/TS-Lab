@@ -1,9 +1,9 @@
 """Trajectory-level TSDS adaptation with upstream IVF/KDE/OT kernels."""
 from __future__ import annotations
 import numpy as np
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
 from baselines.trajectory import budget_config, trajectory_features
-from rags.experiments.regions import REVISION, deliver_trajectories
+from rage.experiments.regions import REVISION, deliver_trajectories
 from .algorithms import tsds_probability_assignment
 from .retrieval import trajectory_neighbours
 
@@ -24,7 +24,7 @@ def tsds_select(engine, *, reference_fragments, index: WindowIndex,
     probabilities = tsds_probability_assignment(
         distances, neighbours, kdes, candidate_count=len(source), alpha=alpha, c_param=c_param)
     if resampling is not None:
-        from rags.experiments.resampling import trajectory_distribution
+        from rage.experiments.resampling import trajectory_distribution
         selected = trajectory_distribution(index, source_info["trajectory_ids"], probabilities,
             pool_manifest=pool_manifest, metadata=resampling, native_mass=True)
         return ArmOutput("tsds", selected, [], SelectionCost(

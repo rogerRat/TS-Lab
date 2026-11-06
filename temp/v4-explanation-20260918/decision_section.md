@@ -71,7 +71,7 @@ p_j=\frac{q_j\exp(u_j/.05)}{\sum_kq_k\exp(u_k/.05)}.
 
 固定分位温度能统一连续排名尺度；但不同单位粒度、长度分布和并列组会使实际集中程度仍有差异，不能宣称所有方法概率分布完全相同。记录相对ESS（rho=1/Σp_j²/q_j）、KL(p||q)、最大并列组先验质量、真实窗口ESS及轨迹曝光。尤其ZeroClip可能有大面积并列，不能为了追求相同集中程度制造虚假排序。排名也可能放大微小而不稳定的分差，后续须检查排序稳定性。
 
-**落实状态：**远程新增独立模块src/rags/experiments/rank_probability.py及tests/test_rank_probability.py，14项针对性测试通过；现有V4调用路径没有接入该模块。rank_resampled_windows可从既有选集构造独立可训练视图，保留窗口和原始选集概率，新选集记录排名协议并改变LESS/RAGS概率版本字段，禁止当成旧选集复用；后续训练须使用新run目录，协议字段至少包含排名版本、源先验、T_rank、原评分/聚合规则和原资产身份。
+**落实状态：**远程新增独立模块src/rage/experiments/rank_probability.py及tests/test_rank_probability.py，14项针对性测试通过；现有V4调用路径没有接入该模块。rank_resampled_windows可从既有选集构造独立可训练视图，保留窗口和原始选集概率，新选集记录排名协议并改变LESS/RAGE概率版本字段，禁止当成旧选集复用；后续训练须使用新run目录，协议字段至少包含排名版本、源先验、T_rank、原评分/聚合规则和原资产身份。
 
 缓存重放脚本temp/v4-explanation-20260918/replay_rank_probability.py已完成两个模型×九任务×九个梯度方法×两种源先验，共324份独立概率overlay，无缺项，jobs_launched=0。输出temp/rank-fixed-t005-20260918，summary.json包含所有强度与概率诊断。overlay只保存概率、单位计数/起点、排名与来源字段，不复制大型源数据，不是新MASE结果；NPZ/JSON同目录partial后原子发布，不使用hash。
 

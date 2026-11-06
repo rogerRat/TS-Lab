@@ -6,10 +6,10 @@ import re
 import time
 
 import numpy as np
-from rags.experiments.regions import load_selection, save_selection
-from rags.experiments.resampling import value_mass
-from rags.experiments.students import atomic_json
-from rags.experiments.v3_protocol import V3_MATRIX, V3_TEMPERATURE_ARMS, validate_v3_config
+from rage.experiments.regions import load_selection, save_selection
+from rage.experiments.resampling import value_mass
+from rage.experiments.students import atomic_json
+from rage.experiments.v3_protocol import V3_MATRIX, V3_TEMPERATURE_ARMS, validate_v3_config
 
 old = Path('/root/autodl-tmp/TS3/outputs/main-shared-nine-v3-20260917')
 new = Path('/root/autodl-tmp/TS3/outputs/main-shared-nine-v3-t005-20260917')
@@ -60,7 +60,7 @@ for student in config['students']:
                         scores = meta['native_scores']
                     else:
                         assert meta['reference_audit']['aggregation'] == 'mean_reference_trajectory_cosines'
-                        assert meta['source_weighting'] == ('equal_block' if arm == 'rags-main' else 'equal_trajectory')
+                        assert meta['source_weighting'] == ('equal_block' if arm == 'rage-main' else 'equal_trajectory')
                         scores = meta['reference_audit']['source_scores']
                     scores = np.asarray(scores)
                     np.testing.assert_allclose(value_mass(scores, temperature=.25, gating=False),
@@ -96,8 +96,8 @@ for student in config['students']:
                 atomic_json(dest/'cells'/cell.name,data)
                 provenance['reused_cells'].append(str(cell))
     assert not any((dest/'cells').glob('*__less-main__*'))
-    assert not any((dest/'cells').glob('*__rags-main__*'))
-    assert not any((dest/'cells').glob('*__rags-traj__*'))
+    assert not any((dest/'cells').glob('*__rage-main__*'))
+    assert not any((dest/'cells').glob('*__rage-traj__*'))
     assert not any((dest/'cells').glob('*__lp-mirror__*'))
 
 atomic_json(new/'temperature_change.json',provenance)
@@ -106,8 +106,8 @@ atomic_json(new/'execution_control.json',dict(mode='run',training_enabled=True,e
     authorization='User requested all temperature methods at 0.05, including lp-mirror'))
 ready = json.loads((new/'readiness.json').read_text()); ready.update(authorized=True,status='ready_authorized')
 atomic_json(new/'readiness.json',ready)
-current_config = Path('configs/rags/main_v3.json')
-archive_config = Path('configs/rags/main_v3_T025.json')
+current_config = Path('configs/rage/main_v3.json')
+archive_config = Path('configs/rage/main_v3_T025.json')
 if not archive_config.exists():
     atomic_json(archive_config,json.loads(current_config.read_text()))
 atomic_json(current_config,config)

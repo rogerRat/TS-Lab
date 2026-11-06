@@ -5,8 +5,8 @@ import json
 import time
 from pathlib import Path
 import numpy as np
-from rags.crb import CRBConfig
-from rags.execution import execution_policy
+from rage.crb import CRBConfig
+from rage.execution import execution_policy
 from .common import _pool_fingerprint
 
 REVISION = "trajectory-0912-repeat-v1"
@@ -88,7 +88,7 @@ def trajectory_features(engine, index, config, *, kind, cache_dir=None,
         if kind == "less":
             _, values = engine.batch_gradient_sketch(windows)
         else:
-            from rags.execution import encoder_embeddings
+            from rage.execution import encoder_embeddings
             values = encoder_embeddings(engine, windows, batch_size=batch)
         values = np.asarray(values, dtype=np.float32)
         if features is None:

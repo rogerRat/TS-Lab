@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from assets.dataset_processing.series import log_skipped_series, normalize_load_dataframe
-from ts3.spec.load_dataframe import validate_series_rows
+from tsl.spec.load_dataframe import validate_series_rows
 
 log = logging.getLogger("load")
 

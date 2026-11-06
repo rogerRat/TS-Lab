@@ -10,8 +10,8 @@
 
 ### 实现与验证
 
-独立 CRB 配置：`configs/rags/v5_crb_split_protocol.json`，身份 `v5-crb-strict-p10-recursive-20260918`。实现为 `src/rags/crb.py` 的 `closest_zero_v5`，其它路径保留。每次二分后立即重选当前最小，新子区间可能抢先于旧并列候选。完全相同优先级暂沿用左端位置顺序；本次不改覆盖/风险阶段并列规则。跨轨迹 CRBEngineMulti 保持批量执行与逐轨迹语义一致。
+独立 CRB 配置：`configs/rage/v5_crb_split_protocol.json`，身份 `v5-crb-strict-p10-recursive-20260918`。实现为 `src/rage/crb.py` 的 `closest_zero_v5`，其它路径保留。每次二分后立即重选当前最小，新子区间可能抢先于旧并列候选。完全相同优先级暂沿用左端位置顺序；本次不改覆盖/风险阶段并列规则。跨轨迹 CRBEngineMulti 保持批量执行与逐轨迹语义一致。
 
-测试：`tests/test_crb_split_v5.py`、`test_crb_split_one_shot.py`、`test_crb_split_antagonist.py`、`test_crb_split_budget.py`、`test_crb_trajectory_p10.py`、`test_rags_crb_multi.py`、`test_rank_v5.py`、`test_crb.py` 共 106 项通过（3.21s）。包括独立递归最小值 oracle、多轨迹等价、阈值冻结、零/等模长候选耗尽、新子区间抢先、无丢弃与窗口无重漏，以及旧版本/排名回归。旧版本的未知 policy 测试改用真正未知名称，以便允许新增 v5。
+测试：`tests/test_crb_split_v5.py`、`test_crb_split_one_shot.py`、`test_crb_split_antagonist.py`、`test_crb_split_budget.py`、`test_crb_trajectory_p10.py`、`test_rage_crb_multi.py`、`test_rank_v5.py`、`test_crb.py` 共 106 项通过（3.21s）。包括独立递归最小值 oracle、多轨迹等价、阈值冻结、零/等模长候选耗尽、新子区间抢先、无丢弃与窗口无重漏，以及旧版本/排名回归。旧版本的未知 policy 测试改用真正未知名称，以便允许新增 v5。
 
 没有设置跨阶段余量回填。可供后续决策：候选耗尽后将余量转给风险探测，在有剩余合法位置时用满总锚点预算。这属于预算转移规则变更，本轮未落地。可进一步比较抵消比例 `||gL+gR||/(||gL||+||gR||)` 与绝对中点模长优先级，以区分一强一弱和方向相反；该替代亦未落地。原审阅其它待决项不在本次决策范围；§5.2 的数学表述错误仅随该段恢复直接纠正。正式 V5 配置/训练尚未接入，未启动训练，未提交/Push。

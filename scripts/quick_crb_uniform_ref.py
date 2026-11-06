@@ -15,14 +15,14 @@ import numpy as np
 
 from assets.gradient.cache import GradientCache, atomic_json, index_request
 from assets.gradient.dataset import GradientDataset
-from rags.crb import CRBEngineMulti
-from rags.execution import SelectionExecution, selection_execution
-from rags.experiments.ablation import reconstruct_gradients
-from rags.experiments.arms import WindowIndex
-from rags.experiments.development_inputs import load_fragments
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.v7_protocol import crb_for
-from rags.experiments.v7_scores import interpolated_chunks, uniform_anchors
+from rage.crb import CRBEngineMulti
+from rage.execution import SelectionExecution, selection_execution
+from rage.experiments.ablation import reconstruct_gradients
+from rage.experiments.arms import WindowIndex
+from rage.experiments.development_inputs import load_fragments
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.v7_protocol import crb_for
+from rage.experiments.v7_scores import interpolated_chunks, uniform_anchors
 
 
 STUDENT = "chronos-base"
@@ -119,7 +119,7 @@ def make_truth(context, *, config):
     # An explicit private namespace prevents a V7 model lock collision and
     # prevents an audit-only full scan from altering production cache identity.
     private_root = output / "gradient_cache"
-    os.environ["TS3_GRADIENT_CACHE_ROOT"] = str(private_root)
+    os.environ["RAGE_GRADIENT_CACHE_ROOT"] = str(private_root)
     _, probe, identity = build_model(STUDENT, model_path=config["model_paths"].get(STUDENT),
                                      context_length=512, prediction_length=64)
     if identity != context["audit"]["model"]:

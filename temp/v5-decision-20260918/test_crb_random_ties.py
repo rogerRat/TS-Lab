@@ -2,8 +2,8 @@
 from dataclasses import replace
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine, CRBEngineMulti
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine, CRBEngineMulti
 
 
 def simulate(config, gradients, fragment_id=0):

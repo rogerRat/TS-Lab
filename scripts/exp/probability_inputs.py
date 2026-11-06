@@ -5,8 +5,8 @@ import shutil
 
 import numpy as np
 
-from rags.experiments.development_inputs import load_fragments, save_fragments
-from rags.experiments.students import atomic_json
+from rage.experiments.development_inputs import load_fragments, save_fragments
+from rage.experiments.students import atomic_json
 
 
 def prepare(inputs, out, datasets, *, series=8, seed=20260914):

@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from test_resampling import distribution
-from rags.experiments.train_eval import fine_tune
+from rage.experiments.train_eval import fine_tune
 
 
 @pytest.mark.parametrize("kind", [torch.optim.Adam, torch.optim.AdamW])
@@ -76,7 +76,7 @@ def test_resume_rejects_changed_schedule_or_distribution(tmp_path):
 
 
 def test_full_pool_epoch_checkpoints_survive_reentry(tmp_path):
-    from rags.experiments.train_eval import run_arm_training
+    from rage.experiments.train_eval import run_arm_training
     windows = distribution()
     model = torch.nn.Linear(4, 2)
     def loss(w):

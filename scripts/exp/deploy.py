@@ -1,4 +1,4 @@
-"""Check and optionally launch the document-frozen RAGS experiment suite."""
+"""Check and optionally launch the document-frozen RAGE experiment suite."""
 from __future__ import annotations
 
 import argparse
@@ -7,12 +7,12 @@ from pathlib import Path
 import yaml
 
 from configs.paths import PROJECT_ROOT
-from rags.experiments.deployment import check_deployment
+from rage.experiments.deployment import check_deployment
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", default="configs/rags/run.yaml")
+    parser.add_argument("--config", default="configs/rage/run.yaml")
     parser.add_argument("--out-root", default="outputs")
     parser.add_argument("--report", default="outputs/deployment-0911.json")
     parser.add_argument("--launch", action="store_true", help="launch only if all prerequisites pass")
@@ -26,7 +26,7 @@ def main(argv=None):
     if not report["ready"]:
         return 2
     if args.launch:
-        from rags.experiments.run import main as run
+        from rage.experiments.run import main as run
         return run(["--config", args.config, "--out-root", args.out_root])
     return 0
 

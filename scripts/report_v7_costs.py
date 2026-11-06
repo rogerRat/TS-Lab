@@ -2,12 +2,12 @@
 import argparse
 import json
 from pathlib import Path
-from rags.experiments.v7_costs import collect, render, atomic_text, update_markdown, read
+from rage.experiments.v7_costs import collect, render, atomic_text, update_markdown, read
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config', default='configs/rags/main_v7_curve4.json')
+    parser.add_argument('--config', default='configs/rage/main_v7_curve4.json')
     parser.add_argument('--run')
     parser.add_argument('--markdown', help='Update only the delimited cost block in this file')
     args = parser.parse_args()

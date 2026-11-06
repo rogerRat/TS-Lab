@@ -5,8 +5,8 @@ from pathlib import Path
 import time
 import numpy as np
 import torch
-from rags.experiments.full_pool_models import build_model
-from rags.execution import SelectionExecution
+from rage.experiments.full_pool_models import build_model
+from rage.execution import SelectionExecution
 
 
 def main():
@@ -55,7 +55,7 @@ def main():
         if cosine.min() < .9999 or relative.max() > .01:
             raise ValueError("batched gradients exceed the BF16 numerical agreement gate")
     if args.output:
-        from rags.experiments.students import atomic_json
+        from rage.experiments.students import atomic_json
         atomic_json(args.output, dict(model=identity, windows=len(values), results=records))
     release = getattr(probe, "release_gradient_workers", None)
     if release:

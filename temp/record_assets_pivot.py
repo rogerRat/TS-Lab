@@ -31,10 +31,10 @@ eWELD、CPHL、NEM price、solar、port activity，覆盖Chronos/TimesFM/TimeMoE
 full_pool_worker在启动、取得worker锁、任务及训练cell入口检查暂停标记，
 在模型加载前拒绝误启动的全流程。准备进程独立使用assets_state.json。
 
-新增入口：python -m rags.experiments.full_pool_assets --run RUN --student STUDENT
+新增入口：python -m rage.experiments.full_pool_assets --run RUN --student STUDENT
 --reference-batch 32 [--gradient-workers 2]。不读取exam，不执行original评估、
 概率选集、fine_tune或checkpoint清理。只构建冻结预训练模型参考梯度：
-LESS uniform窗口与RAGS CRB自适应窗口并集，供轨迹级与Global各臂共同复用。
+LESS uniform窗口与RAGE CRB自适应窗口并集，供轨迹级与Global各臂共同复用。
 选择规则/温度的后续修正不会使这些原生每窗口梯度失效。
 
 沿用当前grad_cache的模型身份、pool字段指纹、BF16编码及reference:DATASET

@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments import full_pool_exploration as module
-from rags.experiments.development_inputs import save_fragments
-from rags.experiments.students import atomic_json
+from rage.core import TimeSeriesFragment
+from rage.experiments import full_pool_exploration as module
+from rage.experiments.development_inputs import save_fragments
+from rage.experiments.students import atomic_json
 
 
 @pytest.mark.parametrize("training_data", ["source_random", "safe_history_random", "source_probability"])
@@ -39,20 +39,20 @@ def test_exploration_separates_history_and_exam_and_resumes(tmp_path, monkeypatc
                     precision_policy="cpu-test", ckpt="fixture")
     scored = []
     if training_data == "source_probability":
-        from rags.experiments.arms import ArmOutput, SelectionCost
-        from rags.experiments.resampling import random_distribution
+        from rage.experiments.arms import ArmOutput, SelectionCost
+        from rage.experiments.resampling import random_distribution
         def select(arm, probe, **kwargs):
             scored.append(kwargs)
             assert len(kwargs["reference_fragments"][0].data) == 50
             assert np.max(kwargs["reference_fragments"][0].data) < .5
             windows = random_distribution(kwargs["index"], pool_manifest=kwargs["pool_manifest"])
-            from rags.experiments.full_pool import COSINE_NUMERICS
+            from rage.experiments.full_pool import COSINE_NUMERICS
             windows.metadata["cosine_numerics"] = COSINE_NUMERICS
             return ArmOutput(arm, windows, [], SelectionCost(), {})
-        monkeypatch.setattr("rags.experiments.full_pool.select_full_pool", select)
+        monkeypatch.setattr("rage.experiments.full_pool.select_full_pool", select)
         epsilon = tmp_path / "epsilon.json"
         atomic_json(epsilon, dict(model=identity, epsilon=.01, percentile=10, count=10, distribution={"10":.01}))
-        config.update(arm="rags", temperature=.1, epsilon_calibration=str(epsilon), crb={})
+        config.update(arm="rage", temperature=.1, epsilon_calibration=str(epsilon), crb={})
     out = tmp_path / "out"
     bundle = (engine, engine, identity)
     report = module.run_exploration(config, out, model_bundle=bundle)

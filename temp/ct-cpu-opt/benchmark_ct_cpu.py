@@ -10,8 +10,8 @@ from types import SimpleNamespace
 import numpy as np
 
 from assets.gradient.cache import GradientCache, WindowRequest
-from rags.execution import SelectionExecution
-from rags.experiments.reference_opinions import reference_scores_many, AGGREGATIONS
+from rage.execution import SelectionExecution
+from rage.experiments.reference_opinions import reference_scores_many, AGGREGATIONS
 
 
 def old_module(name, path):
@@ -34,7 +34,7 @@ class Probe:
 def main():
     before = Path('/root/TS3/temp/ct-cpu-opt/before')
     baseline = old_module('assets.gradient._benchmark_before', before / 'cache.py')
-    old_scores = old_module('rags.experiments._benchmark_before', before / 'reference_opinions.py')
+    old_scores = old_module('rage.experiments._benchmark_before', before / 'reference_opinions.py')
     with tempfile.TemporaryDirectory(prefix='ct-cpu-test-', dir='/root/autodl-tmp') as root:
         for label, cls in [('before', baseline.GradientCache), ('after', GradientCache)]:
             cache = cls(Path(root) / label, Probe(), model_identity={'model_id':'fixture'},

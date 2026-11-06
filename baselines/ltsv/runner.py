@@ -11,11 +11,11 @@ import numpy as np
 import torch
 from torch import nn
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
 from baselines.common import _pool_fingerprint, reference_windows
 from .algorithms import ltsv_window_scores
-from rags.execution import forecast_mse, prepare_contexts
+from rage.execution import forecast_mse, prepare_contexts
 from .runtime import load_restore_timing, accounting
 
 
@@ -53,7 +53,7 @@ def _ltsv_reference_mse(engine, windows, *, batch_size=32):
 def _ltsv_training_loss(engine, windows):
     if callable(getattr(engine, "training_loss", None)):
         return engine.training_loss(windows)
-    from rags.engines import per_sample_cross_entropy
+    from rage.engines import per_sample_cross_entropy
     tensors = engine.batch_tensors(windows)
     output = engine.model(**tensors, return_dict=True)
     return per_sample_cross_entropy(output.logits, tensors["labels"]).mean()
@@ -214,7 +214,7 @@ def ltsv_select(engine, *, reference_fragments, index: WindowIndex,
             np.savez(cache, scores=window_scores,
                      meta=json.dumps({"blocks": icf_steps}))
     if resampling is not None:
-        from rags.experiments.resampling import window_distribution
+        from rage.experiments.resampling import window_distribution
         selected = window_distribution(index, window_scores, pool_manifest=pool_manifest,
             metadata=resampling, temperature=resampling.get("temperature", .1))
         return ArmOutput("ltsv", selected, [], SelectionCost(

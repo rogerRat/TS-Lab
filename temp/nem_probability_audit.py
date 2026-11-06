@@ -5,7 +5,7 @@ import numpy as np
 run = Path('/root/autodl-tmp/TS3/outputs/main-shared-nine-v2-global-20260917')
 rows = []
 for student in ['chronos-base', 'timesfm-2.5', 'timemoe-200m']:
-    for arm in ['rags_gateless','rags_global','rags_traj_gls','rags_traj_global','lessvg_t025']:
+    for arm in ['rage_gateless','rage_global','rage_traj_gls','rage_traj_global','lessvg_t025']:
         path = run/'students'/student/'selections'/f'time_nem_demand_5t__{arm}.npz'
         with np.load(path, allow_pickle=False) as data:
             p = data['probabilities']
@@ -33,7 +33,7 @@ for student in ['chronos-base', 'timesfm-2.5', 'timemoe-200m']:
                     counterfactual_less_mean5_ess_fraction=float(1/(total*(new_p*new_p/c).sum())))
                 starts = data['unit_positions'][data['unit_offsets'][:-1]]
                 comparisons = {}
-                for target in ['rags_traj_gls', 'rags_traj_global']:
+                for target in ['rage_traj_gls', 'rage_traj_global']:
                     with np.load(path.with_name(f'time_nem_demand_5t__{target}.npz'),
                                  allow_pickle=False) as other:
                         other_counts = np.diff(other['unit_offsets'])
@@ -41,8 +41,8 @@ for student in ['chronos-base', 'timesfm-2.5', 'timemoe-200m']:
                         assert np.array_equal(c, other_counts)
                         assert np.array_equal(starts, other_starts)
                         comparisons[target] = float(np.abs(new_p-other['probabilities']).sum()/2)
-                row['tv_less_mean5_to_rags_trajectories'] = comparisons
-            if arm in ['rags_global', 'rags_traj_global']:
+                row['tv_less_mean5_to_rage_trajectories'] = comparisons
+            if arm in ['rage_global', 'rage_traj_global']:
                 audit = json.loads(str(data['diagnostics']))['reference_audit']
                 scores = np.asarray(audit['source_scores'])
                 mean = float((scores*c).sum()/total)

@@ -5,25 +5,25 @@ from pathlib import Path
 import numpy as np
 import pytest
 import torch
-from rags.experiments.v7_protocol import (make_curve_config, make_reduced_config,
+from rage.experiments.v7_protocol import (make_curve_config, make_reduced_config,
     validate, exposure_audit, asset_protocol, EXCLUDED_TASKS)
-from rags.experiments.v7_amendment import (report_view, compatible_identity,
+from rage.experiments.v7_amendment import (report_view, compatible_identity,
     freeze_training, approved_prefix_contract, write_report_views)
-from rags.experiments.v7_train import checkpoint_curve
-from rags.experiments.train_eval import fine_tune
+from rage.experiments.v7_train import checkpoint_curve
+from rage.experiments.train_eval import fine_tune
 from test_training_resume import engine
 from test_production_recipe import base_recipe
 
 
 def configs():
-    base=json.loads(Path('configs/rags/main_v7.json').read_text())
+    base=json.loads(Path('configs/rage/main_v7.json').read_text())
     return make_curve_config(base),make_reduced_config(base)
 
 
 def test_reduced_exact_config_assets_and_steps():
     old,new=configs()
     validate(new)
-    assert json.loads(Path('configs/rags/main_v7_curve4.json').read_text())==new
+    assert json.loads(Path('configs/rage/main_v7_curve4.json').read_text())==new
     assert asset_protocol(old)==asset_protocol(new)
     assert len(new['datasets'])==7 and not set(EXCLUDED_TASKS)&set(new['datasets'])
     assert len(new['datasets'])*len(new['arms'])*3*3==1260

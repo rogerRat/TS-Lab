@@ -7,7 +7,7 @@ import warnings
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_EXPERIMENT_CONFIGS = Path("/root/autodl-tmp/TS3/profile-10b/experiments/configs")
+DATA_EXPERIMENT_CONFIGS = Path("/root/autodl-tmp/rage/profile-10b/experiments/configs")
 CONFIGS = PROJECT_ROOT / "configs"
 LOGS = PROJECT_ROOT / "logs"
 BENCH_DATA = PROJECT_ROOT / "data" / "bench"
@@ -19,6 +19,7 @@ PRETRAINED_MODELS_DIR = PROJECT_ROOT / "cache" / "pretrained_models"
 FEATURES_DIR = PROJECT_ROOT / "data" / "features"
 TRAIN_OUTPUTS = PROJECT_ROOT / "outputs" / "train"
 EVAL_OUTPUTS = PROJECT_ROOT / "outputs" / "eval"
+SELECTION_OUTPUTS = PROJECT_ROOT / "outputs" / "selection"
 VIS_OUTPUTS = PROJECT_ROOT / "outputs" / "vis"
 
 # Project-wide behavior for a requested path outside its declared category.
@@ -33,6 +34,7 @@ OUTPUT_ROOTS = {
     "reference_shard": REFERENCE_SHARD_DATA,
     "train": TRAIN_OUTPUTS,
     "eval": EVAL_OUTPUTS,
+    "selection": SELECTION_OUTPUTS,
     "vis": VIS_OUTPUTS,
 }
 

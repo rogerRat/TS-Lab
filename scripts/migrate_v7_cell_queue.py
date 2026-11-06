@@ -65,16 +65,16 @@ def main():
     os.close(fd)
     os.close(process_fd)
     if finished_cell:
-        from rags.experiments.checkpoint_retention import cleanup_completed_weights
+        from rage.experiments.checkpoint_retention import cleanup_completed_weights
         row = json.loads(finished_cell.read_text())
         cleanup_completed_weights(finished_cell,root/'checkpoints'/row['task']/row['arm'])
     config = json.loads(Path(a.config).read_text())
-    env.update(PYTHONPATH='src:.',TS3_GRADIENT_CACHE_ROOT='/root/autodl-tmp/TS3/cache/grad-pool')
+    env.update(PYTHONPATH='src:.',RAGE_GRADIENT_CACHE_ROOT='/root/autodl-tmp/rage/cache/grad-pool')
     def launch(student,gpu,label):
         python = config['student_environments'][student]
         log = (run/'logs'/f'queue_{label}_{student}.log').open('a')
-        return subprocess.Popen([python,'-m','rags.experiments.v7_queue','--config',a.config,
-            '--run',str(run),'--student',student],cwd='/root/TS3',
+        return subprocess.Popen([python,'-m','rage.experiments.v7_queue','--config',a.config,
+            '--run',str(run),'--student',student],cwd='/root/TS-Lab',
             env=dict(env,CUDA_VISIBLE_DEVICES=str(gpu)),stdout=log,stderr=subprocess.STDOUT)
     worker = launch(a.student,a.gpu,'gpu'+a.gpu)
     extra = launch('chronos-base','1','gpu1_fill') if a.extra_chronos_gpu1 else None

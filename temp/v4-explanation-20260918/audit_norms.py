@@ -8,7 +8,7 @@ proto=json.loads((run/"protocol.json").read_text())
 with np.load(Path(proto["inputs"])/"pool.npz") as d:
  fids=d["ids"];legal=np.diff(d["offsets"])-575
 # Freeze source uniform requirement from production formula, without importing a model/cache writer.
-from rags.crb import CRBConfig
+from rage.crb import CRBConfig
 config=CRBConfig(context_length=512,prediction_length=64,**proto["crb"])
 wanted=set()
 for fid,n in zip(fids,legal):

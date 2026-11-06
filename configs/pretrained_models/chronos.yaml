@@ -1,4 +1,4 @@
-# Immutable registry for third-party Chronos checkpoints used by TS3.
+# Immutable registry for third-party Chronos checkpoints used by RAGE.
 # `revision` must be a Hugging Face commit SHA, never a mutable branch/tag.
 # `destination` is project-relative below cache/pretrained_models and becomes
 # the only training load path.

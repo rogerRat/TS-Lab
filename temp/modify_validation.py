@@ -1,5 +1,5 @@
 from pathlib import Path
-p=Path("src/rags/experiments/full_pool_run.py")
+p=Path("src/rage/experiments/full_pool_run.py")
 s=p.read_text()
 s=s.replace('''required = dict(pool_equivalents=16284, context_length=512, prediction_length=64,
                         students=list(STUDENTS), datasets=list(MAIN_DATASETS),

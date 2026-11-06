@@ -3,8 +3,8 @@ import json
 import resource
 import time
 import numpy as np
-from rags.experiments.v7_scores import uniform_anchors,score_trajectory,interpolated_chunks
-from rags.experiments.ranking import rank_mass
+from rage.experiments.v7_scores import uniform_anchors,score_trajectory,interpolated_chunks
+from rage.experiments.ranking import rank_mass
 
 def main():
     rng=np.random.default_rng(42)

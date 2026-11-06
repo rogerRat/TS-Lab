@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments.train_eval import fine_tune
+from rage.experiments.train_eval import fine_tune
 
 
 def test_previous_checkpoint_survives_until_new_evaluation_succeeds(tmp_path):

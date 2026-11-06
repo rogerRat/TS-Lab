@@ -8,7 +8,7 @@ import sys
 import time
 
 from assets.gradient.cache import atomic_json
-from rags.experiments.v7_run import read
+from rage.experiments.v7_run import read
 from scripts.run_v7_shape_backfill import arm_complete, sources
 from scripts.supervise_v7_night import pidfd
 
@@ -18,7 +18,7 @@ SHAPE = ROOT / 'shape_backfill_20260925'
 SUPERVISOR_PID = 601125
 PENDING_V7_E_PID = 784280
 RECEIPT = SHAPE / 'shutdown_after_max.json'
-FINAL_ARM = 'rags-shape-maxSum'
+FINAL_ARM = 'rage-shape-maxSum'
 
 
 def verify_supervisor():

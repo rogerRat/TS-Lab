@@ -13,8 +13,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
 from baselines.common import _pool_fingerprint, reference_windows
 from .algorithms import lp_mirror_scores
 
@@ -127,7 +127,7 @@ def lp_mirror_select(engine, *, reference_fragments, index: WindowIndex,
             )
 
     if resampling is not None:
-        from rags.experiments.resampling import window_distribution
+        from rage.experiments.resampling import window_distribution
         selected = window_distribution(index, scores, pool_manifest=pool_manifest,
             metadata=resampling, temperature=resampling.get("temperature", .1), mapping=mapping)
         return ArmOutput("lp_mirror", selected, [], SelectionCost(

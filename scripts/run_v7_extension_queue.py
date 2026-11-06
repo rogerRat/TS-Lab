@@ -10,9 +10,9 @@ import sys
 import time
 from assets.gradient.cache import atomic_json
 from scripts.supervise_v7_night import pidfd
-from rags.experiments.v7_run import gate, read, freeze, folder
-from rags.experiments.v7_extension import CANDIDATES, make_config, prepare
-from rags.experiments.v7_queue import claim
+from rage.experiments.v7_run import gate, read, freeze, folder
+from rage.experiments.v7_extension import CANDIDATES, make_config, prepare
+from rage.experiments.v7_queue import claim
 
 
 def complete(config,run,model):
@@ -45,8 +45,8 @@ def finalize_task(config,path):
     gate(config,run,'assets')
     gate(config,run,'select')
     # Validate full curves/identity, not just counts, before entering next task.
-    from rags.experiments.v7_amendment import report_view
-    from rags.experiments.v7_run import artifact_identity
+    from rage.experiments.v7_amendment import report_view
+    from rage.experiments.v7_run import artifact_identity
     for m in config['students']:
         identity=read(run/'models'/f'{m}.json')
         for s in config['seeds']:
@@ -77,7 +77,7 @@ def wait_external_claim(config,run):
     try:
         words=Path(f'/proc/{pid}/cmdline').read_bytes().decode().split('\0')
         expected=[('--student','chronos-base'),('--run',str(run))]
-        if 'rags.experiments.v7_queue' not in words or any(
+        if 'rage.experiments.v7_queue' not in words or any(
                 flag not in words or words[words.index(flag)+1]!=value for flag,value in expected):
             raise RuntimeError('External worker PID identity differs')
         with selectors.DefaultSelector() as watcher:
@@ -90,7 +90,7 @@ def wait_external_claim(config,run):
 
 def run_task(config,path,adopt=False):
     run=Path(config['run_root']); logs=run/'logs';logs.mkdir(exist_ok=True)
-    env=dict(os.environ,PYTHONPATH='src:.',TS3_GRADIENT_CACHE_ROOT=str(run/'gradient_cache'))
+    env=dict(os.environ,PYTHONPATH='src:.',RAGE_GRADIENT_CACHE_ROOT=str(run/'gradient_cache'))
     models=config['students']; gpu_for={'chronos-base':'0','timerxl-84m':'1','timesfm-2.5':'1'}
     active={}; sequence=0
     selector=selectors.DefaultSelector()
@@ -104,11 +104,11 @@ def run_task(config,path,adopt=False):
         if phase in ('assets','select'):
             command=['-m','scripts.run_v7','--phase',phase]
         else:
-            command=['-m','rags.experiments.v7_queue']
+            command=['-m','rage.experiments.v7_queue']
             if phase=='initialize':command+=['--initialize-only']
         command += ['--config',str(path),'--run',str(run),'--student',model]
         log=(logs/f'auto_{sequence}_{phase}_{model}_gpu{slot[0]}.log').open('a')
-        process=subprocess.Popen([config['student_environments'][model],*command],cwd='/root/TS3',
+        process=subprocess.Popen([config['student_environments'][model],*command],cwd='/root/TS-Lab',
             env=dict(env,CUDA_VISIBLE_DEVICES=slot[0]),stdout=log,stderr=subprocess.STDOUT)
         register(process,model,phase,slot)
         atomic_json(logs/f'auto_{sequence}_pid.json',dict(pid=process.pid,phase=phase,model=model,gpu=slot[0]))
@@ -169,12 +169,12 @@ def main():
     parent=Path(args.parent).resolve()
     lock=(parent/'extension_queue.lock').open('a+')
     fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-    base=read('configs/rags/main_v7_curve4.json')
+    base=read('configs/rage/main_v7_curve4.json')
     for i,task in enumerate(CANDIDATES):
         name='ne-china-wind-20260925' if i==0 else task['id']+'-20260925'
         run=parent/'extensions'/name
         config=make_config(base,parent,run,task)
-        path=Path('configs/rags')/('v7_extension_ne_china_wind.json' if i==0 else 'v7_extension_'+task['id']+'.json')
+        path=Path('configs/rage')/('v7_extension_ne_china_wind.json' if i==0 else 'v7_extension_'+task['id']+'.json')
         freeze(path,config)
         if (run/'task_queue_complete.json').exists():
             if not all(complete(config,run,m) for m in config['students']):

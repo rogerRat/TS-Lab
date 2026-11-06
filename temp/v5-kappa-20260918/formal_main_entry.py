@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 from .full_pool_run import run_suite, validate_config
-from rags.epsilon_protocol import load_p10_calibration
+from rage.epsilon_protocol import load_p10_calibration
 
 
 def preflight(config, readiness):

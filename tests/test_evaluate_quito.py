@@ -147,7 +147,7 @@ def test_base_checkpoint_and_unified_dispatch(snapshot, tmp_path):
 
 
 def test_quito_reference_never_includes_test_values(snapshot):
-    from rags.experiments.quito_bench import build_quito_task, build_quito_task_specs
+    from rage.experiments.quito_bench import build_quito_task, build_quito_task_specs
     spec = build_quito_task_specs(["hour"], root=snapshot)[0]
     task = build_quito_task(spec, context_length=8, prediction_length=3)
     assert task.test_windows.shape == (10, 11)
@@ -161,8 +161,8 @@ def test_quito_reference_never_includes_test_values(snapshot):
 def test_time_rolling_does_not_extend_before_test_boundary(tmp_path, monkeypatch):
     import sys
     import types
-    from rags.experiments import time_bench
-    from rags.experiments.tasks import TaskSpec
+    from rage.experiments import time_bench
+    from rage.experiments.tasks import TaskSpec
     (tmp_path / "fixture").mkdir()
     monkeypatch.setattr(time_bench, "TIME_DATA_ROOT", tmp_path)
     monkeypatch.setattr(time_bench, "load_time_datasets", lambda: {

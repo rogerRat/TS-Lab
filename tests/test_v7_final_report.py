@@ -4,7 +4,7 @@ from scripts.report_v7_final import rank_shape, reported_mase, SHAPE_ARMS
 
 
 def test_endpoint_is_frozen_and_orig_is_untrained():
-    row = dict(arm="rags-shape-expSum", test_curve=[
+    row = dict(arm="rage-shape-expSum", test_curve=[
         dict(epoch=2.5, metrics=dict(mase=0.7)),
         dict(epoch=3.0, metrics=dict(mase=0.8)),
         dict(epoch=3.5, metrics=dict(mase=0.1)),

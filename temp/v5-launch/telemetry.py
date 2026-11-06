@@ -1,7 +1,7 @@
 from pathlib import Path
 import json,subprocess,time,csv,os
 from datetime import datetime,timezone,timedelta
-from rags.experiments.students import atomic_json
+from rage.experiments.students import atomic_json
 run=Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918')
 atomic_json(run/'telemetry-process.json',dict(pid=os.getpid(),interval_seconds=5))
 history=[]

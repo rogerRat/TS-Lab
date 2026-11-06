@@ -4,9 +4,9 @@ import math
 
 import pytest
 
-from rags.experiments.probing import (MODELS, choose_task_model, parameter_probe,
+from rage.experiments.probing import (MODELS, choose_task_model, parameter_probe,
     parameter_results, relative_gain, summarize, task_probe, validate_config)
-from rags.experiments.probe_recipes import recipe
+from rage.experiments.probe_recipes import recipe
 
 
 def config():
@@ -114,7 +114,7 @@ def test_relative_ranking_is_not_absolute_error_drop():
 
 def test_missing_seed_and_exam_use_rejected():
     settings = config()
-    from rags.experiments.probing import trial_config
+    from rage.experiments.probing import trial_config
     trial = trial_config(settings, "chronos-base", ["a"], 1e-3, [1, 2])
     report = runner([])(trial, None)
     report["trials"].pop()
@@ -181,7 +181,7 @@ def test_search_policy_rejects_old_artifacts_and_preserves_budget_on_rerun(tmp_p
 
 
 def test_all_cli_uses_three_environments_then_only_the_chosen_one(tmp_path, monkeypatch):
-    from rags.experiments import probing
+    from rage.experiments import probing
     settings = config()
     settings["task_probe_model"] = "best_relative_gain"
     for model in MODELS:

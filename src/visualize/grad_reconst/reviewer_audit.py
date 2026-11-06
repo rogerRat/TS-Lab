@@ -1,9 +1,9 @@
 """Replay current CRB on immutable cached observations; never manufacture gradients."""
 import argparse, json, pathlib, dataclasses
 import numpy as np
-from rags.crb import CRBConfig, CRBEngine
-from rags.core import TimeSeriesFragment
-from rags.window_reconstruction import interpolate_window_gradients
+from rage.crb import CRBConfig, CRBEngine
+from rage.core import TimeSeriesFragment
+from rage.window_reconstruction import interpolate_window_gradients
 
 def save(path, value):
     tmp=path.with_suffix('.tmp'); tmp.write_text(json.dumps(value,indent=2)); tmp.replace(path)

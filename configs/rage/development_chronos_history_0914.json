@@ -1,0 +1,32 @@
+{
+  "inputs": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914/development-inputs",
+  "datasets": [
+    "boomlet_1676",
+    "boomlet_619"
+  ],
+  "epochs": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.5,
+    3,
+    4
+  ],
+  "seeds": [
+    0
+  ],
+  "batch_size": 32,
+  "eval_batch": 32,
+  "validation_windows": 8,
+  "timing_context": "concurrent_development_not_a_speed_comparison",
+  "student": "chronos-base",
+  "model_path": "/root/autodl-tmp/pretrained_models/chronos-t5-base",
+  "purpose": "development_safe_history_diagnostic_not_source_pool_result",
+  "training_data": "safe_history_random",
+  "learning_rates": [
+    1e-7,
+    0.000001,
+    0.000003
+  ]
+}

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from rags.experiments.reference_opinions import reference_scores,AGGREGATIONS
+from rage.experiments.reference_opinions import reference_scores,AGGREGATIONS
 
 @pytest.mark.parametrize('mode',AGGREGATIONS)
 @pytest.mark.parametrize('device',['cpu','cuda'])

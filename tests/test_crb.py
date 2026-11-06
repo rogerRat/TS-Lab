@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine, CRBPipeline, match_blocks
-from rags.experiments.crb_main import _evaluation_windows
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine, CRBPipeline, match_blocks
+from rage.experiments.crb_main import _evaluation_windows
 
 
 def fragment_with_positions(count: int, *, context: int = 2, horizon: int = 1,

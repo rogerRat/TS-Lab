@@ -100,8 +100,8 @@ class ProcessingProgress:
             total if total is not None else "unknown", progress, format_duration(elapsed), eta,
             detail or "none",
             extra={
-                "ts3_event": "progress",
-                "ts3_progress_event": event,
+                "rage_event": "progress",
+                "rage_progress_event": event,
             },
         )
 

@@ -1,11 +1,11 @@
 # MAIN-v3 — 主实验
 
 - 更新时间：2026-09-17T22:51:09+08:00
-- 配置：`configs/rags/main_reference_opinion_20260917.json`；运行：`temp/reference-aggregation-20260917/report-fixture`
-- 所有使用采样温度的默认方法（lp-mirror / less-main / rags-main / rags-traj）统一 T=0.05。
-- 九任务、三模型；矩阵 orig / rand / tsds / lp-mirror / less-main / rags-main / rags-traj；仅 seed 0。
+- 配置：`configs/rage/main_reference_opinion_20260917.json`；运行：`temp/reference-aggregation-20260917/report-fixture`
+- 所有使用采样温度的默认方法（lp-mirror / less-main / rage-main / rage-traj）统一 T=0.05。
+- 九任务、三模型；矩阵 orig / rand / tsds / lp-mirror / less-main / rage-main / rage-traj；仅 seed 0。
 - C512/H64/D1，CRB 2%/1%/1%；全部合法起点保留，批量分裂规则不变。
-- 新reference-opinion-v1：LESS参考max；RAGS主zeroClipSum；显式后缀记录聚合规则。
+- 新reference-opinion-v1：LESS参考max；RAGE主zeroClipSum；显式后缀记录聚合规则。
 - 原生逐窗口梯度沿用已有字段校验缓存；V3 选集、训练和评测新生，不复制旧 cells/checkpoints。
 - V1/V2 内容完整归档，继续参考：[MAIN-v1](archive/MAIN-v1.md)、[MAIN-v2](archive/MAIN-v2.md)。
 
@@ -35,8 +35,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -47,8 +47,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -59,8 +59,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_azure_i_cpu_5t
 
@@ -73,8 +73,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -85,8 +85,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -97,8 +97,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_darwin_water_15t
 
@@ -111,8 +111,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -123,8 +123,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -135,8 +135,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_finland_15t
 
@@ -149,8 +149,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -161,8 +161,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -173,8 +173,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_eweld_15t
 
@@ -187,8 +187,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -199,8 +199,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -211,8 +211,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_cphl_h
 
@@ -225,8 +225,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -237,8 +237,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -249,8 +249,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_nem_price_5t
 
@@ -263,8 +263,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -275,8 +275,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -287,8 +287,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_solar_h
 
@@ -301,8 +301,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -313,8 +313,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -325,8 +325,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 ### time_port_activity_d
 
@@ -339,8 +339,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timesfm-2.5
 
@@ -351,8 +351,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 #### timemoe-200m
 
@@ -363,8 +363,8 @@
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-main | 0 | — | — | — | — | — |
-| rags-traj | 0 | — | — | — | — | — |
+| rage-main | 0 | — | — | — | — | — |
+| rage-traj | 0 | — | — | — | — | — |
 
 **解读**：
 
@@ -386,10 +386,10 @@
 | tsds | — | — | — | — |
 | lp-mirror | — | — | — | .05 |
 | less-main | trajectory | maxSum | global | .05 |
-| rags-main | block | zeroClipSum | global | .05 |
-| rags-traj | trajectory | zeroClipSum | global | .05 |
+| rage-main | block | zeroClipSum | global | .05 |
+| rage-traj | trajectory | zeroClipSum | global | .05 |
 
-RAGS-Main暂定zeroClipSum，LESS-Main恢复跨参考max；没有用最终测试集优选主项。
+RAGE-Main暂定zeroClipSum，LESS-Main恢复跨参考max；没有用最终测试集优选主项。
 expSum内层exp(raw cosine)，加权求和后外层Softmax；max不乘参考alpha，zeroClip不等于源支持门控。
 历史reference-mean线性批次保留原产物，以-linearSum展示；本批独立选集/训练，不改旧批次。
 <!-- v3-notes:end -->

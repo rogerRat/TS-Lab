@@ -46,18 +46,18 @@ PY_F=/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python
 #    chronos and timesfm concurrently (distinct envs, distinct per-model caches).
 if [ ! -f "$A/timerxl-84m/stage_a_complete.marker" ]; then
   say "stage A references timerxl-84m"
-  "$PY_T" -m rags.experiments.reference_census compute --run "$TIMER" --student timerxl-84m \
+  "$PY_T" -m rage.experiments.reference_census compute --run "$TIMER" --student timerxl-84m \
     --out "$A" --stage references 2>&1 | tee -a "$A/timerxl-references.log" || { say "STAGE_A_TIMERXL_FAILED"; exit 1; }
   touch "$A/timerxl-84m/stage_a_complete.marker" 2>/dev/null || { mkdir -p "$A/timerxl-84m"; touch "$A/timerxl-84m/stage_a_complete.marker"; }
 fi
 
 if [ ! -f "$A/chronos-base/stage_a_complete.marker" ] || [ ! -f "$A/timesfm-2.5/stage_a_complete.marker" ]; then
   say "stage A references chronos-base + timesfm-2.5 (parallel)"
-  ( "$PY_C" -m rags.experiments.reference_census compute --run "$MAIN" --student chronos-base \
+  ( "$PY_C" -m rage.experiments.reference_census compute --run "$MAIN" --student chronos-base \
       --out "$A" --stage references 2>&1 | tee -a "$A/chronos-references.log" \
       && touch "$A/chronos-base/stage_a_complete.marker" ) &
   P1=$!
-  ( "$PY_F" -m rags.experiments.reference_census compute --run "$MAIN" --student timesfm-2.5 \
+  ( "$PY_F" -m rage.experiments.reference_census compute --run "$MAIN" --student timesfm-2.5 \
       --out "$A" --stage references 2>&1 | tee -a "$A/timesfm-references.log" \
       && touch "$A/timesfm-2.5/stage_a_complete.marker" ) &
   P2=$!
@@ -70,13 +70,13 @@ say "stage A complete"
 #    different models parallel.
 if [ ! -f "$A/.stage_b_complete" ]; then
   say "stage B alignment (chronos+timesfm serial MAIN->UNI, timerxl parallel)"
-  ( "$PY_C" -m rags.experiments.reference_census compute --run "$MAIN" --student chronos-base --out "$A" --stage alignment 2>&1 | tee -a "$A/chronos-alignment-main.log" \
-    && "$PY_C" -m rags.experiments.reference_census compute --run "$UNI" --student chronos-base --out "$A" --stage alignment 2>&1 | tee -a "$A/chronos-alignment-uni.log" ) &
+  ( "$PY_C" -m rage.experiments.reference_census compute --run "$MAIN" --student chronos-base --out "$A" --stage alignment 2>&1 | tee -a "$A/chronos-alignment-main.log" \
+    && "$PY_C" -m rage.experiments.reference_census compute --run "$UNI" --student chronos-base --out "$A" --stage alignment 2>&1 | tee -a "$A/chronos-alignment-uni.log" ) &
   P1=$!
-  ( "$PY_F" -m rags.experiments.reference_census compute --run "$MAIN" --student timesfm-2.5 --out "$A" --stage alignment 2>&1 | tee -a "$A/timesfm-alignment-main.log" \
-    && "$PY_F" -m rags.experiments.reference_census compute --run "$UNI" --student timesfm-2.5 --out "$A" --stage alignment 2>&1 | tee -a "$A/timesfm-alignment-uni.log" ) &
+  ( "$PY_F" -m rage.experiments.reference_census compute --run "$MAIN" --student timesfm-2.5 --out "$A" --stage alignment 2>&1 | tee -a "$A/timesfm-alignment-main.log" \
+    && "$PY_F" -m rage.experiments.reference_census compute --run "$UNI" --student timesfm-2.5 --out "$A" --stage alignment 2>&1 | tee -a "$A/timesfm-alignment-uni.log" ) &
   P2=$!
-  ( "$PY_T" -m rags.experiments.reference_census compute --run "$TIMER" --student timerxl-84m --out "$A" --stage alignment 2>&1 | tee -a "$A/timerxl-alignment.log" ) &
+  ( "$PY_T" -m rage.experiments.reference_census compute --run "$TIMER" --student timerxl-84m --out "$A" --stage alignment 2>&1 | tee -a "$A/timerxl-alignment.log" ) &
   P3=$!
   rc=0; wait $P1 || rc=1; wait $P2 || rc=1; wait $P3 || rc=1
   [ $rc -ne 0 ] && { say "STAGE_B_FAILED"; exit 1; }
@@ -87,7 +87,7 @@ say "stage B complete"
 # 5. Stage C: CPU associations + report.
 if [ ! -f "$A/report/REPORT.md" ]; then
   say "stage C associations"
-  OPENBLAS_NUM_THREADS=4 "$PY_C" -m rags.experiments.reference_associations \
+  OPENBLAS_NUM_THREADS=4 "$PY_C" -m rage.experiments.reference_associations \
     --runs "$MAIN" "$UNI" "$TIMER" --census "$A" --out "$A/report" 2>&1 | tee -a "$A/associations.log" || {
     say "STAGE_C_FAILED"; exit 1; }
 fi

@@ -1,4 +1,4 @@
-"""TS3 visualization package boundary.
+"""RAGE visualization package boundary.
 
 This package retains generic loss/performance plotting and runtime setup.
 Legacy feature-space, grid and transfer-method reports have been removed.

@@ -11,9 +11,11 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY environment.ts3.yml /tmp/environment.ts3.yml
+COPY requ/requirements.txt /tmp/requirements.txt
 
-RUN micromamba create --yes --prefix /opt/conda/envs/ts3 --file /tmp/environment.ts3.yml \
+RUN micromamba create --yes --prefix /opt/conda/envs/rage python=3.10 pip 'setuptools>=68' \
+    && micromamba run --prefix /opt/conda/envs/rage python -m pip install --extra-index-url https://download.pytorch.org/whl/cu128 'torch==2.7.1+cu128' \
+    && micromamba run --prefix /opt/conda/envs/rage python -m pip install -r /tmp/requirements.txt \
     && micromamba clean --all --yes
 
 COPY requ/third_parties.lock /tmp/third_parties.lock
@@ -28,23 +30,23 @@ RUN set -eux; \
         test -z "${extra}"; \
         git clone "${url}" "/tmp/third_parties/${name}"; \
         git -C "/tmp/third_parties/${name}" checkout --detach "${commit}"; \
-        micromamba run --prefix /opt/conda/envs/ts3 python -m pip install --no-deps "/tmp/third_parties/${name}"; \
+        micromamba run --prefix /opt/conda/envs/rage python -m pip install --no-deps "/tmp/third_parties/${name}"; \
     done < /tmp/third_parties.lock; \
-    micromamba run --prefix /opt/conda/envs/ts3 python -m pip check; \
+    micromamba run --prefix /opt/conda/envs/rage python -m pip check; \
     rm -rf /tmp/third_parties /tmp/third_parties.lock
 
 FROM ${CUDA_IMAGE} AS runtime
 
-ENV CONDA_PREFIX=/opt/conda/envs/ts3
+ENV CONDA_PREFIX=/opt/conda/envs/rage
 ENV PATH=${CONDA_PREFIX}/bin:${PATH}
-ENV PYTHONPATH=/workspace
+ENV PYTHONPATH=/workspace/src:/workspace
 ENV HF_HOME=/workspace/.cache/huggingface
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends bash ca-certificates libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=environment-builder /opt/conda/envs/ts3 /opt/conda/envs/ts3
+COPY --from=environment-builder /opt/conda/envs/rage /opt/conda/envs/rage
 
 WORKDIR /workspace
 COPY . /workspace

@@ -4,7 +4,7 @@ from dataclasses import dataclass, replace, field, asdict
 
 import time
 
-from rags.crb import CRBEngineMulti
+from rage.crb import CRBEngineMulti
 from .cache import GradientCache, FragmentGradients, index_request
 
 
@@ -34,7 +34,7 @@ def prepare_gradients(names, engine, *, run_dir, reference_fragments, pool, inde
     read prepared rows, never silently trigger model work.
     """
     from baselines.trajectory import trajectory_positions
-    from rags.experiments.arms import WindowIndex
+    from rage.experiments.arms import WindowIndex
     from .blocks import compute_pool_blocks
     from .source_crb_cache import source_cache_directory
     reference_dataset = "reference:" + dataset_tag
@@ -95,8 +95,8 @@ def prepare_gradients(names, engine, *, run_dir, reference_fragments, pool, inde
                 required[request.dataset].update(map(tuple, request.ids.tolist()))
             prepared.method_costs['less'] = end_cost(less_before,
                 len(required['source']), len(required[reference_dataset]))
-        if any(name in names for name in ("rags", "rags_traj", "rags_uniform")):
-            rags_before = begin_cost()
+        if any(name in names for name in ("rage", "rage_traj", "rage_uniform")):
+            rage_before = begin_cost()
             trajectory_assets = dict(trajectories=[], counts=[])
             prepared.source_blocks, prepared.source_counters = compute_pool_blocks(
                 pool, index, config=crb_config, gradient_computer=FragmentGradients(cache, "source"),
@@ -116,11 +116,11 @@ def prepare_gradients(names, engine, *, run_dir, reference_fragments, pool, inde
             prepared.source_trajectory_counts = trajectory_assets['counts']
             prepared.reference_trajectories = [a for r in prepared.reference_results
                 if (a := aggregate_anchors(r, expected_count=sum(crb_config.budgets(len(r.valid_starts))))) is not None]
-            prepared.method_costs['rags'] = end_cost(rags_before, prepared.source_counters['gradients'],
+            prepared.method_costs['rage'] = end_cost(rage_before, prepared.source_counters['gradients'],
                 sum(r.computed_gradients for r in prepared.reference_results))
-            prepared.method_costs['rags_traj'] = dict(prepared.method_costs['rags'],
-                preparation_scope='shared_complete_RAGS_preparation_including_compact_aggregation')
-            if 'rags_uniform' in names:
+            prepared.method_costs['rage_traj'] = dict(prepared.method_costs['rage'],
+                preparation_scope='shared_complete_RAGE_preparation_including_compact_aggregation')
+            if 'rage_uniform' in names:
                 uniform_before = begin_cost()
 
                 uniform_config = replace(crb_config, error_placement='uniform')
@@ -139,7 +139,7 @@ def prepare_gradients(names, engine, *, run_dir, reference_fragments, pool, inde
                     uniform.source_trajectory_counts,
                     [trajectory_counts(r) for r in prepared.reference_results],
                     [trajectory_counts(r) for r in uniform.reference_results])
-                prepared.method_costs['rags_uniform'] = end_cost(uniform_before,
+                prepared.method_costs['rage_uniform'] = end_cost(uniform_before,
                     uniform.source_counters['gradients'], sum(r.computed_gradients for r in uniform.reference_results))
         cache.freeze()
         return prepared

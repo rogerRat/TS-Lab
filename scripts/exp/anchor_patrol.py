@@ -28,9 +28,9 @@ from pathlib import Path
 import subprocess
 import time
 
-DEFAULT_RUN_ROOT = "/root/autodl-tmp/TS3/outputs/anchor-budget-20260914"
+DEFAULT_RUN_ROOT = "/root/autodl-tmp/rage/outputs/anchor-budget-20260914"
 DEFAULT_PYTHON = "/root/miniconda3/envs/time/bin/python"
-DEFAULT_REPO = "/root/TS3"
+DEFAULT_REPO = "/root/TS-Lab"
 
 
 def utc() -> str:
@@ -96,7 +96,7 @@ def launch_simulate(mode, run_root, python, repo):
         session = "anchor-sim-prelim"
     log = run_root / f"simulate_{mode}_{stamp}.log"
     command = (f"cd {repo} && PYTHONPATH={repo}/src {python} -u "
-               f"-m rags.experiments.anchor_budget_simulate --run-root {run_root} "
+               f"-m rage.experiments.anchor_budget_simulate --run-root {run_root} "
                f"--mode {mode} --out {out} >> {log} 2>&1")
     try:
         subprocess.run(["tmux", "new-session", "-d", "-s", session, "bash", "-c",

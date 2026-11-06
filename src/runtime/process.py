@@ -2,7 +2,7 @@
 
 @scenario: Keep child processes from surviving an unexpected parent exit while
            allowing Load and feature extraction to own their task protocols.
-           This is project runtime infrastructure, not a TS3 algorithm.
+           This is project runtime infrastructure, not a RAGE algorithm.
 """
 
 from __future__ import annotations

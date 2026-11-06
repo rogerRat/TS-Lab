@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex
 from baselines.algorithms import ltsv_window_scores
 from baselines.lp_mirror import runner as lp
 from baselines.ltsv import runner as ltsv

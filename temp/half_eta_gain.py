@@ -32,7 +32,7 @@ for student in config['students']:
             deterministic=adaptive=split=0
             for fid,n in geo:
                 if not n:continue
-                # LESS remains at current budget; user only asks to cut RAGS CRB.
+                # LESS remains at current budget; user only asks to cut RAGE CRB.
                 current_c=min(n,max(min(2,n),round(.02*n)));e=round(.01*n);s=e
                 uniform=set(np.rint(np.linspace(0,n-1,current_c+e+s)).astype(int).tolist())
                 c=min(n,max(min(2,n),round((.01 if half else .02)*n)))
@@ -49,6 +49,6 @@ for student in config['students']:
         detail.append((task,round(cautious),round(optimistic)))
     rate=prev['gradient_seconds_per_new_window']
     grad=[v*rate/3600 for v in savings]
-    # RAGS body only, leave LESS/TSDS/LP/random/training fixed.
-    rags_body=sum(120*np.sqrt(sum(n for f,n in geo)/194405) for task,geo in geometry.items())/3600
-    print(student,'Ref gradient hours saved',grad,'RAGS body plausible saved hours',[rags_body*.3,rags_body*.6],'details',detail)
+    # RAGE body only, leave LESS/TSDS/LP/random/training fixed.
+    rage_body=sum(120*np.sqrt(sum(n for f,n in geo)/194405) for task,geo in geometry.items())/3600
+    print(student,'Ref gradient hours saved',grad,'RAGE body plausible saved hours',[rage_body*.3,rage_body*.6],'details',detail)

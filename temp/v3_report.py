@@ -21,17 +21,17 @@ METHOD_NOTES = '''
 | tsds | 原生 TSDS | 原方法不变 | 原生分布不变 |
 | lp-mirror | 窗口 | 原方法不变 | 延续 V2 lpv_t025 的 raw-value 分布 |
 | less-main | 轨迹 | 每参考轨迹 1/N | 无门控、Global、平均余弦、Softmax |
-| rags-main | 块 | (1/N)×块合法起点占所属轨迹比例 | 无门控、Global、两级评委、Softmax |
-| rags-traj | 轨迹 | 每参考轨迹 1/N | 无门控、Global、平均余弦、Softmax |
+| rage-main | 块 | (1/N)×块合法起点占所属轨迹比例 | 无门控、Global、两级评委、Softmax |
+| rage-traj | 轨迹 | 每参考轨迹 1/N | 无门控、Global、平均余弦、Softmax |
 
 N 指当前参考数据集的参考轨迹数；参考话语权总和为 1。权重只用于分数相加，
 最终 P_j=softmax(S_j/T)，不乘源单位长度，不对 Softmax 输出再次分配参考预算。
-less-main/rags-main/rags-traj 统一 T=0.25；该温度沿用此前数值，尚未针对平均评分重新调参。
+less-main/rage-main/rage-traj 统一 T=0.25；该温度沿用此前数值，尚未针对平均评分重新调参。
 
 less-main 对按 rounded linspace 均匀选取的原生窗口投影梯度做 FP32 算术平均，
-再分别归一化轨迹代表并算余弦。rags-traj 同样直接平均实际计算的原生 CRB 锚点梯度，
+再分别归一化轨迹代表并算余弦。rage-traj 同样直接平均实际计算的原生 CRB 锚点梯度，
 不使用旧版的全窗口线性重构均值；每轨迹梯度数量核对同一配置预算，唯一设计差异是取点位置。
-rags-main 保留块级线性中点代表。CRB 覆盖阶段最长区间二分，误差阶段积分风险优先，
+rage-main 保留块级线性中点代表。CRB 覆盖阶段最长区间二分，误差阶段积分风险优先，
 分裂阶段允许批量最小模长 frontier，耗尽可用预算，p10 只审计，不筛分裂区间、不丢窗。
 
 源块等权竞争不保证源轨迹等总概率：同分且块数不同的源轨迹可累积不同质量。
@@ -54,8 +54,8 @@ rags-main 保留块级线性中点代表。CRB 覆盖阶段最长区间二分，
 
 def display_method(method, config):
     if not config.get('opinion_aggregation_protocol'):
-        return {'less-main': 'less-linearSum', 'rags-main': 'rags-block-linearSum',
-                'rags-traj': 'rags-traj-linearSum'}.get(method,method)
+        return {'less-main': 'less-linearSum', 'rage-main': 'rage-block-linearSum',
+                'rage-traj': 'rage-traj-linearSum'}.get(method,method)
     return method
 
 
@@ -64,13 +64,13 @@ def opinion_method_notes(config):
         '| 方法 | 单位 | 聚合 | 竞争 | 温度 |','|---|---|---|---|---|']
     for name,p in config['method_protocols'].items():
         lines.append(f"| {name} | {p.get('scoring_unit','—')} | {p.get('reference_aggregation','—')} | {p.get('competition','—')} | {'.05' if name not in ('orig','rand','tsds') else '—'} |")
-    conclusion = ('RAGS-Block/Traj各四种聚合均为未排序变体；未指定RAGS主方法。LESS-Main采用max。'
+    conclusion = ('RAGE-Block/Traj各四种聚合均为未排序变体；未指定RAGE主方法。LESS-Main采用max。'
         if config.get('opinion_aggregation_protocol') in ('reference-opinion-v2-neutral','reference-opinion-v3-weighted-first','reference-opinion-v4-mixed-weight-order')
         else '历史v1设计曾暂定zeroClipSum，已被中立矩阵撤回；LESS-Main采用max。')
     lines += ['', conclusion,
-        ('RAGS linear/zeroClip/max先乘alpha；maxSum=max(alpha*cos)。expSum=sum(alpha*exp(cos/1.0))，内层T=1.00、外层Softmax T=.05。LESS-Main仍取原始余弦max。'
+        ('RAGE linear/zeroClip/max先乘alpha；maxSum=max(alpha*cos)。expSum=sum(alpha*exp(cos/1.0))，内层T=1.00、外层Softmax T=.05。LESS-Main仍取原始余弦max。'
          if config.get('opinion_aggregation_protocol')=='reference-opinion-v4-mixed-weight-order' else
-         'RAGS先乘alpha：maxSum=max(alpha*cos)，expSum=sum(exp(alpha*cos))后外层Softmax。LESS-Main仍取原始余弦max。'
+         'RAGE先乘alpha：maxSum=max(alpha*cos)，expSum=sum(exp(alpha*cos))后外层Softmax。LESS-Main仍取原始余弦max。'
          if config.get('opinion_aggregation_protocol')=='reference-opinion-v3-weighted-first' else
          '历史方案expSum=sum(alpha*exp(cos))，max不乘alpha；本轮权重顺序见配置版本。'),
         '历史reference-mean线性批次保留原产物，以-linearSum展示；本批独立选集/训练，不改旧批次。']
@@ -91,16 +91,16 @@ def render(run_dir, destination):
     active = control.get('training_enabled') is True
     temperatures = v3_temperatures(config)
     gradient_temperature = temperatures['less-main']
-    config_label = ('configs/rags/main_v4.json' if version=='v4' else 'configs/rags/matrix_reference_opinion_20260917.json'
+    config_label = ('configs/rage/main_v4.json' if version=='v4' else 'configs/rage/matrix_reference_opinion_20260917.json'
         if config.get('opinion_aggregation_protocol') in ('reference-opinion-v2-neutral','reference-opinion-v3-weighted-first','reference-opinion-v4-mixed-weight-order') else
-        'configs/rags/main_reference_opinion_20260917.json' if opinion_profile else
-        'configs/rags/main_v3_t005.json' if gradient_temperature == .05 else 'configs/rags/main_v3.json')
+        'configs/rage/main_reference_opinion_20260917.json' if opinion_profile else
+        'configs/rage/main_v3_t005.json' if gradient_temperature == .05 else 'configs/rage/main_v3.json')
     lines = [f'# MAIN-{version} — 主实验', '', f'- 更新时间：{stamp}',
         f'- 配置：`{config_label}`；运行：`{run}`',
-        f'- 所有使用采样温度的默认方法（lp-mirror / less-main / rags-main / rags-traj）统一 T={gradient_temperature}。',
+        f'- 所有使用采样温度的默认方法（lp-mirror / less-main / rage-main / rage-traj）统一 T={gradient_temperature}。',
         f"- 九任务、{len(config['students'])}模型；矩阵 "+ ' / '.join(display_method(m,config) for m in methods)+f"；seeds {config['seeds']}。",
         '- C512/H64/D1，CRB 2%/1%/1%；全部合法起点保留，批量分裂规则不变。',
-        ('- 新意见聚合协议：LESS参考max；RAGS按Block/Traj及四聚合显式命名，不指定主方法。' if opinion_profile else
+        ('- 新意见聚合协议：LESS参考max；RAGE按Block/Traj及四聚合显式命名，不指定主方法。' if opinion_profile else
          '- 本批仍为冻结reference-mean线性协议；旧主方法以-linearSum展示，尚无新聚合规则训练结果。'),
         f'- 原生逐窗口梯度沿用已有字段校验缓存；{version.upper()} 训练与评测独立；V4轮间复用静态概率和orig，训练seed逐轮变化。',
         '- V1/V2 内容完整归档，继续参考：[MAIN-v1](archive/MAIN-v1.md)、[MAIN-v2](archive/MAIN-v2.md)。', '',

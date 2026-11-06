@@ -17,11 +17,11 @@ import sys
 import time
 
 from assets.gradient.cache import atomic_json
-from rags.experiments.v7_extension import V7_E_CANDIDATES, make_config, prepare
-from rags.experiments.v7_protocol import MODELS, validate
-from rags.experiments.v7_run import artifact_identity, freeze, read, folder, gate
-from rags.experiments.v7_amendment import report_view
-from rags.experiments.v7_shape_backfill import checked_model_lease, run_model, sidecar_config
+from rage.experiments.v7_extension import V7_E_CANDIDATES, make_config, prepare
+from rage.experiments.v7_protocol import MODELS, validate
+from rage.experiments.v7_run import artifact_identity, freeze, read, folder, gate
+from rage.experiments.v7_amendment import report_view
+from rage.experiments.v7_shape_backfill import checked_model_lease, run_model, sidecar_config
 from scripts.report_v7_final import SHAPE_ARMS, render
 from scripts.run_v7_extension_queue import complete, finalize_task, run_task
 from scripts.supervise_v7_night import pidfd
@@ -29,7 +29,7 @@ from scripts.supervise_v7_night import pidfd
 
 VERSION = 'v7-e-two-shape-two-seed-exploration-20260926'
 GPU = {'chronos-base': '0', 'timerxl-84m': '1', 'timesfm-2.5': '1'}
-MAIN_CONFIG = Path('configs/rags/main_v7_curve4.json')
+MAIN_CONFIG = Path('configs/rage/main_v7_curve4.json')
 
 
 def frozen_shape_choice(parent, shape_pid=None):
@@ -113,7 +113,7 @@ def run_shape_phase(parent, run, config_path, shape_arms, arm):
                        '--parent', str(parent), '--worker-config', str(config_path),
                        '--student', model, '--arm', arm]
             with log.open('a') as stream:
-                process = subprocess.Popen(command, cwd='/root/TS3',
+                process = subprocess.Popen(command, cwd='/root/TS-Lab',
                     env=dict(os.environ, PYTHONPATH='src:.', CUDA_VISIBLE_DEVICES=GPU[model]),
                     stdout=stream, stderr=subprocess.STDOUT)
             fd = pidfd(process.pid)
@@ -136,7 +136,7 @@ def run_one(parent, task, shape_arms):
     run = parent/'extensions'/'v7-e'/f"{task['id']}-20260926"
     config = make_config(base, parent, run, task, shape_arms=shape_arms)
     validate(config)
-    config_path = Path('configs/rags')/f"v7_e_{task['id']}.json"
+    config_path = Path('configs/rage')/f"v7_e_{task['id']}.json"
     freeze(config_path, config)
     marker = run/'v7_e_task_complete.json'
     if marker.is_file():

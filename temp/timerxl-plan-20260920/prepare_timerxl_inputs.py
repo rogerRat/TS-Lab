@@ -14,8 +14,8 @@ from pathlib import Path
 
 import numpy as np
 
-from rags.experiments.development_inputs import load_fragments, save_fragments
-from rags.experiments.full_pool_exploration import development_split
+from rage.experiments.development_inputs import load_fragments, save_fragments
+from rage.experiments.full_pool_exploration import development_split
 
 ARCHIVE = Path("/root/autodl-tmp/TS3/archive/outputs-cleanup-20260915")
 DEV_SRC = ARCHIVE / "full-pool-exp-0914/development-inputs"
@@ -46,7 +46,7 @@ def main():
         for fragment in fragments:
             keep = len(fragment.data) - TRUNCATE
             assert keep > CONTEXT + VALIDATION_WINDOWS * HORIZON, fragment.entity_id
-            from rags.core import TimeSeriesFragment
+            from rage.core import TimeSeriesFragment
             truncated.append(TimeSeriesFragment(fragment.data[:keep].copy(),
                                                 entity_id=fragment.entity_id,
                                                 fragment_id=fragment.fragment_id))

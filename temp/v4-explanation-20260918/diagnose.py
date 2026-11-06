@@ -2,8 +2,8 @@ import json,time,os
 from pathlib import Path
 import numpy as np
 from collections import OrderedDict
-from rags.crb import CRBConfig,CRBEngineMulti
-from rags.experiments.development_inputs import load_fragments
+from rage.crb import CRBConfig,CRBEngineMulti
+from rage.experiments.development_inputs import load_fragments
 from assets.gradient.dataset import GradientDataset,decode_bf16
 from assets.gradient.cache import FragmentGradients
 run=Path("/root/autodl-tmp/TS3/outputs/main-v4-three-seeds-20260918/rounds/seed0")
@@ -11,7 +11,7 @@ old=Path("/root/autodl-tmp/TS3/outputs/main-shared-nine-v2-global-20260917")
 out=Path("/root/TS3/temp/v4-explanation-20260918");out.mkdir(exist_ok=True)
 protocol=json.loads((run/"protocol.json").read_text())
 tasks=["time_nem_demand_5t","time_finland_15t","time_eweld_15t","time_azure_i_cpu_5t"]
-methods=["less-main"]+["rags-"+g+"-"+a for g in ["block","traj"] for a in ["linearSum","zeroClipSum","maxSum","expSum"]]
+methods=["less-main"]+["rage-"+g+"-"+a for g in ["block","traj"] for a in ["linearSum","zeroClipSum","maxSum","expSum"]]
 def unit(x):
  n=np.linalg.norm(x,axis=-1,keepdims=True);return np.divide(x,n,out=np.zeros_like(x,dtype=float),where=n>0)
 def cos(x,y):return float(unit(x)@unit(y))
@@ -43,7 +43,7 @@ for model in protocol["students"]:
   row=dict(task=task,method=method,units=len(p),reference_count=s["meta"].get("reference_audit",{}).get("reference_count",s["meta"].get("reference_count")),score_std=float(s["score"].std()),logit_std=float(s["score"].std()/.05),tv_unit_uniform=float(abs(p-1/len(p)).sum()/2),unit_ess=float(1/(p@p)),trajectory_ess=float(1/(tp@tp)),top10pct_mass=float(np.sort(tp)[-int(np.ceil(len(tp)/10)):].sum()),expected_legal_length=float(tp@legal),tv_window_uniform=float(abs(p-count/total).sum()/2))
   cell=folder/"cells"/(task+"__"+method+"__seed0.json")
   if cell.exists(): row["mase"]=json.loads(cell.read_text())["mase"]
-  if method=="rags-traj-maxSum":
+  if method=="rage-traj-maxSum":
    less=sels[(task,"less-main")]
    a=soft(s["score"]*row["reference_count"]/.05);b=soft(less["score"]/row["reference_count"]/.05)
    row.update(tv_to_less_actual=float(abs(p-less["p"]).sum()/2),tv_anchor_only_at_less_scale=float(abs(a-less["p"]).sum()/2),tv_anchor_only_at_traj_scale=float(abs(p-b).sum()/2))

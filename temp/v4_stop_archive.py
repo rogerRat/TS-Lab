@@ -7,7 +7,7 @@ import csv, json, os, shutil, tarfile, time
 from pathlib import Path
 
 repo = Path('/root/TS3'); os.chdir(repo)
-from rags.experiments.students import atomic_json
+from rage.experiments.students import atomic_json
 
 outputs = Path('/root/autodl-tmp/TS3/outputs')
 run = outputs / 'main-v4-three-seeds-20260918'
@@ -87,7 +87,7 @@ with (archive / 'all_results_ranked.csv').open('w', newline='') as stream:
     writer.writeheader(); writer.writerows(tables)
 
 shutil.copytree(repo / 'docs', archive / 'docs', dirs_exist_ok=True)
-shutil.copytree(repo / 'configs/rags', archive / 'configs/rags', dirs_exist_ok=True)
+shutil.copytree(repo / 'configs/rage', archive / 'configs/rage', dirs_exist_ok=True)
 shutil.copy2(repo / 'docs/MAIN-v4.md', repo / 'docs/archive/MAIN-v4-partial-terminated-20260918.md')
 
 seed_summary = ', '.join(f'{k}={v} unique cells' for k, v in per_seed.items())

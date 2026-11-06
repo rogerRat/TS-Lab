@@ -6,8 +6,8 @@ AGGREGATIONS = ('linearSum', 'zeroClipSum', 'maxSum', 'expSum')
 COMPETITIONS = ('global', 'local')
 REVISION = 'reference-opinion-v3-weighted-first'
 LEGACY_REVISION = 'reference-opinion-v1'
-FAMILIES = {'less': 'less', 'rags-block': 'rags', 'rags-main': 'rags', 'rags-traj': 'rags_traj',
-            'rags-uniform': 'rags_uniform'}
+FAMILIES = {'less': 'less', 'rage-block': 'rage', 'rage-main': 'rage', 'rage-traj': 'rage_traj',
+            'rage-uniform': 'rage_uniform'}
 OPINION_ARMS = tuple(f'{family}-{mode}{suffix}' for family in FAMILIES
     for mode in AGGREGATIONS for suffix in ('', '-global', '-local'))
 OPINION_BASES = {name: base for family, base in FAMILIES.items()
@@ -31,7 +31,7 @@ def selection_options(name, config=None):
         return dict(aggregation=mode, competition=protocol.get('competition', 'global'))
     if config is not None:  # Historical runs without explicit method definitions.
         return dict(aggregation='linearSum', competition='global')
-    # Unqualified RAGS names are historical linear aliases, not selected defaults.
+    # Unqualified RAGE names are historical linear aliases, not selected defaults.
     return dict(aggregation='maxSum' if name == 'less-main' else 'linearSum', competition='global')
 
 
@@ -39,10 +39,10 @@ def weight_placement_for(name, config=None):
     profile = (config or {}).get('opinion_aggregation_protocol')
     if config is not None:
         if profile == 'reference-opinion-v3-weighted-first':
-            return 'before_transform' if name.startswith('rags-') else 'after_transform'
+            return 'before_transform' if name.startswith('rage-') else 'after_transform'
         if profile != 'reference-opinion-v4-mixed-weight-order':
             return 'after_transform'
-    if name.startswith('rags-'):
+    if name.startswith('rage-'):
         return 'after_transform' if selection_options(name, config)['aggregation']=='expSum' else 'before_transform'
     return 'after_transform'
 

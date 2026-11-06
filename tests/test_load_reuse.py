@@ -11,7 +11,7 @@ from assets.dataset_processing.load_reuse import (
     write_load_metadata,
 )
 from assets.dataset_processing.shard_dataset import ShardDatasetReader, ShardDatasetWriter
-from ts3.spec.files.shard_dataset import validate_shard_dataset_bundle
+from tsl.spec.files.shard_dataset import validate_shard_dataset_bundle
 
 
 def _identity(batch="profile-10b"):

@@ -1,0 +1,161 @@
+{
+  "datasets": [
+    "time_nem_demand_5t",
+    "time_azure_i_cpu_5t",
+    "time_darwin_water_15t",
+    "time_finland_15t",
+    "time_eweld_15t",
+    "time_cphl_h",
+    "time_nem_price_5t",
+    "time_solar_h",
+    "time_port_activity_d"
+  ],
+  "formal_exam_used": false,
+  "models": {
+    "chronos-base": {
+      "batch_size": 32,
+      "context_length": 512,
+      "epochs": [
+        2
+      ],
+      "learning_rates": [
+        0.001
+      ],
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "max_grad_norm": 1,
+        "micro_batch_size": 32,
+        "min_lr_ratio": 0,
+        "schedule": "linear",
+        "warmup_ratio": 0
+      },
+      "prediction_length": 64,
+      "schedule_epochs": 6,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "training_data": "safe_history_random",
+      "weight_decay": 0
+    },
+    "timemoe-200m": {
+      "batch_size": 64,
+      "context_length": 512,
+      "epochs": [
+        1
+      ],
+      "learning_rates": [
+        0.0001
+      ],
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "exclude_bias_norm": true,
+        "max_grad_norm": 1,
+        "micro_batch_size": 16,
+        "min_lr_ratio": 0.5,
+        "schedule": "cosine",
+        "warmup_ratio": 0
+      },
+      "prediction_length": 64,
+      "schedule_epochs": 6,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "training_data": "safe_history_random",
+      "weight_decay": 0.1
+    },
+    "timesfm-2.5": {
+      "batch_size": 32,
+      "context_length": 512,
+      "epochs": [
+        2.625
+      ],
+      "learning_rates": [
+        3e-05
+      ],
+      "optimizer": {
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "max_grad_norm": 1,
+        "micro_batch_size": 32,
+        "min_lr_ratio": 0,
+        "schedule": "cosine",
+        "warmup_ratio": 0
+      },
+      "prediction_length": 64,
+      "schedule_epochs": 6,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "training_data": "safe_history_random",
+      "weight_decay": 0.01
+    }
+  },
+  "schema_version": 1,
+  "stage": "user_approved_development_scope",
+  "task_selection_evidence": [
+    "/root/autodl-tmp/rage/outputs/probe-20260914/probe-v2/task_probe/result.json",
+    "/root/autodl-tmp/rage/outputs/probe-20260914/timesfm-single-domain-v1",
+    "/root/autodl-tmp/rage/outputs/probe-20260914/probe-expansion-v1"
+  ],
+  "selection_method": "user_approved_order_not_automatic_top_k",
+  "pending_validation": {
+    "chronos-base": [
+      "time_nem_demand_5t",
+      "time_azure_i_cpu_5t",
+      "time_darwin_water_15t",
+      "time_finland_15t",
+      "time_eweld_15t",
+      "quito_min",
+      "time_cphl_h",
+      "time_nem_price_5t",
+      "time_solar_h",
+      "time_port_activity_d"
+    ],
+    "timesfm-2.5": [
+      "quito_min",
+      "time_cphl_h",
+      "time_nem_price_5t"
+    ],
+    "metric_audit": [
+      "quito_min",
+      "time_azure_i_cpu_5t"
+    ]
+  },
+  "notes": [
+    "All models share these ten task IDs in this order; no additional candidate tasks added.",
+    "Model settings retain prior safe-history probe settings; not a runnable source-only training protocol.",
+    "Selection does not assert all tasks improve or have been validated on all models.",
+    "Quito hour excluded pending metric audit; Port Activity retained as a weak-gain domain control.",
+    "Original automatic shared_selection.json and historical outputs are preserved.",
+    "2026-09-16 21:55 user decision: quito_min deferred (reference side 3865 series / 10.02M points dominates runtime); to be backfilled later."
+  ],
+  "input_roots": {
+    "time_nem_demand_5t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_azure_i_cpu_5t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-expansion-v1r2",
+    "time_darwin_water_15t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-expansion-v1r2",
+    "time_finland_15t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_eweld_15t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "quito_min": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_cphl_h": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_nem_price_5t": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_solar_h": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-v2",
+    "time_port_activity_d": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-expansion-v1r2"
+  }
+}

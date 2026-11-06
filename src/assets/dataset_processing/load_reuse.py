@@ -18,7 +18,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
-from ts3.spec.files.shard_dataset import (
+from tsl.spec.files.shard_dataset import (
     FORMAT_VERSION,
     LOAD_METADATA_FILENAME,
     LOAD_METADATA_SCHEMA_VERSION,

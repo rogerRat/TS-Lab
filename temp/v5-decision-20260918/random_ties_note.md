@@ -4,7 +4,7 @@
 
 随机种子使用显式 `placement_seed`（当前协议 0）与轨迹 `fragment_id` 派生，均按 32 位无符号整数取模；cover/error/split 使用独立随机流编号 0/1/2。候选按左端位置规范排序后随机抽取，仅排序用于定义可复现的随机索引，不固定偏向左侧。逐轨迹、跨轨迹合批及轨迹处理顺序不同应得到同一轨迹的相同选择。记录 tie policy、种子、派生字段与三个流编号；复现同时保留代码/NumPy 版本及实际锚点列表。变更种子可能改变锚点、P10、块和后续匹配，需隔离协议身份及缓存资产。
 
-最新独立 CRB 配置为 `configs/rags/v5_crb_random_ties_protocol.json`，身份 `v5-crb-strict-p10-recursive-random-ties-20260918`。新 V5 入口必须显式传入 `priority_tie_policy=random`；兼容默认值仍是 left，以保持旧路径精确复现。实现也支持显式 right 作为独立近期偏置对照，但本轮默认决定为 random；right 不代表对所有阶段额外加近期权重。原 `v5_crb_split_protocol.json` 保留前一轮 left 规则追溯，不再作为最新 V5 并列选择定义。冻结的排名温度、分数并列组均分完全不变；CRB 调度随机与最终分数并列组不得混淆。
+最新独立 CRB 配置为 `configs/rage/v5_crb_random_ties_protocol.json`，身份 `v5-crb-strict-p10-recursive-random-ties-20260918`。新 V5 入口必须显式传入 `priority_tie_policy=random`；兼容默认值仍是 left，以保持旧路径精确复现。实现也支持显式 right 作为独立近期偏置对照，但本轮默认决定为 random；right 不代表对所有阶段额外加近期权重。原 `v5_crb_split_protocol.json` 保留前一轮 left 规则追溯，不再作为最新 V5 并列选择定义。冻结的排名温度、分数并列组均分完全不变；CRB 调度随机与最终分数并列组不得混淆。
 
 **第 7 项仅为建议，尚未决定。** 保持新增 BP 锚点位置为整数 $m=\lfloor(a+b)/2\rfloor$；保持免费块代表为连续线性插值的几何中点 $(a+b)/2$，梯度代表始终为 $(g_a+g_b)/2$，即使几何位置不是合法整数窗口也不新增 BP。例如 $a=0,b=3$，BP 锚点在 1，几何代表在 1.5；插值到整数 1 的梯度是 $(2/3)g_a+(1/3)g_b$，不能混称为端点平均。区间只有相邻两个合法起点时停止分裂并保留块；单起点轨迹用唯一已有梯度。建议将“中点”改为“整数分裂点”和“几何插值代表”两种术语，并将公式中的位置理解为合法起点列表的序号。连续平均不宣称等于左闭右开离散块窗口梯度平均。
 

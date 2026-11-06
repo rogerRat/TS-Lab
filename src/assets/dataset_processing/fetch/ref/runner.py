@@ -7,7 +7,7 @@ import logging
 from importlib import import_module
 from pathlib import Path
 
-from ts3.spec.ref_extraction import ReferenceExtractionSpecification
+from tsl.spec.ref_extraction import ReferenceExtractionSpecification
 from configs.paths import config_file, output_path
 
 log = logging.getLogger("fetch.ref")

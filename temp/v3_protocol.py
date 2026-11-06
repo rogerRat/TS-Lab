@@ -3,14 +3,14 @@ import json
 from pathlib import Path
 
 
-V3_MATRIX = ('orig', 'rand', 'tsds', 'lp-mirror', 'less-main', 'rags-main', 'rags-traj')
+V3_MATRIX = ('orig', 'rand', 'tsds', 'lp-mirror', 'less-main', 'rage-main', 'rage-traj')
 V3_BASES = {'rand': 'random', 'lp-mirror': 'lp_mirror', 'less-main': 'less',
-            'rags-main': 'rags', 'rags-traj': 'rags_traj'}
+            'rage-main': 'rage', 'rage-traj': 'rage_traj'}
 V3_DATASETS = ('time_nem_demand_5t', 'time_azure_i_cpu_5t', 'time_darwin_water_15t',
                'time_finland_15t', 'time_eweld_15t', 'time_cphl_h',
                'time_nem_price_5t', 'time_solar_h', 'time_port_activity_d')
-V3_TEMPERATURE_ARMS = ('lp-mirror', 'less-main', 'rags-main', 'rags-traj')
-V3_GRADIENT_ARMS = ('less-main', 'rags-main', 'rags-traj')
+V3_TEMPERATURE_ARMS = ('lp-mirror', 'less-main', 'rage-main', 'rage-traj')
+V3_GRADIENT_ARMS = ('less-main', 'rage-main', 'rage-traj')
 
 
 def v3_temperatures(config):
@@ -35,7 +35,7 @@ V3_METHOD_PROTOCOLS = {
         'reference_aggregation': 'mean_cosine', 'probability': 'softmax(score/T)',
         'source_length_weighting': False, 'post_softmax_weighting': False,
     },
-    'rags-main': {
+    'rage-main': {
         'gating': False, 'competition': 'global', 'scoring_unit': 'block',
         'anchors': 'CRB_coverage_error_closest_zero_batched_split',
         'block_gradient': 'linear_interpolation_geometric_midpoint',
@@ -46,7 +46,7 @@ V3_METHOD_PROTOCOLS = {
         'post_softmax_weighting': False, 'p10_filters_split': False,
         'retains_all_legal_starts': True,
     },
-    'rags-traj': {
+    'rage-traj': {
         'gating': False, 'competition': 'global', 'scoring_unit': 'trajectory',
         'anchors': 'CRB_coverage_error_closest_zero_batched_split',
         'trajectory_gradient': 'arithmetic_mean_of_raw_sampled_window_gradients',
@@ -66,13 +66,13 @@ def opinion_method_protocols(arms=V3_MATRIX):
     from .reference_opinions import OPINION_BASES, selection_options
     protocols = {}
     for arm in arms:
-        family = ({'less': 'less-main', 'rags': 'rags-main', 'rags_traj': 'rags-traj',
-                   'rags_uniform': 'rags-main'}.get(OPINION_BASES.get(arm)) or arm)
+        family = ({'less': 'less-main', 'rage': 'rage-main', 'rage_traj': 'rage-traj',
+                   'rage_uniform': 'rage-main'}.get(OPINION_BASES.get(arm)) or arm)
         protocol = deepcopy(V3_METHOD_PROTOCOLS[family])
         if family in V3_GRADIENT_ARMS:
             options = selection_options(arm)
             # Preserve the preceding, never-launched v1 design as historical.
-            if arm in ('rags-main', 'rags-traj'):
+            if arm in ('rage-main', 'rage-traj'):
                 options = dict(aggregation='zeroClipSum', competition='global')
             protocol.update(reference_aggregation=options['aggregation'],
                             competition=options['competition'],
@@ -83,10 +83,10 @@ def opinion_method_protocols(arms=V3_MATRIX):
             if options['aggregation']=='expSum':
                 protocol['exp_inner_scale'] = 1.
                 protocol['probability'] = 'softmax(sum(alpha*exp(raw_cosine))/T)'
-            if family=='rags-traj':
+            if family=='rage-traj':
                 protocol['difference_from_less_main'] = 'anchor_positions_and_reference_aggregation'
                 protocol['difference_from_less_with_same_aggregation'] = 'anchor_positions_only'
-            if OPINION_BASES.get(arm)=='rags_uniform':
+            if OPINION_BASES.get(arm)=='rage_uniform':
                 protocol['anchors'] = 'CRB_error_stage_uniform_same_actual_K'
         protocols[arm] = protocol
     return protocols
@@ -116,15 +116,15 @@ def validate_opinion_config(config):
 
 
 NEUTRAL_MATRIX = ('rand', 'orig', 'less-main',
-    'rags-block-linearSum', 'rags-block-zeroClipSum', 'rags-block-maxSum', 'rags-block-expSum',
-    'rags-traj-linearSum', 'rags-traj-zeroClipSum', 'rags-traj-maxSum', 'rags-traj-expSum',
+    'rage-block-linearSum', 'rage-block-zeroClipSum', 'rage-block-maxSum', 'rage-block-expSum',
+    'rage-traj-linearSum', 'rage-traj-zeroClipSum', 'rage-traj-maxSum', 'rage-traj-expSum',
     'tsds', 'lp-mirror')
 
 
 def neutral_method_protocols(weighted_first=False, exp_after=False):
     protocols = opinion_method_protocols(NEUTRAL_MATRIX)
     for name, protocol in protocols.items():
-        if name.startswith('rags-'):
+        if name.startswith('rage-'):
             protocol.update(method_role='unranked_variant', main_method_selected=False)
             if weighted_first:
                 protocol.update(reference_aggregation_revision='reference-opinion-v3-weighted-first',
@@ -134,20 +134,20 @@ def neutral_method_protocols(weighted_first=False, exp_after=False):
                     protocol['probability']='softmax(sum(exp(alpha*raw_cosine))/T)'
                 if protocol['reference_aggregation']=='maxSum':
                     protocol['probability']='softmax(max(alpha*raw_cosine)/T)'
-            if name.startswith('rags-traj-'):
+            if name.startswith('rage-traj-'):
                 protocol['difference_from_less_main'] = ('anchor_positions_only'
                     if protocol['reference_aggregation']=='maxSum'
                     else 'anchor_positions_and_reference_aggregation')
     if weighted_first:
         protocols['less-main'].update(weight_placement='after_transform', max_input='raw_cosine')
         for name, protocol in protocols.items():
-            if name.startswith('rags-traj-') and protocol['reference_aggregation']=='maxSum':
+            if name.startswith('rage-traj-') and protocol['reference_aggregation']=='maxSum':
                 protocol['difference_from_less_main']='anchor_positions_and_reference_score_scale'
     if exp_after:
         if not weighted_first:
             raise ValueError('Mixed protocol requires weighted-first linear/clip/max')
         for name, protocol in protocols.items():
-            if name.startswith('rags-'):
+            if name.startswith('rage-'):
                 protocol['reference_aggregation_revision']='reference-opinion-v4-mixed-weight-order'
                 if protocol['reference_aggregation']=='expSum':
                     protocol.update(weight_placement='after_transform',
@@ -160,8 +160,8 @@ def validate_neutral_config(config):
     from copy import deepcopy
     if config.get('arms') != list(NEUTRAL_MATRIX):
         raise ValueError('Neutral matrix requires exactly the thirteen named methods')
-    if config.get('rags_main_method') is not None or config.get('rags_main_method_selected') is not False:
-        raise ValueError('Neutral matrix cannot declare a RAGS main method')
+    if config.get('rage_main_method') is not None or config.get('rage_main_method_selected') is not False:
+        raise ValueError('Neutral matrix cannot declare a RAGE main method')
     profile=config.get('opinion_aggregation_protocol')
     weighted_first=profile in ('reference-opinion-v3-weighted-first','reference-opinion-v4-mixed-weight-order')
     if config.get('method_protocols') != neutral_method_protocols(weighted_first=weighted_first,

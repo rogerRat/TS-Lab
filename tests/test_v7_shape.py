@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 
-from rags.experiments.v7_shape import (
+from rage.experiments.v7_shape import (
     ARMS, endpoint_positions, feature_cache, integrated_squared_distance,
     reference_weights, scores_many, shape_rows,
 )
-from rags.crb import GradientBlock
+from rage.crb import GradientBlock
 
 
 def test_integrated_squared_distance_matches_quadrature():
@@ -33,19 +33,19 @@ def test_shape_reduces_to_midpoint_cosine_and_preserves_slope():
 
 
 def test_arm_priority_is_exp_then_linear_then_controls():
-    assert ARMS == ('rags-shape-expSum', 'rags-shape-linearSum',
-                    'rags-shape-zeroClipSum', 'rags-shape-maxSum')
+    assert ARMS == ('rage-shape-expSum', 'rage-shape-linearSum',
+                    'rage-shape-zeroClipSum', 'rage-shape-maxSum')
 
 
 def test_filtered_shape_worker_still_rejects_unknown_arm(tmp_path):
-    from rags.experiments.v7_shape_backfill import run_model
+    from rage.experiments.v7_shape_backfill import run_model
     with pytest.raises(ValueError, match='Unknown shape arm'):
         run_model(tmp_path, [], [], 'chronos-base', 'wrong',
                   seed_filter=1, task_filter={'time_coastal_ts_h'})
 
 
 def test_first_receipts_create_missing_sidecar_parents(tmp_path):
-    from rags.experiments.v7_shape_backfill import publish_receipt
+    from rage.experiments.v7_shape_backfill import publish_receipt
     import json
     for section in ('shape_select', 'shape_complete', 'arm_phases'):
         path = tmp_path/'fresh_run'/section/'first.json'
@@ -57,8 +57,8 @@ def test_first_receipts_create_missing_sidecar_parents(tmp_path):
 def test_global_arm_barrier_requires_every_model_seed_task(tmp_path,monkeypatch):
     import json
     from scripts import run_v7_shape_backfill as queue
-    from rags.experiments.v7_protocol import MODELS
-    from rags.experiments.v7_run import artifact_identity
+    from rage.experiments.v7_protocol import MODELS
+    from rage.experiments.v7_run import artifact_identity
     monkeypatch.setattr(queue,'report_view',lambda raw,expected,config,model: raw
                         if raw.get('identity') == expected else (_ for _ in ()).throw(ValueError()))
     parent=tmp_path/'run'
@@ -79,9 +79,9 @@ def test_global_arm_barrier_requires_every_model_seed_task(tmp_path,monkeypatch)
             path.write_text(json.dumps(manifest))
             expected=dict(artifact_identity(side_config,model,seed,'task',manifest,{'model':model}),
                           training_protocol=side_config['training_protocol'])
-            path=sidecar/'seeds'/f'seed{seed}'/model/'cells'/'task__rags-shape-expSum.json'
+            path=sidecar/'seeds'/f'seed{seed}'/model/'cells'/'task__rage-shape-expSum.json'
             path.parent.mkdir(parents=True,exist_ok=True)
-            path.write_text(json.dumps(dict(identity=expected,arm='rags-shape-expSum',
+            path.write_text(json.dumps(dict(identity=expected,arm='rage-shape-expSum',
                                             seed=seed,task='task')))
     assert queue.arm_complete([parent],[config],ARMS[0])
     receipt = queue.accept_arm_phase(parent,[parent],[config],ARMS[0])
@@ -153,25 +153,25 @@ def test_four_aggregations_keep_existing_reference_weight_placement():
 
 
 def test_shape_sidecar_identity_is_new_and_parent_untouched(monkeypatch,tmp_path):
-    from rags.experiments import v7_shape_backfill, v7_run
+    from rage.experiments import v7_shape_backfill, v7_run
     monkeypatch.setattr(v7_shape_backfill,'validate',lambda config:None)
     parent={'asset_protocol':{'experiment_version':'v7'},'seeds':[0,1,2],
-            'arms':['orig','rand','rags-block-expSum'],'datasets':['task'],
+            'arms':['orig','rand','rage-block-expSum'],'datasets':['task'],
             'training_protocol':{'version':'v7-seven-tasks-chronos3-other4-20260924'}}
     shape=v7_shape_backfill.sidecar_config(parent,tmp_path)
     assert parent['seeds'] == [0,1,2]
     assert shape['seeds'] == [0,1]
-    assert shape['arms'][2] == 'rags-shape-expSum'
+    assert shape['arms'][2] == 'rage-shape-expSum'
     parent_identity=v7_run.artifact_identity(parent,'chronos-base',0,'task',{},'model')
     shape_identity=v7_run.artifact_identity(shape,'chronos-base',0,'task',{},'model')
     assert 'shape_amendment' not in parent_identity
-    assert shape_identity['shape_amendment']['version'] == 'v7-rags-block-shape-integral-v1'
+    assert shape_identity['shape_amendment']['version'] == 'v7-rage-block-shape-integral-v1'
 
 
 def test_shape_queue_requires_all_original_and_extension_cells(tmp_path):
     import json
     from scripts.run_v7_shape_backfill import complete
-    from rags.experiments.v7_protocol import MODELS
+    from rage.experiments.v7_protocol import MODELS
     runs=[tmp_path]+[tmp_path/'extensions'/name for name in ('wind','sg','coastal')]
     configs=[{'datasets':['task'],'arms':['orig','rand']}]
     assert not complete(tmp_path,runs,configs)
@@ -194,7 +194,7 @@ def test_shape_queue_requires_all_original_and_extension_cells(tmp_path):
 
 def test_baseline_reuse_relabels_verified_result_without_inference(tmp_path):
     import json
-    from rags.experiments import v7_shape_backfill, v7_run
+    from rage.experiments import v7_shape_backfill, v7_run
     parent=tmp_path/'parent'; sidecar=tmp_path/'shape'
     model='chronos-base'; task='task'; manifest={'total_equivalents':16284}; identity={'model_id':'test'}
     training={'version':'v7-seven-tasks-chronos3-other4-20260924'}

@@ -1,7 +1,7 @@
 """Unified dispatch only; implementations live in per-baseline packages."""
 from __future__ import annotations
 import time
-from rags.experiments.arms import ArmOutput, WindowIndex
+from rage.experiments.arms import ArmOutput, WindowIndex
 from .contracts import baseline_contract, verify_static_identities
 from .less.runner import less_select
 from .tsds.runner import tsds_select
@@ -29,7 +29,7 @@ def run_baseline(name: str, **kwargs) -> ArmOutput:
     index = kwargs.get("index")
     if not isinstance(index, WindowIndex):
         raise TypeError("external baselines require the shared static WindowIndex")
-    from rags.experiments.regions import RegionWindows
+    from rage.experiments.regions import RegionWindows
     if isinstance(output.selected, RegionWindows):
         for fid, start, stop in output.selected.regions:
             fragment = index.by_fragment[int(fid)]

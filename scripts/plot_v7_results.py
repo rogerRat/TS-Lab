@@ -3,12 +3,12 @@ import argparse
 from pathlib import Path
 import os
 import tempfile
-from rags.experiments.v7_figures import read, render
+from rage.experiments.v7_figures import read, render
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config',default='configs/rags/main_v7_curve4.json')
+    parser.add_argument('--config',default='configs/rage/main_v7_curve4.json')
     parser.add_argument('--run')
     parser.add_argument('--out',default='docs/results/figures')
     parser.add_argument('--reuse-snapshot',action='store_true',

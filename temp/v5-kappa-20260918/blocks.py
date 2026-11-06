@@ -4,7 +4,7 @@ import json
 import time
 from pathlib import Path
 import numpy as np
-from rags.crb import CRBConfig, CRBEngineMulti, CRBResult, GradientBlock
+from rage.crb import CRBConfig, CRBEngineMulti, CRBResult, GradientBlock
 
 def save_pool_blocks(path: Path, blocks: list[GradientBlock], counters: dict) -> None:
     directions = np.stack([b.direction for b in blocks]).astype(np.float32)

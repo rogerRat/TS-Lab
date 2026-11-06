@@ -3,10 +3,10 @@ import argparse, json, os
 from pathlib import Path
 
 import sys
-sys.path.insert(0, "/root/TS3/src")
+sys.path.insert(0, "/root/TS-Lab/src")
 
-from rags.experiments.full_pool_run import run_suite
-from rags.experiments.students import atomic_json
+from rage.experiments.full_pool_run import run_suite
+from rage.experiments.students import atomic_json
 
 
 def main():

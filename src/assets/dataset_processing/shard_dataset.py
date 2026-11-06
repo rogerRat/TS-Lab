@@ -15,7 +15,7 @@ from typing import Any, Iterable
 
 import numpy as np
 
-from ts3.spec.files.shard_dataset import (
+from tsl.spec.files.shard_dataset import (
     DEFAULT_SHARD_BYTES, LOAD_INDEX_SCHEMA, META_SCHEMA, read_arrow, write_arrow,
 )
 

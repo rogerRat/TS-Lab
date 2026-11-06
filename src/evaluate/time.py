@@ -245,7 +245,7 @@ def _metadata(config: EvaluationRunConfig, checkpoint: Path, checked: Mapping[st
     @scenario: Make raw TIME results independently reproducible.
     @logic: Hashes every local source/data/checkpoint artifact and ordered task list.
     """
-    manifest = checkpoint / "ts3_checkpoint_manifest.json"
+    manifest = checkpoint / "rage_checkpoint_manifest.json"
     adapter_path = _adapter_source(config.adapter_class)
     return {
         "benchmark": "time",
@@ -339,7 +339,7 @@ def run_time(config: EvaluationRunConfig, checkpoint: Path, output_dir: Path, re
             each TIME Dataset with explicit storage_path, predicts, and delegates
             raw artifact writing and metrics to TIME's official saver.
     @param config: Common config with benchmark ``time``.
-    @param checkpoint: Complete TS3 Chronos checkpoint directory.
+    @param checkpoint: Complete RAGE Chronos checkpoint directory.
     @param output_dir: Existing run root prepared by evaluate.run.
     @param resume: Explicit permission to reuse only complete task outputs.
     """

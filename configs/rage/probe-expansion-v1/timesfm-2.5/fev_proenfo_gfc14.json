@@ -1,0 +1,40 @@
+{
+  "batch_size": 32,
+  "context_length": 512,
+  "datasets": [
+    "fev_proenfo_gfc14"
+  ],
+  "device": "cuda",
+  "epochs": [
+    2.625
+  ],
+  "eval_batch": 32,
+  "inputs": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs-expansion-v1r2",
+  "learning_rates": [
+    0.00003
+  ],
+  "model_path": null,
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "eps": 1e-8,
+    "max_grad_norm": 1,
+    "micro_batch_size": 32,
+    "min_lr_ratio": 0,
+    "schedule": "cosine",
+    "warmup_ratio": 0
+  },
+  "prediction_length": 64,
+  "schedule_epochs": 6,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "student": "timesfm-2.5",
+  "training_data": "safe_history_random",
+  "validation_windows": 8,
+  "weight_decay": 0.01
+}

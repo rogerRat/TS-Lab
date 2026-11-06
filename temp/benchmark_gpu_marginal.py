@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 import numpy as np
 import torch
-import rags.experiments.resampling as mod
+import rage.experiments.resampling as mod
 from threadpoolctl import threadpool_limits
 
 torch.set_num_threads(4)
@@ -36,7 +36,7 @@ with threadpool_limits(limits=4):
         for attempt in range(3):
             torch.cuda.synchronize()
             started = time.perf_counter()
-            beta, _ = mod.rags_marginal(refs, sources, n, m, device='cuda',
+            beta, _ = mod.rage_marginal(refs, sources, n, m, device='cuda',
                                         gating=False, temperature=.25, row_batch=batch)
             torch.cuda.synchronize()
             elapsed = time.perf_counter()-started

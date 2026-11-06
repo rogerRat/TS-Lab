@@ -16,10 +16,10 @@ import torch
 
 from baselines.common import reference_windows
 from baselines.ltsv.runner import _ltsv_reference_mse, _ltsv_training_loss
-from rags.execution import SelectionExecution, prepare_contexts, selection_execution
-from rags.experiments.development_inputs import load_fragments
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.students import atomic_json
+from rage.execution import SelectionExecution, prepare_contexts, selection_execution
+from rage.experiments.development_inputs import load_fragments
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.students import atomic_json
 
 
 def _restore_snapshot_on_device(base_flat, device):

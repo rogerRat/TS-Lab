@@ -10,7 +10,7 @@ from scripts.supervise_v7_night import pidfd
 
 ROOT = Path('/root/autodl-tmp/TS3/outputs/main-v7-20260923')
 LOG = ROOT/'shape_backfill_20260925/logs/chronos-base.log'
-SENTINEL = 'V7_SHAPE_ARM_TASK_COMPLETE rags-shape-linearSum chronos-base 1 time_solar_h'
+SENTINEL = 'V7_SHAPE_ARM_TASK_COMPLETE rage-shape-linearSum chronos-base 1 time_solar_h'
 IN_MODIFY = 0x00000002
 
 

@@ -13,7 +13,7 @@ RAM_LIMIT_GB=92
 EXPECT_CELLS=63
 [ -f "$COUNT" ] || echo 0 > "$COUNT"
 
-python_worker_pids() { pgrep -f -- 'bin/python -m rags.experiments.full_pool_worker'; }
+python_worker_pids() { pgrep -f -- 'bin/python -m rage.experiments.full_pool_worker'; }
 
 state_of() {  # $1=student -> "stage dataset"
   $PY -c "import json;d=json.load(open('$RUN/students/$1/state.json'));print(d.get('stage','?'),d.get('dataset','?'))" 2>/dev/null
@@ -55,7 +55,7 @@ CONTROL
     echo "$(date '+%H:%M:%S') launch $student stage=$stage/$dset ram=$(mem_gb)G" >> "$LOG"
     cd /root/TS3 && env PYTHONPATH=/root/TS3/src HF_HOME=/root/autodl-tmp/hf-cache \
       PYTHONUNBUFFERED=1 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
-      nohup "$pybin" -m rags.experiments.full_pool_worker --run "$RUN" --student "$student" \
+      nohup "$pybin" -m rage.experiments.full_pool_worker --run "$RUN" --student "$student" \
       >> "$RUN/$student.log" 2>&1 < /dev/null 9>&- &
     echo $(( $(cat $COUNT) + 1 )) > "$COUNT"
     sleep 45

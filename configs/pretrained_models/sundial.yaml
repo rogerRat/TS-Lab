@@ -1,4 +1,4 @@
-# Revision-pinned Sundial model. No official fine-tuning recipe exists; TS3
+# Revision-pinned Sundial model. No official fine-tuning recipe exists; RAGE
 # assembles the checkpoint-native TimeFlow components for training (see the
 # adapter docstring), so training is enabled with self-implemented provenance.
 models:

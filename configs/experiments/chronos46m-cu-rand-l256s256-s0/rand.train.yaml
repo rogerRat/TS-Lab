@@ -1,6 +1,6 @@
 sampling:
   policy: random
-  source_catalog: /root/TS3/configs/catalog/src/profile-10b-segl256s256.yaml
+  source_catalog: /root/TS-Lab/configs/catalog/src/profile-10b-segl256s256.yaml
 context_length: 256
 prediction_length: 64
 window_stride: 256
@@ -8,10 +8,10 @@ missing_value_policy: reject
 seed: 0
 batch_size: 64
 training_steps: 10000
-adapter_class: adapters.chronos.train.adapter:ChronosTS3TrainAdapter
+adapter_class: adapters.chronos.train.adapter:ChronosRAGETrainAdapter
 adapter_config:
   model:
-    architecture_source: /root/TS3/third_parties/chronos-forecasting/test/dummy-chronos-model
+    architecture_source: /root/TS-Lab/third_parties/chronos-forecasting/test/dummy-chronos-model
     pretrained_weights: null
     initialization_mode: from_scratch
     initializer_factor: 0.05

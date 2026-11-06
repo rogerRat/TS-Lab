@@ -121,7 +121,7 @@ def rank_resampled_windows_v5(selected, *, temperature=DEFAULT_TEMPERATURE):
         pre_rank_probability_mapping=selected.metadata.get('probability_mapping'),
         pre_rank_temperature=selected.metadata.get('temperature'),
         temperature=float(temperature), source_weighting='legal_window_counts')
-    for key in ('less_probability_revision', 'rags_probability_revision'):
+    for key in ('less_probability_revision', 'rage_probability_revision'):
         if key in metadata:
             metadata[key] += ':' + REVISION
     result = ResampledWindows(selected.values, selected.window_locations, selected.window_ids,

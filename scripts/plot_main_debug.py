@@ -12,18 +12,18 @@ import matplotlib.gridspec as gridspec
 
 MODELS = {
     "timerxl-84m": (
-        "/root/autodl-tmp/TS3/outputs/main-rank-volume-timerxl-v6-20260921/rounds",
-        "/root/autodl-tmp/TS3/cache/grad-pool/thuml-timer-base-84m--70077a71acce1b4c00d98332fcaabc694255d8e5"),
+        "/root/autodl-tmp/rage/outputs/main-rank-volume-timerxl-v6-20260921/rounds",
+        "/root/autodl-tmp/rage/cache/grad-pool/thuml-timer-base-84m--70077a71acce1b4c00d98332fcaabc694255d8e5"),
     "chronos-base": (
-        "/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918/rounds",
-        "/root/autodl-tmp/TS3/cache/grad-pool/amazon-chronos-t5-base--ad294eaacead15db499b740ea4122266dd2a81a2"),
+        "/root/autodl-tmp/rage/outputs/main-rank-volume-20260918/rounds",
+        "/root/autodl-tmp/rage/cache/grad-pool/amazon-chronos-t5-base--ad294eaacead15db499b740ea4122266dd2a81a2"),
     "timesfm-2.5": (
-        "/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918/rounds",
-        "/root/autodl-tmp/TS3/cache/grad-pool/google-timesfm-2.5-200m-transformers--5a9806b9b291fad9233b5249d88263f1846304d3"),
+        "/root/autodl-tmp/rage/outputs/main-rank-volume-20260918/rounds",
+        "/root/autodl-tmp/rage/cache/grad-pool/google-timesfm-2.5-200m-transformers--5a9806b9b291fad9233b5249d88263f1846304d3"),
 }
 SEEDS = (0, 1, 2)
 N_TRAJ = 6
-GROUP = ["rags-block-expSum", "rags-block-linearSum", "rand", "less-main", "tsds", "lp-mirror", "orig"]
+GROUP = ["rage-block-expSum", "rage-block-linearSum", "rand", "less-main", "tsds", "lp-mirror", "orig"]
 PL = plt.get_cmap("plasma")
 TC = plt.get_cmap("viridis")
 
@@ -128,4 +128,4 @@ def gen_debug(model, run, pool, out_path):
 
 
 for model, (run, pool) in MODELS.items():
-    gen_debug(model, run, pool, Path(f"/root/TS3/docs/results/figures/{model}__main_debug.png"))
+    gen_debug(model, run, pool, Path(f"/root/TS-Lab/docs/results/figures/{model}__main_debug.png"))

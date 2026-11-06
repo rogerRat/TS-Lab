@@ -7,8 +7,8 @@ import time
 import numpy as np
 import torch
 
-from rags.execution import SelectionExecution, selection_execution
-from rags.experiments.full_pool_models import build_model
+from rage.execution import SelectionExecution, selection_execution
+from rage.experiments.full_pool_models import build_model
 
 
 def main():

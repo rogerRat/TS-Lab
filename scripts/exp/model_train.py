@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from rags.experiments.students import STUDENTS, run_student_task
+from rage.experiments.students import STUDENTS, run_student_task
 
 
 def main(argv=None):

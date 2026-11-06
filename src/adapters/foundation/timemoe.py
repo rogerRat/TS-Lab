@@ -17,7 +17,7 @@ SOURCE_REVISION = "67460eb4af69eeed5fa86e591846cb0ae0744c26"
 
 def official_classes():
     from configs.paths import PROJECT_ROOT
-    root = Path(os.environ.get("RAGS_TIMEMOE_SOURCE", PROJECT_ROOT / "third_parties/Time-MoE-pinned")).resolve()
+    root = Path(os.environ.get("RAGE_TIMEMOE_SOURCE", PROJECT_ROOT / "third_parties/Time-MoE-pinned")).resolve()
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
     from time_moe.models.modeling_time_moe import TimeMoeForPrediction

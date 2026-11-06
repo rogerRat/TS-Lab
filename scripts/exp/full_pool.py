@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-from rags.experiments.full_pool_run import run_suite
+from rage.experiments.full_pool_run import run_suite
 
 
 def main(argv=None):

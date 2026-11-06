@@ -20,7 +20,7 @@ network_git() (
 checkout_source() {
     local name="$1" url="$2" revision="$3" target stored
     target="$PROJECT_ROOT/third_parties/$name"
-    stored="$TS3_INSTALL_ROOT/third_parties/$name"
+    stored="$RAGE_INSTALL_ROOT/third_parties/$name"
     if [[ ! -e "$target" && ! -L "$target" ]]; then
         [[ -e "$stored" ]] || network_git clone "$url" "$stored"
         [[ -d "$stored/.git" ]] || { echo "Not a checkout: $stored" >&2; return 1; }
@@ -76,11 +76,12 @@ import torch
 profile = sys.argv[1]
 modules = {
     "main": ["chronos", "fev", "numpy", "pandas", "pyarrow", "scipy", "faiss",
-             "ot", "threadpoolctl", "umap", "tensorboard", "rags"],
-    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "rags"],
-    "timemoe": ["faiss", "scipy", "yaml", "plotly", "rags"],
-    "sundial": ["faiss", "scipy", "yaml", "plotly", "rags"],
-    "timerxl": ["faiss", "scipy", "yaml", "plotly", "rags"],
+             "ot", "threadpoolctl", "umap", "tensorboard", "matplotlib", "rage", "tsl",
+             "rage.static_selection", "scripts.select_static"],
+    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "rage"],
+    "timemoe": ["faiss", "scipy", "yaml", "plotly", "rage"],
+    "sundial": ["faiss", "scipy", "yaml", "plotly", "rage"],
+    "timerxl": ["faiss", "scipy", "yaml", "plotly", "rage"],
     "time": ["timebench", "timebench.evaluation.data", "chronos"],
 }
 for module in modules[profile]:
@@ -128,36 +129,36 @@ main() {
     fi
     command -v conda >/dev/null || { echo 'conda is required' >&2; return 1; }
     command -v git >/dev/null || { echo 'git is required' >&2; return 1; }
-    export TS3_INSTALL_ROOT="${TS3_INSTALL_ROOT:-/root/autodl-tmp/ts3}"
+    export RAGE_INSTALL_ROOT="${RAGE_INSTALL_ROOT:-/root/autodl-tmp/rage}"
     local existing_env_dirs
     existing_env_dirs="$(conda info --json | "$(conda info --base)/bin/python" -c 'import json,sys; print(":".join(json.load(sys.stdin)["envs_dirs"]))')"
-    export CONDA_ENVS_PATH="$TS3_INSTALL_ROOT/envs:$existing_env_dirs"
+    export CONDA_ENVS_PATH="$RAGE_INSTALL_ROOT/envs:$existing_env_dirs"
     export PYTHONNOUSERSITE=1
     unset PYTHONPATH
     export PIP_INDEX_URL="${PYPI_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
     export PYTORCH_INDEX_URL="${PYTORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"
     export PIP_NO_INPUT=1 PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_USER=false
-    export PIP_CACHE_DIR="$TS3_INSTALL_ROOT/cache/pip"
-    export CONDA_PKGS_DIRS="$TS3_INSTALL_ROOT/cache/conda"
-    export TMPDIR="$TS3_INSTALL_ROOT/cache/tmp"
+    export PIP_CACHE_DIR="$RAGE_INSTALL_ROOT/cache/pip"
+    export CONDA_PKGS_DIRS="$RAGE_INSTALL_ROOT/cache/conda"
+    export TMPDIR="$RAGE_INSTALL_ROOT/cache/tmp"
     if [[ "$verify_only" == false ]]; then
-        [[ -d "$(dirname "$TS3_INSTALL_ROOT")" ]] || {
-            echo 'Set TS3_INSTALL_ROOT to a directory on a writable data disk.' >&2; return 1;
+        [[ -d "$(dirname "$RAGE_INSTALL_ROOT")" ]] || {
+            echo 'Set RAGE_INSTALL_ROOT to a directory on a writable data disk.' >&2; return 1;
         }
-        df -h "$(dirname "$TS3_INSTALL_ROOT")"
+        df -h "$(dirname "$RAGE_INSTALL_ROOT")"
         local available
-        available="$(df -Pk "$(dirname "$TS3_INSTALL_ROOT")" | awk 'END {print $4}')"
+        available="$(df -Pk "$(dirname "$RAGE_INSTALL_ROOT")" | awk 'END {print $4}')"
         (( available >= 20 * 1024 * 1024 )) || {
-            echo 'Need 20 GiB free: expand the data disk or set TS3_INSTALL_ROOT.' >&2; return 1;
+            echo 'Need 20 GiB free: expand the data disk or set RAGE_INSTALL_ROOT.' >&2; return 1;
         }
-        mkdir -p "$TS3_INSTALL_ROOT"/{envs,third_parties,logs/install} \
+        mkdir -p "$RAGE_INSTALL_ROOT"/{envs,third_parties,logs/install} \
             "$PIP_CACHE_DIR" "$CONDA_PKGS_DIRS" "$TMPDIR" "$PROJECT_ROOT/third_parties"
         # Keep new environments addressable by name in future interactive shells.
         case ":$existing_env_dirs:" in
-            *":$TS3_INSTALL_ROOT/envs:"*) ;;
-            *) conda config --append envs_dirs "$TS3_INSTALL_ROOT/envs" ;;
+            *":$RAGE_INSTALL_ROOT/envs:"*) ;;
+            *) conda config --append envs_dirs "$RAGE_INSTALL_ROOT/envs" ;;
         esac
-        local logfile="$TS3_INSTALL_ROOT/logs/install/$(date +%Y%m%d-%H%M%S)-$$.log"
+        local logfile="$RAGE_INSTALL_ROOT/logs/install/$(date +%Y%m%d-%H%M%S)-$$.log"
         exec > >(tee -a "$logfile") 2>&1
         echo "Installation log: $logfile"
     fi
@@ -167,15 +168,16 @@ main() {
     local PROFILE ENV_NAME REQUIREMENTS
     for PROFILE in "${profiles[@]}"; do
         case "$PROFILE" in
-            main) ENV_NAME=ts3; REQUIREMENTS=requirements.txt ;;
+            main) ENV_NAME=rage; REQUIREMENTS=requirements.txt ;;
             time) ENV_NAME=time; REQUIREMENTS=time-requirements.txt ;;
-            *) ENV_NAME="ts3-$PROFILE"; REQUIREMENTS="$PROFILE-requirements.txt" ;;
+            *) ENV_NAME="rage-$PROFILE"; REQUIREMENTS="$PROFILE-requirements.txt" ;;
         esac
         echo "=== $PROFILE ($ENV_NAME) ==="
         [[ "$verify_only" == true ]] || install_profile
         verify_profile
+        printf "verified\n" > "$RAGE_INSTALL_ROOT/envs/$ENV_NAME/.complete"
         if [[ "$verify_only" == false ]]; then
-            run_pip freeze > "$TS3_INSTALL_ROOT/logs/install/$ENV_NAME-$(date +%Y%m%d-%H%M%S).txt"
+            run_pip freeze > "$RAGE_INSTALL_ROOT/logs/install/$ENV_NAME-$(date +%Y%m%d-%H%M%S).txt"
         fi
     done
     echo "Completed: ${profiles[*]}"

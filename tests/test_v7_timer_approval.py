@@ -2,7 +2,7 @@
 from copy import deepcopy
 import numpy as np
 import pytest
-from rags.experiments.v7_cache import V7Cache, approved_timer_model_pair, TIMER_REUSE_APPROVAL
+from rage.experiments.v7_cache import V7Cache, approved_timer_model_pair, TIMER_REUSE_APPROVAL
 from test_v7 import Probe, request
 
 
@@ -47,7 +47,7 @@ def test_other_config_changes_rejected(key, value):
 
 
 def test_approved_import_no_bp_preserves_existing_and_audits(tmp_path, monkeypatch):
-    monkeypatch.delenv('TS3_GRADIENT_CACHE_ROOT', raising=False)
+    monkeypatch.delenv('RAGE_GRADIENT_CACHE_ROOT', raising=False)
     old_model, new_model = models()
     probe = Probe()
     common = dict(context_length=4, prediction_length=2)

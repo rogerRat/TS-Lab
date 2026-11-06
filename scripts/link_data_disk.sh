@@ -5,7 +5,7 @@
 set -Eeuo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-DATA_ROOT="${AUTODL_DATA_ROOT:-/root/autodl-tmp/TS3}"
+DATA_ROOT="${AUTODL_DATA_ROOT:-/root/autodl-tmp/rage}"
 DRY_RUN=0
 
 usage() {
@@ -105,6 +105,6 @@ for relative in data outputs logs cache archive; do
 done
 
 if ((DRY_RUN == 0)); then
-    printf 'project=%s\ndata_root=%s\nfilesystem=%s\n' "$PROJECT_ROOT" "$DATA_ROOT" "$data_device" > "$DATA_ROOT/.ts3-data-links"
-    echo "completed; manifest=$DATA_ROOT/.ts3-data-links"
+    printf 'project=%s\ndata_root=%s\nfilesystem=%s\n' "$PROJECT_ROOT" "$DATA_ROOT" "$data_device" > "$DATA_ROOT/.rage-data-links"
+    echo "completed; manifest=$DATA_ROOT/.rage-data-links"
 fi

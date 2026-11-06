@@ -4,13 +4,13 @@
 
 冻结内容：
 
-- 原始锚点梯度保留模长，LESS轨迹内原始均值、RAGS块两端原始梯度插值中点；只有构造代表后进入匹配时才方向归一化。BP预算仅在锚点准备阶段使用，耗尽后绝不追加任何BP，缺准备资产直接报错。
-- 参考双层权重仅进入评分：LESS先1/N_ref再Max；RAGS Max为max(alpha*c)，Linear为Σalpha*c，ReLU为Σalpha*ReLU(c)，Exp为Σalpha*exp(c)，Exp内层温度1。源长度不进入这些评分。
+- 原始锚点梯度保留模长，LESS轨迹内原始均值、RAGE块两端原始梯度插值中点；只有构造代表后进入匹配时才方向归一化。BP预算仅在锚点准备阶段使用，耗尽后绝不追加任何BP，缺准备资产直接报错。
+- 参考双层权重仅进入评分：LESS先1/N_ref再Max；RAGE Max为max(alpha*c)，Linear为Σalpha*c，ReLU为Σalpha*ReLU(c)，Exp为Σalpha*exp(c)，Exp内层温度1。源长度不进入这些评分。
 - 完成各方法评分后，只保留对象排名和精确并列关系，分位按对象数定义，不按源长度加权。共同累计曲线F_T(x)=(1-exp(-x/T))/(1-exp(-1/T))；按对象排名区间分配中间质量，无第二次Softmax，无新增正分门控。
 - 默认T_rank=1/(2ln4)=0.36067376022224085，长度前前50%对象目标质量80%，各方法/模型/任务共用，不按对象数调整。精确并列整组区间分配后组内均分，不按ID或随机扰动打破；边界并列偏差报告，不为达成80%制造虚假次序。
 - 源侧q_j=m_j/Σm按对象实际拥有的不同合法起点计数，仅最后进入一次：P_j=q_j*p_tilde_j/Σ(q*p_tilde)。必须再次归一化，随后对象内均匀抽合法起点。80%只约束中间排名曲线，不保证长度加权后的最终对象概率仍满足此比例。
 
-机器可读冻结配置：远程/root/TS3/configs/rags/v5_rank_probability_protocol.json。实现src/rags/experiments/rank_v5.py新增frozen_rank_protocol_v5、validate_frozen_rank_protocol_v5与正式调用入口apply_frozen_rank_v5；入口逐字段校验冻结配置并保存完整协议身份，拒绝静默改变温度/先验/并列规则/BP边界。正式选集与新run必须携带该协议及原始评分/资产身份，不能沿用V4或此前加权分位重放的概率身份。不使用hash。
+机器可读冻结配置：远程/root/TS3/configs/rage/v5_rank_probability_protocol.json。实现src/rage/experiments/rank_v5.py新增frozen_rank_protocol_v5、validate_frozen_rank_protocol_v5与正式调用入口apply_frozen_rank_v5；入口逐字段校验冻结配置并保存完整协议身份，拒绝静默改变温度/先验/并列规则/BP边界。正式选集与新run必须携带该协议及原始评分/资产身份，不能沿用V4或此前加权分位重放的概率身份。不使用hash。
 
 更改默认温度、曲线、排名测度、权重位置或并列政策，应建立新协议身份和新产物目录，不能回写本冻结协议。底层函数的显式temperature参数仅用于隔离的敏感性分析，不允许通过它覆盖正式配置。后续完整V5矩阵/训练入口接入仍须明确，不能将概率重放当作训练成绩。
 

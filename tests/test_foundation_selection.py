@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from rags.experiments.foundation_selection import select_long_context_candidates
+from rage.experiments.foundation_selection import select_long_context_candidates
 
 
 class _SketchEngine:

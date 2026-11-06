@@ -7,8 +7,8 @@ import numpy as np
 UNI = Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-uni-20260920')
 V5 = Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918')
 DEST = Path('docs/UNI.md')
-UNI_ARMS = ['rags-block-expSum-uni', 'rags-block-linearSum-uni']
-V5_BASES = ['rags-block-expSum', 'rags-block-linearSum']
+UNI_ARMS = ['rage-block-expSum-uni', 'rage-block-linearSum-uni']
+V5_BASES = ['rage-block-expSum', 'rage-block-linearSum']
 BASELINES = ['rand', 'orig', 'less-main', 'tsds', 'lp-mirror']
 ALL_ARMS = UNI_ARMS + V5_BASES + BASELINES
 
@@ -27,18 +27,18 @@ def render():
     now = datetime.now(timezone(timedelta(hours=8))).isoformat(timespec='seconds')
     uni_cells, v5_cells = cells(UNI), cells(V5)
     config = json.loads((UNI / 'protocol.json').read_text()) if (UNI / 'protocol.json').exists() \
-        else json.loads(Path('configs/rags/main_v5_uni.json').read_text())
+        else json.loads(Path('configs/rage/main_v5_uni.json').read_text())
     students, datasets = config['students'], config['datasets']
     state = json.loads((UNI / 'state.json').read_text()) if (UNI / 'state.json').exists() else {}
     total = len(students) * len(datasets) * (1 + 6 * 3)
     done = sum(len(v) for v in uni_cells.values())
     lines = [
-        '# UNI — v5-uni 实验三：轨迹内部均匀化（RAGS-uni）', '',
+        '# UNI — v5-uni 实验三：轨迹内部均匀化（RAGE-uni）', '',
         f'- 更新时间：{now}',
-        '- 配置：`configs/rags/main_v5_uni.json`；运行：`/root/autodl-tmp/TS3/outputs/main-rank-volume-uni-20260920`',
+        '- 配置：`configs/rage/main_v5_uni.json`；运行：`/root/autodl-tmp/TS3/outputs/main-rank-volume-uni-20260920`',
         f'- 进度：{done}/{total} cells；状态：{state.get("status", "starting")}（已完成 seeds：{state.get("completed_seeds", [])}）',
         '- 定义：uni 不是块也不是轨迹方法。先按基线块方法得到全部块概率（等价于块概率加和到轨迹），再把每条轨迹内部各块差异抹除——轨迹总质量在其块间均分，块内仍均匀抽合法窗口。轨迹间排名、冻结 Rank 曲线、训练配方、种子、模型、ckpt 与 v5 完全一致，只改变方法。',
-        '- 新臂：`rags-block-expSum-uni`、`rags-block-linearSum-uni`（v5 两个最强块方法的 uni 变体）；同跑保留 rand/orig/less-main/tsds/lp-mirror 基线。',
+        '- 新臂：`rage-block-expSum-uni`、`rage-block-linearSum-uni`（v5 两个最强块方法的 uni 变体）；同跑保留 rand/orig/less-main/tsds/lp-mirror 基线。',
         '- 梯度资产：硬链接复用 v5 同模型/同投影/同字段缓存（零新增 BP），`gradient_reuse.json` 强制缓存命中。',
         '- 对照：`docs/MAIN.md`（v5 最终结果，666/666 完成）。',
         '',
@@ -91,7 +91,7 @@ def render():
                 lines.append(f"| {name} | {r['n']} | {r['mean']:.6f} | {sd_text} | {vs_orig_text} | {vs_rand_text} | {wins_text} |")
             lines.append('')
     lines += ['## 执行与追溯', '',
-        '- 代码：`f699b7f`（rags 分支）；uni 变换 `rags-intra-trajectory-uniform-v1`；测试 `tests/test_uni_selection.py` 12 项 + 既有选集/恢复测试扩展。',
+        '- 代码：`f699b7f`（rage 分支）；uni 变换 `rage-intra-trajectory-uniform-v1`；测试 `tests/test_uni_selection.py` 12 项 + 既有选集/恢复测试扩展。',
         '- 身份隔离：v5-uni cell 记录 `experiment_version=v5-uni`；v5 冻结矩阵（13 臂）不被 uni 扩展；uni 选集带 `intra_trajectory_uniformization` 元数据，缓存校验区分基线/uni 身份。',
         '- 预算与 CRB：cover/error/split 2%/1%/1%，min_kappa、最右并列、预算严格耗尽，与 v5 逐字段一致。', '']
     DEST.write_text('\n'.join(lines) + '\n')

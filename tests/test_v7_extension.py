@@ -4,12 +4,12 @@ from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
 import pytest
-from rags.experiments.v7_extension import make_config, validate_extension, publish_source_cache, CANDIDATES
-from rags.experiments.v7_cache import V7Cache
+from rage.experiments.v7_extension import make_config, validate_extension, publish_source_cache, CANDIDATES
+from rage.experiments.v7_cache import V7Cache
 
 
 def test_extension_changes_only_approved_fields():
-    parent = json.loads(Path('configs/rags/main_v7_curve4.json').read_text())
+    parent = json.loads(Path('configs/rage/main_v7_curve4.json').read_text())
     new = make_config(parent,'/parent','/new')
     validate_extension(new)
     assert new['seeds'] == [0,1]
@@ -26,8 +26,8 @@ def test_extension_changes_only_approved_fields():
 
 def test_initialize_original_only_reuses_evaluation_no_training(tmp_path,monkeypatch):
     import torch
-    import rags.experiments.v7_train as train
-    parent=json.loads(Path('configs/rags/main_v7_curve4.json').read_text())
+    import rage.experiments.v7_train as train
+    parent=json.loads(Path('configs/rage/main_v7_curve4.json').read_text())
     config=make_config(parent,'/parent',str(tmp_path))
     task=config['datasets'][0]; student='chronos-base'
     directory=tmp_path/'inputs'/student;directory.mkdir(parents=True)
@@ -103,7 +103,7 @@ def test_completed_task_reentry_skips_inputs_assets_and_selection(tmp_path,monke
 
 
 def test_select_admission_checks_only_its_own_model_assets(tmp_path,monkeypatch):
-    from rags.experiments import v7_run
+    from rage.experiments import v7_run
     calls=[]
     def inspect(config,run,phase,*,student=None):
         calls.append((phase,student))

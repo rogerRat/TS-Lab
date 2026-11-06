@@ -23,7 +23,7 @@ uni = cells(uni_report.UNI)
 v5 = cells(uni_report.V5)
 lines = ['## 最终结论（342/342 完成，seed 0/1/2 全量）', '']
 for mode in ('expSum', 'linearSum'):
-    ua, ba = f'rags-block-{mode}-uni', f'rags-block-{mode}'
+    ua, ba = f'rage-block-{mode}-uni', f'rage-block-{mode}'
     deltas, wins, losses = [], 0, 0
     per_task = []
     for (st, ds, arm), group in sorted(uni.items()):

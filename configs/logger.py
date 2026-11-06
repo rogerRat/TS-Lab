@@ -101,11 +101,11 @@ class _Heartbeat:
         self._thread.start()
 
     def observe(self, record: logging.LogRecord) -> None:
-        if getattr(record, "ts3_event", None) == "heartbeat":
+        if getattr(record, "rage_event", None) == "heartbeat":
             return
         with self._lock:
             self._last_activity_at = time.monotonic()
-            record_stage = getattr(record, "ts3_stage", None)
+            record_stage = getattr(record, "rage_stage", None)
             if record_stage:
                 self.current_stage = str(record_stage)
 
@@ -120,11 +120,11 @@ class _Heartbeat:
                 "Still running: %s; no log output for %s; uptime %s",
                 stage, format_duration(idle_for),
                 format_duration(time.monotonic() - self._started_at),
-                extra={"ts3_event": "heartbeat"},
+                extra={"rage_event": "heartbeat"},
             )
 
 
-class _TS3Formatter(logging.Formatter):
+class _RAGEFormatter(logging.Formatter):
     """Render all configured sinks with one readable project format."""
 
     converter = staticmethod(
@@ -153,7 +153,7 @@ def configure_logger(
         raise ValueError("log_group must be a relative path below logs")
 
     logger = logging.getLogger(name)
-    if any(getattr(handler, "_ts3_cli_handler", False) for handler in logger.handlers):
+    if any(getattr(handler, "_rage_cli_handler", False) for handler in logger.handlers):
         return logger
 
     logger.setLevel(logging.DEBUG)
@@ -165,7 +165,7 @@ def configure_logger(
     destination.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(_TZ).strftime("%Y%m%d%H%M%S")
     log_file = destination / f"{log_basename}_{timestamp}.log"
-    formatter = _TS3Formatter(
+    formatter = _RAGEFormatter(
         "%(asctime)s | %(levelname)-8s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
@@ -175,17 +175,17 @@ def configure_logger(
     )
     file_handler.setLevel(file_level)
     file_handler.setFormatter(formatter)
-    file_handler._ts3_cli_handler = True
+    file_handler._rage_cli_handler = True
     logger.addHandler(file_handler)
 
     console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(console_level)
     console_handler.setFormatter(formatter)
-    console_handler._ts3_cli_handler = True
+    console_handler._rage_cli_handler = True
     logger.addHandler(console_handler)
 
     heartbeat = _Heartbeat(logger, stage) if enable_heartbeat else None
-    logger._ts3_heartbeat = heartbeat
+    logger._rage_heartbeat = heartbeat
 
     class _StageFilter(logging.Filter):
         def filter(self, record: logging.LogRecord) -> bool:

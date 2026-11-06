@@ -15,7 +15,7 @@ from .exceptions import ModelNotFoundError
 from .projection import ParameterHashProjector, TensorSketchProjector
 from .base import _FullModelProjector, IndependentGradientWorkers
 from gradient.count_sketch import add_count_sketch
-from rags.execution import SelectionExecution
+from rage.execution import SelectionExecution
 
 
 DEFAULT_CHRONOS_T5_SMALL = (
@@ -707,7 +707,7 @@ class ChronosTinyGradientEngine:
                 loaded_model.config.chronos_config = dict(tokenizer_config.__dict__)
             return models, tokenizer_config.create_tokenizer(), model_seeds
         elif config.initialization_mode == "from_scratch":
-            # The Tiny architecture is part of the checked-in TS3 protocol. It
+            # The Tiny architecture is part of the checked-in RAGE protocol. It
             # is deliberately constructed locally so warm-up never downloads or
             # accidentally consumes pretrained weights.
             hf_config = T5Config(

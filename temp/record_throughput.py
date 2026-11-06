@@ -11,11 +11,11 @@ note = '''
 不应作为整个主实验的长期执行策略。现有方向分批、进程单例锁和阶段缓存释放
 减少内存峰值，但不保证 GPU 满载；不同 student 的单例锁彼此独立，允许并行。
 
-14:08:42–53 实测：只有一个 TimeMoE Python worker，正在 Azure / rags_gateless
+14:08:42–53 实测：只有一个 TimeMoE Python worker，正在 Azure / rage_gateless
 selection；GPU 利用率 34–62%，显存固定约 15335MiB，功率约 105–118W。
 容器 RAM 约 49GiB，CPU 配额为 22 核（cpu.max=2200000/100000），
 不能把 nproc 返回的 208 核视为容器可用算力。
-当前原 RAGS 匹配每 32 个参考块做 GPU FP64 矩阵乘，随后把评分传回 CPU，
+当前原 RAGE 匹配每 32 个参考块做 GPU FP64 矩阵乘，随后把评分传回 CPU，
 逐参考块做 NumPy softmax、审计和源边缘概率累加。这种阶段交替会产生 GPU 空隙；
 低利用率不能简单归因为模型参数少，也不能单靠增加常驻显存解决。
 本次未修改该评分算法，后续若优化应保留 FP64 概率与审计等价并测量实际吞吐。

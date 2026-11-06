@@ -2,12 +2,12 @@ from pathlib import Path
 import os,json,signal,time,subprocess
 
 repo=Path('/root/TS3');os.chdir(repo)
-from rags.experiments.students import atomic_json
-from rags.experiments.v4_protocol import validate_v4_config
+from rage.experiments.students import atomic_json
+from rage.experiments.v4_protocol import validate_v4_config
 run=Path('/root/autodl-tmp/TS3/outputs/main-v4-three-seeds-20260918')
 config=json.loads((run/'protocol.json').read_text());validate_v4_config(config)
 assert json.loads((run/'state.json').read_text())['seed']==0
-assert 'source_gpu = torch.empty' in (repo/'src/rags/experiments/reference_opinions.py').read_text()
+assert 'source_gpu = torch.empty' in (repo/'src/rage/experiments/reference_opinions.py').read_text()
 round_dir=run/'rounds/seed0'
 def snapshot():
     return {s:dict(cells=sorted(p.name for p in (round_dir/'students'/s/'cells').glob('*.json')),
@@ -19,9 +19,9 @@ for p in Path('/proc').iterdir():
     if not p.name.isdigit():continue
     try:args=[a.decode() for a in (p/'cmdline').read_bytes().split(b'\0') if a]
     except (OSError,UnicodeError):continue
-    if 'rags.experiments.v4_seed_rounds' in args and str(run) in args:
+    if 'rage.experiments.v4_seed_rounds' in args and str(run) in args:
         pids.append((0,int(p.name)))
-    elif 'rags.experiments.full_pool_worker' in args and str(round_dir) in args:
+    elif 'rage.experiments.full_pool_worker' in args and str(round_dir) in args:
         pids.append((1,int(p.name)))
 assert sum(kind==0 for kind,_ in pids)==1,(pids,'Parent changed; coordinate before reload')
 assert sum(kind==1 for kind,_ in pids)==2,(pids,'Workers changed; coordinate before reload')
@@ -43,7 +43,7 @@ env=dict(os.environ,PYTHONPATH=str(repo/'src'),HF_HOME='/root/autodl-tmp/hf-cach
 python='/root/miniconda3/envs/ts3/bin/python'
 with (run/'suite.log').open('a') as log:
     log.write('\n2026-09-18 PERFORMANCE_RELOAD source-resident optimization for current seed0\n');log.flush()
-    proc=subprocess.Popen([python,'-m','rags.experiments.v4_seed_rounds','--config','configs/rags/main_v4.json',
+    proc=subprocess.Popen([python,'-m','rage.experiments.v4_seed_rounds','--config','configs/rage/main_v4.json',
         '--run',str(run)],cwd=repo,env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
 old=json.loads((run/'launcher.json').read_text())
 atomic_json(run/'launcher.json',dict(old,pid=proc.pid,previous_pid=old['pid'],

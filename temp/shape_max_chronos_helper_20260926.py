@@ -2,14 +2,14 @@
 from pathlib import Path
 import sys
 
-from rags.experiments.v7_run import read
-from rags.experiments.v7_shape_backfill import run_model
+from rage.experiments.v7_run import read
+from rage.experiments.v7_shape_backfill import run_model
 from scripts.run_v7_shape_backfill import complete, sources
 
 
 ROOT = Path('/root/autodl-tmp/TS3/outputs/main-v7-20260923')
 TASKS = {'time_ne_china_wind_h', 'time_sg_pm25_h', 'time_coastal_ts_h'}
-ARM = 'rags-shape-maxSum'
+ARM = 'rage-shape-maxSum'
 
 
 def main():

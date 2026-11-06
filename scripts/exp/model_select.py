@@ -10,7 +10,7 @@ from typing import Sequence
 import numpy as np
 
 from gradient.foundation import FoundationGradientConfig, FoundationGradientEngine
-from rags.experiments.foundation_selection import select_long_context_candidates
+from rage.experiments.foundation_selection import select_long_context_candidates
 
 
 def main(argv: Sequence[str] | None = None) -> int:

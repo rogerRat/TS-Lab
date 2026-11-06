@@ -1,11 +1,11 @@
 # MAIN-v3 — 主实验
 
 - 更新时间：2026-09-17T23:17:46+08:00
-- 配置：`configs/rags/matrix_reference_opinion_20260917.json`；运行：`temp/weighted-opinions-20260917/report-fixture`
-- 所有使用采样温度的默认方法（lp-mirror / less-main / rags-main / rags-traj）统一 T=0.05。
-- 九任务、三模型；矩阵 rand / orig / less-main / rags-block-linearSum / rags-block-zeroClipSum / rags-block-maxSum / rags-block-expSum / rags-traj-linearSum / rags-traj-zeroClipSum / rags-traj-maxSum / rags-traj-expSum / tsds / lp-mirror；仅 seed 0。
+- 配置：`configs/rage/matrix_reference_opinion_20260917.json`；运行：`temp/weighted-opinions-20260917/report-fixture`
+- 所有使用采样温度的默认方法（lp-mirror / less-main / rage-main / rage-traj）统一 T=0.05。
+- 九任务、三模型；矩阵 rand / orig / less-main / rage-block-linearSum / rage-block-zeroClipSum / rage-block-maxSum / rage-block-expSum / rage-traj-linearSum / rage-traj-zeroClipSum / rage-traj-maxSum / rage-traj-expSum / tsds / lp-mirror；仅 seed 0。
 - C512/H64/D1，CRB 2%/1%/1%；全部合法起点保留，批量分裂规则不变。
-- 新意见聚合协议：LESS参考max；RAGS按Block/Traj及四聚合显式命名，不指定主方法。
+- 新意见聚合协议：LESS参考max；RAGE按Block/Traj及四聚合显式命名，不指定主方法。
 - 原生逐窗口梯度沿用已有字段校验缓存；V3 选集、训练和评测新生，不复制旧 cells/checkpoints。
 - V1/V2 内容完整归档，继续参考：[MAIN-v1](archive/MAIN-v1.md)、[MAIN-v2](archive/MAIN-v2.md)。
 
@@ -33,14 +33,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -51,14 +51,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -69,14 +69,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -89,14 +89,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -107,14 +107,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -125,14 +125,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -145,14 +145,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -163,14 +163,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -181,14 +181,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -201,14 +201,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -219,14 +219,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -237,14 +237,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -257,14 +257,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -275,14 +275,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -293,14 +293,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -313,14 +313,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -331,14 +331,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -349,14 +349,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -369,14 +369,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -387,14 +387,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -405,14 +405,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -425,14 +425,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -443,14 +443,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -461,14 +461,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -481,14 +481,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -499,14 +499,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -517,14 +517,14 @@
 | rand | 0 | — | — | — | — | — |
 | orig | 0 | — | — | — | — | — |
 | less-main | 0 | — | — | — | — | — |
-| rags-block-linearSum | 0 | — | — | — | — | — |
-| rags-block-zeroClipSum | 0 | — | — | — | — | — |
-| rags-block-maxSum | 0 | — | — | — | — | — |
-| rags-block-expSum | 0 | — | — | — | — | — |
-| rags-traj-linearSum | 0 | — | — | — | — | — |
-| rags-traj-zeroClipSum | 0 | — | — | — | — | — |
-| rags-traj-maxSum | 0 | — | — | — | — | — |
-| rags-traj-expSum | 0 | — | — | — | — | — |
+| rage-block-linearSum | 0 | — | — | — | — | — |
+| rage-block-zeroClipSum | 0 | — | — | — | — | — |
+| rage-block-maxSum | 0 | — | — | — | — | — |
+| rage-block-expSum | 0 | — | — | — | — | — |
+| rage-traj-linearSum | 0 | — | — | — | — | — |
+| rage-traj-zeroClipSum | 0 | — | — | — | — | — |
+| rage-traj-maxSum | 0 | — | — | — | — | — |
+| rage-traj-expSum | 0 | — | — | — | — | — |
 | tsds | 0 | — | — | — | — | — |
 | lp-mirror | 0 | — | — | — | — | — |
 
@@ -546,18 +546,18 @@
 | rand | — | — | — | — |
 | orig | — | — | — | — |
 | less-main | trajectory | maxSum | global | .05 |
-| rags-block-linearSum | block | linearSum | global | .05 |
-| rags-block-zeroClipSum | block | zeroClipSum | global | .05 |
-| rags-block-maxSum | block | maxSum | global | .05 |
-| rags-block-expSum | block | expSum | global | .05 |
-| rags-traj-linearSum | trajectory | linearSum | global | .05 |
-| rags-traj-zeroClipSum | trajectory | zeroClipSum | global | .05 |
-| rags-traj-maxSum | trajectory | maxSum | global | .05 |
-| rags-traj-expSum | trajectory | expSum | global | .05 |
+| rage-block-linearSum | block | linearSum | global | .05 |
+| rage-block-zeroClipSum | block | zeroClipSum | global | .05 |
+| rage-block-maxSum | block | maxSum | global | .05 |
+| rage-block-expSum | block | expSum | global | .05 |
+| rage-traj-linearSum | trajectory | linearSum | global | .05 |
+| rage-traj-zeroClipSum | trajectory | zeroClipSum | global | .05 |
+| rage-traj-maxSum | trajectory | maxSum | global | .05 |
+| rage-traj-expSum | trajectory | expSum | global | .05 |
 | tsds | — | — | — | — |
 | lp-mirror | — | — | — | .05 |
 
-RAGS-Block/Traj各四种聚合均为未排序变体；未指定RAGS主方法。LESS-Main采用max。
-RAGS先乘alpha：maxSum=max(alpha*cos)，expSum=sum(exp(alpha*cos))后外层Softmax。LESS-Main仍取原始余弦max。
+RAGE-Block/Traj各四种聚合均为未排序变体；未指定RAGE主方法。LESS-Main采用max。
+RAGE先乘alpha：maxSum=max(alpha*cos)，expSum=sum(exp(alpha*cos))后外层Softmax。LESS-Main仍取原始余弦max。
 历史reference-mean线性批次保留原产物，以-linearSum展示；本批独立选集/训练，不改旧批次。
 <!-- v3-notes:end -->

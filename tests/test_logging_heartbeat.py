@@ -34,8 +34,8 @@ def test_processing_progress_marks_events_and_deduplicates_snapshots():
             if record.getMessage().startswith("TEST heartbeat")
         ]
         assert len(heartbeats) == 1
-        assert heartbeats[0].ts3_event == "progress"
-        assert heartbeats[0].ts3_progress_event == "heartbeat"
+        assert heartbeats[0].rage_event == "progress"
+        assert heartbeats[0].rage_progress_event == "heartbeat"
     finally:
         progress.close()
         logger.removeHandler(handler)
@@ -51,7 +51,7 @@ def test_global_heartbeat_is_concise_and_does_not_replay_progress(monkeypatch, t
     try:
         configured_logger.info(
             "Progress heartbeat: [=====...............]",
-            extra={"ts3_event": "progress", "ts3_progress_event": "heartbeat"},
+            extra={"rage_event": "progress", "rage_progress_event": "heartbeat"},
         )
         time.sleep(0.08)
         log_file = next((tmp_path / "tests").glob("heartbeat_*.log"))
@@ -61,7 +61,7 @@ def test_global_heartbeat_is_concise_and_does_not_replay_progress(monkeypatch, t
         assert "current stage: Progress heartbeat" not in contents
         assert "[=====...............]" not in contents.split("Still running: TEST;", 1)[1]
     finally:
-        heartbeat = configured_logger._ts3_heartbeat
+        heartbeat = configured_logger._rage_heartbeat
         heartbeat._stop.set()
         heartbeat._thread.join(timeout=1)
         for handler in list(configured_logger.handlers):

@@ -83,23 +83,23 @@ NEM在同一参考轨迹内已经高度分散；Chronos两种Q方向近乎相同
 | 模型 | 方法 | std(S)/T | TV原生单位均匀 | 轨迹ESS | top10%轨迹质量 |
 |---|---|---:|---:|---:|---:|
 | chronos-base | less-main | 1.785014 | 0.790549 | 9.9 | 0.891 |
-| chronos-base | rags-block-linearSum | 0.299880 | 0.116519 | 386.8 | 0.319 |
-| chronos-base | rags-block-zeroClipSum | 0.248780 | 0.101778 | 385.6 | 0.338 |
-| chronos-base | rags-block-maxSum | 0.000386 | 0.000141 | 354.5 | 0.307 |
-| chronos-base | rags-block-expSum | 0.307652 | 0.121990 | 390.0 | 0.326 |
-| chronos-base | rags-traj-linearSum | 1.521694 | 0.709074 | 30.6 | 0.803 |
-| chronos-base | rags-traj-zeroClipSum | 1.259667 | 0.694630 | 31.7 | 0.789 |
-| chronos-base | rags-traj-maxSum | 0.322730 | 0.133946 | 940.9 | 0.194 |
-| chronos-base | rags-traj-expSum | 1.646299 | 0.806001 | 6.8 | 0.906 |
+| chronos-base | rage-block-linearSum | 0.299880 | 0.116519 | 386.8 | 0.319 |
+| chronos-base | rage-block-zeroClipSum | 0.248780 | 0.101778 | 385.6 | 0.338 |
+| chronos-base | rage-block-maxSum | 0.000386 | 0.000141 | 354.5 | 0.307 |
+| chronos-base | rage-block-expSum | 0.307652 | 0.121990 | 390.0 | 0.326 |
+| chronos-base | rage-traj-linearSum | 1.521694 | 0.709074 | 30.6 | 0.803 |
+| chronos-base | rage-traj-zeroClipSum | 1.259667 | 0.694630 | 31.7 | 0.789 |
+| chronos-base | rage-traj-maxSum | 0.322730 | 0.133946 | 940.9 | 0.194 |
+| chronos-base | rage-traj-expSum | 1.646299 | 0.806001 | 6.8 | 0.906 |
 | timesfm-2.5 | less-main | 1.571193 | 0.894219 | 13.5 | 0.962 |
-| timesfm-2.5 | rags-block-linearSum | 0.232953 | 0.077824 | 357.4 | 0.309 |
-| timesfm-2.5 | rags-block-zeroClipSum | 0.223677 | 0.090749 | 266.4 | 0.359 |
-| timesfm-2.5 | rags-block-maxSum | 0.000645 | 0.000250 | 354.2 | 0.307 |
-| timesfm-2.5 | rags-block-expSum | 0.234758 | 0.082232 | 343.3 | 0.315 |
-| timesfm-2.5 | rags-traj-linearSum | 1.027205 | 0.583357 | 46.2 | 0.684 |
-| timesfm-2.5 | rags-traj-zeroClipSum | 0.783918 | 0.562263 | 49.6 | 0.663 |
-| timesfm-2.5 | rags-traj-maxSum | 0.234793 | 0.091381 | 978.9 | 0.174 |
-| timesfm-2.5 | rags-traj-expSum | 1.076704 | 0.722563 | 21.9 | 0.812 |
+| timesfm-2.5 | rage-block-linearSum | 0.232953 | 0.077824 | 357.4 | 0.309 |
+| timesfm-2.5 | rage-block-zeroClipSum | 0.223677 | 0.090749 | 266.4 | 0.359 |
+| timesfm-2.5 | rage-block-maxSum | 0.000645 | 0.000250 | 354.2 | 0.307 |
+| timesfm-2.5 | rage-block-expSum | 0.234758 | 0.082232 | 343.3 | 0.315 |
+| timesfm-2.5 | rage-traj-linearSum | 1.027205 | 0.583357 | 46.2 | 0.684 |
+| timesfm-2.5 | rage-traj-zeroClipSum | 0.783918 | 0.562263 | 49.6 | 0.663 |
+| timesfm-2.5 | rage-traj-maxSum | 0.234793 | 0.091381 | 978.9 | 0.174 |
+| timesfm-2.5 | rage-traj-expSum | 1.076704 | 0.722563 | 21.9 | 0.812 |
 
 Block实际按块竞争，轨迹总质量P_t=Σ_b∈t p_b；分数接近相同时，P_t约为该轨迹块数/总块数。源轨迹长度不同，块数多的轨迹会获得更多总质量。Traj按轨迹竞争，轨迹内部按合法窗口均匀抽样。两侧固定温度相同不等于采样集中程度/源先验相同。
 NEM Chronos Block-linear选中轨迹的期望合法长度约24,232，Traj-linear约8,823。没有显式源长度乘子并不消除这种竞争单位带来的影响。

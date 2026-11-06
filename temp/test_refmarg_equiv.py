@@ -2,7 +2,7 @@
 import time, sys
 import numpy as np
 sys.path.insert(0, '/root/TS3/src')
-from rags.experiments.reference_opinions import reference_marginal, REVISION
+from rage.experiments.reference_opinions import reference_marginal, REVISION
 
 rng = np.random.default_rng(42)
 def unit_rows(n, d=256):

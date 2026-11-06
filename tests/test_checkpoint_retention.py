@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from rags.experiments.checkpoint_retention import cleanup_completed_weights
-from rags.experiments.students import atomic_json
+from rage.experiments.checkpoint_retention import cleanup_completed_weights
+from rage.experiments.students import atomic_json
 
 
 def test_requires_result_and_only_removes_known_training_files(tmp_path):

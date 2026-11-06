@@ -1,9 +1,9 @@
 import json
-from rags.experiments.v7_figures import load_snapshot,mean_curves,rank_arms,GROUPS
+from rage.experiments.v7_figures import load_snapshot,mean_curves,rank_arms,GROUPS
 
 
 def test_legacy_display_preserves_raw_group_identity():
-    from rags.experiments.v7_display import display_arm
+    from rage.experiments.v7_display import display_arm
     assert 'grad-cos' in GROUPS['main']
     assert 'gradcos-legacy' not in GROUPS['main']
     assert display_arm('grad-cos') == 'gradcos-legacy'
@@ -38,7 +38,7 @@ def test_incomplete_grid_not_averaged_as_completed(tmp_path):
 
 def test_original_plasma_endpoints_and_global_order():
     import matplotlib.pyplot as plt
-    from rags.experiments.v7_figures import color_map_for
+    from rage.experiments.v7_figures import color_map_for
     colors=color_map_for(['worst','orig','best','middle'],['best','middle','worst'])
     assert colors['best']==plt.get_cmap('plasma')(0.)
     assert colors['worst']==plt.get_cmap('plasma')(1.)
@@ -49,7 +49,7 @@ def test_original_plasma_endpoints_and_global_order():
 def test_symlog_preserves_extremes_and_color():
     import matplotlib.pyplot as plt
     import numpy as np
-    from rags.experiments.v7_figures import symlog_axis
+    from rage.experiments.v7_figures import symlog_axis
     fig,ax=plt.subplots()
     line,=ax.plot([0,1,2,3],[-2,0,.5,1e6],color='purple')
     before=line.get_ydata().copy()
@@ -64,7 +64,7 @@ def test_symlog_preserves_extremes_and_color():
 def test_focus_keeps_extreme_in_overview_and_discloses_clipping():
     import matplotlib.pyplot as plt
     import numpy as np
-    from rags.experiments.v7_figures import focus_with_overview,focus_limits,draw_overview
+    from rage.experiments.v7_figures import focus_with_overview,focus_limits,draw_overview
     fig,ax=plt.subplots()
     line,=ax.plot([.5,1,1.5,2,2.5,3],[1,1.1,1,1.2,1.1,1e6],color='purple')
     original=line.get_ydata().copy()
@@ -83,7 +83,7 @@ def test_focus_keeps_extreme_in_overview_and_discloses_clipping():
 
 def test_overview_grid_preserves_empty_task_slots_and_does_not_cover_main():
     import matplotlib.pyplot as plt
-    from rags.experiments.v7_figures import focus_with_overview,overview_area
+    from rage.experiments.v7_figures import focus_with_overview,overview_area
     fig=plt.figure();main=fig.add_axes([.1,.6,.8,.3])
     main.plot([0,1,2,3,4],[1,1.1,1.2,1,1e6],label='method')
     focus=focus_with_overview(main)
@@ -102,7 +102,7 @@ def test_overview_grid_preserves_empty_task_slots_and_does_not_cover_main():
 
 def test_gradient_labels_hidden_but_symlog_retained():
     import matplotlib.pyplot as plt
-    from rags.experiments.v7_figures import gradient_axis
+    from rage.experiments.v7_figures import gradient_axis
     fig,ax=plt.subplots();ax.plot([0,1,2],[0,1,1e6])
     gradient_axis(ax);fig.canvas.draw()
     assert ax.get_yscale()=='symlog'

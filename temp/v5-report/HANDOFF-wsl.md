@@ -10,7 +10,7 @@
 
 - WSL 已有 FlyingBird VPN，用户再次确认 GPT 必须通过其 **127.0.0.1:7892** 代理。monitor.py 仅对 Codex 及其子进程设置 HTTP_PROXY/HTTPS_PROXY/ALL_PROXY（以及小写形式），NO_PROXY 为 localhost/127.0.0.1/::1；不更改全局网络配置。不带代理的 GPT 请求会超时，已验证代理恢复模型响应；不可移除。实验 SSH 通路不依赖 HTTP 代理。
 - 本机 `wsl` 上能直接运行 `ssh -p 26856 root@connect.bjb1.seetacloud.com`；已验证无交互连接。
-- 实验源码 `/root/TS3`，分支 `rags`；首先读取 `/root/TS3/AGENTS.md`，然后 `docs/MAIN.md`、`docs/method.md` 和 `docs/Progress.md`。
+- 实验源码 `/root/TS3`，分支 `rage`；首先读取 `/root/TS3/AGENTS.md`，然后 `docs/MAIN.md`、`docs/method.md` 和 `docs/Progress.md`。
 - 冻结科学代码提交 **6d3ead6**：`Freeze V5 ranking, source-volume prior and recursive kappa CRB`。Git 自身提交 ID 可引用，运行时数据/模型/缓存不允许 hash；只比较显式字段。
 - 正式 run **/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918**。
 - 实验 tmux **main-rank-volume**。Supervisor Python `/root/TS3/temp/v5-launch/supervisor.py`，最后已确认 PID **148026**（实时核对，不把旧 PID 当永久事实）。实验在容器独立运行，WSL 巡检只监督它。
@@ -22,13 +22,13 @@
 
 - 2 模型（chronos-base、timesfm-2.5）、9 下游任务、13 方法、seed 0/1/2；666 个独立 cell =18 orig+648训练评估。每轮216训练cell。orig只测一次，后续seed引用，不重复计数。
 - 任务顺序：time_nem_demand_5t、time_azure_i_cpu_5t、time_darwin_water_15t、time_finland_15t、time_eweld_15t、time_cphl_h、time_nem_price_5t、time_solar_h、time_port_activity_d。
-- 方法：rand、orig、less-main；rags-block 与 rags-traj 各 linearSum/zeroClipSum/maxSum/expSum；tsds、lp-mirror。不得自动选定或删除某个RAGS主方法。
+- 方法：rand、orig、less-main；rage-block 与 rage-traj 各 linearSum/zeroClipSum/maxSum/expSum；tsds、lp-mirror。不得自动选定或删除某个RAGE主方法。
 - 优先级：**seed → 下游任务 → 该任务全部方法 cell**。当前seed两模型×九任务×12训练方法全部完成训练评测后才进入下一seed。轮内两模型并行，每个模型先做完当前任务全部方法再推进；两模型独立按相同任务顺序推进，当前没有跨模型任务屏障，整轮seed屏障覆盖两模型。
 - N16284、C512/H64/D1；CRB cover/error/split 2%/1%/1%；训练 batch/microbatch32/32、优化器等全部不变。Chronos epochs2、LR.001、wd0、linear schedule_epochs6；TimesFM epochs2.625、LR3e-5、wd.01、cosine schedule_epochs6；AdamW betas .9/.999 eps1e-8 clip1。
 - 源侧按合法窗口起点数量先验；参考轨迹1/N、参考块(1/N)×本块起点/所属轨迹起点。参考权重只在得分阶段。Max=max(alpha*cos)、Linear=sum(alpha*cos)、ReLU=sum(alpha*relu(cos))、Exp=sum(alpha*exp(cos/1.0))。
 - 代表取原始梯度含范数的平均/插值，仅匹配时归一化。LESS均匀rounded-linspace锚点，Traj使用CRB锚点。块取端点梯度几何中点插值，绝无额外BP。
 - CRB递归最小kappa、并列最右、实际floor中点、估计几何中点、严格耗尽预算。完全无P10/资格筛选/调度RNG。
-- LESS/RAGS只取对象分数排序及精确并列，冻结 F_T(x)=(1-exp(-x/T))/(1-exp(-1/T))，**T=1/(2ln4)**。每对象等宽排名区间积分质量；并列组区间质量组内等分。再乘源窗口量并归一化一次。前半80%约束在源先验之前；奇数/边界并列可偏离。没有最终Softmax。LP-Mirror原生T.05、TSDS原生分布不改。
+- LESS/RAGE只取对象分数排序及精确并列，冻结 F_T(x)=(1-exp(-x/T))/(1-exp(-1/T))，**T=1/(2ln4)**。每对象等宽排名区间积分质量；并列组区间质量组内等分。再乘源窗口量并归一化一次。前半80%约束在源先验之前；奇数/边界并列可偏离。没有最终Softmax。LP-Mirror原生T.05、TSDS原生分布不改。
 - BP只能在真实锚点资产准备；评分/插值不能新增BP；缺资产报错。梯度projection4096/seed42、nativeBF16缓存，字段校验和单写者锁、原子写。
 
 ## 执行优化及已否决项
@@ -49,7 +49,7 @@
 - 最后完整巡检北京时间 **2026-09-18 22:19:48**：83/666独立cell，65训练+18orig，seed0；Chronos已完成NEM/Azure/Darwin，正在Finland Block-ReLU；TimesFM完成NEM/Azure，正在Darwin Block-Linear。无failed或Traceback/OOM。GPU当时99%，滚动约2分钟均值90.96%，显存约27GiB，数据盘可用209GiB。首次接管必须重新核对实时状态。
 - NEM seed0：Chronos最佳Block-Linear相对rand+13.53%、Block-ReLU+11.05%；TimesFM最佳Block-Exp+4.16%。只是单任务/seed结果，不能做全局因果结论。训练seed和下游评估与V4矩阵未变，方法变动。
 - TSDS原生FAISS在Darwin/Finland少样本聚类会打印建议更大样本的WARNING，已在native流程正常继续；不得为消除警告改变方法。
-- 科学代码仍6d3ead6。当前dirty docs/MAIN.md、docs/Progress.md、AGENTS.md是授权运行/报告约束记录；无科学源码修改。另有早前未追踪docs/experiments/rags_implementation_review_20260917.md，勿纳入/删除。没有Push。
+- 科学代码仍6d3ead6。当前dirty docs/MAIN.md、docs/Progress.md、AGENTS.md是授权运行/报告约束记录；无科学源码修改。另有早前未追踪docs/experiments/rage_implementation_review_20260917.md，勿纳入/删除。没有Push。
 
 ## 每次巡检动作（本WSL单一Codex任务持续负责）
 

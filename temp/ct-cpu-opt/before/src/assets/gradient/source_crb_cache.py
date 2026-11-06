@@ -10,7 +10,7 @@ import tempfile
 
 import numpy as np
 
-from rags.crb import CRBResult, GradientBlock
+from rage.crb import CRBResult, GradientBlock
 from .cache import atomic_json
 from .variants import TrajectoryGradient, aggregate_anchors
 

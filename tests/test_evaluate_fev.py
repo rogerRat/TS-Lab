@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import torch
+import yaml
 
 from adapters.chronos.eval.fev import ChronosFEVEvaluationAdapter
 from evaluate.fev import RQ3_METRICS, _parse_fev_bench_config, _warn_reference_task_mismatch, load_task_declarations
@@ -30,20 +31,35 @@ class EvaluateFEVTest(unittest.TestCase):
     def test_project_declaration_contains_twenty_direct_tasks(self):
         """The project YAML is complete and does not redirect to a checkout."""
         path = PROJECT_ROOT / "configs/eval/fev/default.yaml"
-        tasks = load_task_declarations(path)
-        self.assertEqual(len(tasks), 20)
+        declaration = yaml.safe_load(path.read_text(encoding="utf-8"))
+        self.assertEqual(set(declaration), {"tasks"})
+        self.assertEqual(len(declaration["tasks"]), 20)
         self.assertNotIn("base_task_file", path.read_text(encoding="utf-8"))
 
     def test_every_task_declares_all_six_metrics(self):
         """Each task explicitly contains official and added research metrics."""
-        tasks = load_task_declarations(
-            PROJECT_ROOT / "configs/eval/fev/default.yaml"
-        )
+        tasks = yaml.safe_load((PROJECT_ROOT / "configs/eval/fev/default.yaml").read_text(
+            encoding="utf-8"))["tasks"]
         expected = set(RQ3_METRICS)
         for task in tasks:
             names = {_metric_name(task["eval_metric"])}
             names.update(_metric_name(value) for value in task["extra_metrics"])
             self.assertEqual(names, expected)
+
+    def test_loader_accepts_complete_declaration_with_local_assets(self):
+        import tempfile
+
+        declaration = yaml.safe_load((PROJECT_ROOT / "configs/eval/fev/default.yaml").read_text(
+            encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as directory:
+            asset = Path(directory) / "fixture.arrow"
+            asset.write_bytes(b"fixture")
+            for task in declaration["tasks"]:
+                task["dataset_path"] = str(asset)
+            path = Path(directory) / "tasks.yaml"
+            path.write_text(yaml.safe_dump(declaration), encoding="utf-8")
+            tasks = load_task_declarations(path)
+        self.assertEqual(len(tasks), 20)
 
     def test_explicit_single_task_selection_uses_its_real_index(self):
         path, expected, indices = _parse_fev_bench_config(
@@ -68,7 +84,7 @@ class EvaluateFEVTest(unittest.TestCase):
 
         checkpoint = Path(tempfile.mkdtemp())
         self.addCleanup(lambda: shutil.rmtree(checkpoint))
-        (checkpoint / "ts3_checkpoint_manifest.json").write_text(
+        (checkpoint / "rage_checkpoint_manifest.json").write_text(
             json.dumps({"reference_task_record": {"benchmark": "fev", "task_indices": [13]}}),
             encoding="ascii",
         )
@@ -86,7 +102,7 @@ class EvaluateFEVTest(unittest.TestCase):
 
         checkpoint = Path(tempfile.mkdtemp())
         self.addCleanup(lambda: shutil.rmtree(checkpoint))
-        (checkpoint / "ts3_checkpoint_manifest.json").write_text(
+        (checkpoint / "rage_checkpoint_manifest.json").write_text(
             json.dumps({"reference_task_record": None}),
             encoding="ascii",
         )

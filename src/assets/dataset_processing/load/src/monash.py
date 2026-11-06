@@ -22,7 +22,7 @@ sys.path.insert(0, str(_PROJECT_ROOT))
 from assets.dataset_processing.configs.monash import MONASH_NAME_MAP  # noqa: E402
 from assets.dataset_processing.series import BATCH_SIZE, SQLiteSeriesReservoir, log_skipped_series, normalize_load_dataframe, split_univariate_series  # noqa: E402
 from assets.dataset_processing.tsf_utils import parse_tsf_record, parse_tsf_values, is_index_like  # noqa: E402
-from ts3.spec.load_dataframe import validate_series_rows  # noqa: E402
+from tsl.spec.load_dataframe import validate_series_rows  # noqa: E402
 
 log = logging.getLogger("load")
 

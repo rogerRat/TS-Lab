@@ -1,0 +1,23 @@
+{
+  "student": "timesfm-2.5",
+  "status": "frozen_from_completed_development_not_formal_results",
+  "settings": {
+    "epsilon_calibration": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914/epsilon-timesfm-2.5/epsilon.json",
+    "learning_rate": 0.000001,
+    "epochs": 2.5,
+    "temperature": {"rage": 1.0, "trajectory_level": 1.0, "less": 0.1, "lp_mirror": 0.1, "ltsv": 0.1},
+    "development_evidence": {
+      "root": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914",
+      "schedule": ["explore-timesfm-source/results.json", "explore-timesfm-full-scale/results.json", "explore-timesfm-full-scale-replicate/results.json"],
+      "probability": "probability-timesfm-summary.json",
+      "epoch_rule": "minimum mean development MASE across seeds0/1/2 at actual N16284 among predeclared half/integer epoch observations",
+      "epoch_mean_mase": 0.9490113921688577,
+      "temperature_rule": "minimum final E32 development MASE in equal-budget seed0 two-temperature grid; both independent seeds retained without retuning",
+      "formal_exam_used": false,
+      "limitations": "two-task schedule development; one-task fixed eight-series probability development; gains small and RAGE not reliably better than Random; safe-history results not source selection evidence"
+    }
+  },
+  "applies_equally_to_all_training_arms": true,
+  "other_models_frozen": false,
+  "formal_matrix_started": false
+}

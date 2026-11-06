@@ -2,9 +2,9 @@ import json
 
 import numpy as np
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.development_inputs import load_fragments, save_fragments
-from rags.experiments.students import atomic_json
+from rage.core import TimeSeriesFragment
+from rage.experiments.development_inputs import load_fragments, save_fragments
+from rage.experiments.students import atomic_json
 from scripts.exp.probability_inputs import prepare
 
 

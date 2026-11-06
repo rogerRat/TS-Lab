@@ -2,8 +2,8 @@ from threading import Barrier, Lock
 import numpy as np
 import pytest
 
-from rags.experiments.reference_execution import gradient_agreement, choose_execution
-from rags.experiments.reference_queue import execute_streams, commands
+from rage.experiments.reference_execution import gradient_agreement, choose_execution
+from rage.experiments.reference_queue import execute_streams, commands
 
 
 def test_agreement_tiny_gradients_and_identity_shape():
@@ -52,7 +52,7 @@ def test_failure_blocks_only_own_dependents():
 def test_queue_has_one_stream_per_cache_and_no_stage_markers():
     import json
     from pathlib import Path
-    config = json.loads(Path('configs/rags/reference_census_execution.json').read_text())
+    config = json.loads(Path('configs/rage/reference_census_execution.json').read_text())
     streams = commands(config)
     assert set(streams) == {'chronos-base', 'timesfm-2.5'}
     assert [len(jobs) for jobs in streams.values()] == [3, 3]
@@ -66,11 +66,11 @@ def test_queue_has_one_stream_per_cache_and_no_stage_markers():
 def test_published_reader_and_async_geometry_match_sync(tmp_path):
     from types import SimpleNamespace
     from assets.gradient.cache import GradientCache
-    from rags.core import TimeSeriesFragment
-    from rags.crb import CRBConfig
-    from rags.execution import SelectionExecution
-    from rags.experiments.reference_census import collect_references
-    from rags.experiments.reference_execution import PublishedGradientRows
+    from rage.core import TimeSeriesFragment
+    from rage.crb import CRBConfig
+    from rage.execution import SelectionExecution
+    from rage.experiments.reference_census import collect_references
+    from rage.experiments.reference_execution import PublishedGradientRows
     class Probe:
         device = 'cpu'
         execution = SelectionExecution(gradient_batch=3)
@@ -100,8 +100,8 @@ def test_published_reader_and_async_geometry_match_sync(tmp_path):
 
 
 def test_tuner_preserves_science_and_rejects_wrong_batch():
-    from rags.execution import SelectionExecution
-    from rags.experiments.reference_execution import tune_execution
+    from rage.execution import SelectionExecution
+    from rage.experiments.reference_execution import tune_execution
     class Probe:
         device = 'cpu'
         execution = SelectionExecution(gradient_batch=1, gradient_workers=1)

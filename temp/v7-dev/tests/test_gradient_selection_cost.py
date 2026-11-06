@@ -2,8 +2,8 @@ from dataclasses import replace
 import json
 import numpy as np
 import pytest
-from rags.experiments.gradient_cost import gradient_cost_record
-from rags.experiments.selection_metrics import SelectionMetrics
+from rage.experiments.gradient_cost import gradient_cost_record
+from rage.experiments.selection_metrics import SelectionMetrics
 from test_gradient_assets import Probe, cache_at
 from assets.gradient import WindowRequest
 from test_selection_metrics import output
@@ -66,10 +66,10 @@ def test_metric_cost_record_and_cached_original_preserved(tmp_path):
         benchmark=dict(mean_seconds_per_window=.5), preparation_new_windows=2,
         preparation_seconds=2., preparation_gradient_seconds=1.,
         method_preparation_nongrad_seconds=1.)
-    result = meter.measure('task', 'rags', output, gradient_cost=kwargs)
+    result = meter.measure('task', 'rage', output, gradient_cost=kwargs)
     original = result.cost.notes['gradient_cost'].copy()
     assert original['estimated_cold_selection_seconds'] == 4 + original['measured_selection_body_seconds']
-    meter.measure('task', 'rags', lambda: result, selection_cached=True, gradient_cost=kwargs)
+    meter.measure('task', 'rage', lambda: result, selection_cached=True, gradient_cost=kwargs)
     assert result.cost.notes['gradient_cost'] == original
     rows = [json.loads(r) for r in meter.path.read_text().splitlines()]
     assert rows[-1]['gradient_cost']['estimated_cold_selection_seconds'] is None

@@ -2,8 +2,8 @@
 from dataclasses import replace
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine, CRBEngineMulti, _Interval
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine, CRBEngineMulti, _Interval
 
 
 def cfg(n, cover=3, error=0, split=5):
@@ -110,12 +110,12 @@ def test_worker_without_calibration_emits_split_audit_not_p10(tmp_path):
     import json
     from test_full_pool_worker import fixture
     from assets.gradient.cache import atomic_json
-    from rags.experiments.full_pool_worker import run_worker
+    from rage.experiments.full_pool_worker import run_worker
     config,bundle=fixture(tmp_path)
-    config['arms']=['rags-block-linearSum']
+    config['arms']=['rage-block-linearSum']
     config['crb']=dict(split_policy='min_kappa',epsilon_policy='none',
         priority_tie_policy='right',cover_density=.3,error_density=.1,split_density=.1)
-    from rags.experiments.protocol import method_protocols
+    from rage.experiments.protocol import method_protocols
     config['method_protocols']=method_protocols(config['arms'])
     atomic_json(tmp_path/'protocol.json',config)
     out=run_worker(tmp_path,'chronos-base',model_bundle=bundle)

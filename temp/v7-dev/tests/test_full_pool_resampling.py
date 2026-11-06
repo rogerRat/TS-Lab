@@ -4,13 +4,13 @@ import numpy as np
 import pytest
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig
-from rags.execution import SelectionExecution, selection_execution
-from rags.experiments.arms import WindowIndex
-from rags.experiments.full_pool import ARMS, select_full_pool
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig
+from rage.execution import SelectionExecution, selection_execution
+from rage.experiments.arms import WindowIndex
+from rage.experiments.full_pool import ARMS, select_full_pool
 from assets.gradient import GradientCache
-from rags.experiments.resampling import ResampledWindows, trajectory_distribution
+from rage.experiments.resampling import ResampledWindows, trajectory_distribution
 
 
 

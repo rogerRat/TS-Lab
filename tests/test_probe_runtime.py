@@ -6,12 +6,12 @@ import pandas as pd
 import pytest
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.development_inputs import save_fragments, load_fragments
-from rags.experiments.full_pool_exploration import run_exploration
-from rags.experiments.optimization import learning_rate_factor, optimizer_options
-from rags.experiments.prepare_probe_inputs import prepare
-from rags.experiments.train_eval import fine_tune
+from rage.core import TimeSeriesFragment
+from rage.experiments.development_inputs import save_fragments, load_fragments
+from rage.experiments.full_pool_exploration import run_exploration
+from rage.experiments.optimization import learning_rate_factor, optimizer_options
+from rage.experiments.prepare_probe_inputs import prepare
+from rage.experiments.train_eval import fine_tune
 
 
 def engine():
@@ -68,7 +68,7 @@ def test_custom_optimizer_and_schedule_resume_exactly(tmp_path):
 
 
 def test_fractional_epoch_runtime_excludes_validation_and_exam(tmp_path, monkeypatch):
-    from rags.experiments import full_pool_exploration as module
+    from rage.experiments import full_pool_exploration as module
     inputs = tmp_path / "inputs"
     inputs.mkdir()
     save_fragments(inputs / "fixture__reference.npz", [TimeSeriesFragment(

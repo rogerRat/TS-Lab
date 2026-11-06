@@ -12,8 +12,8 @@ import time
 
 import torch
 
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.students import atomic_json
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.students import atomic_json
 
 
 def reset_first_step(optimizer):

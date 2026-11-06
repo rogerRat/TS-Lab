@@ -1,6 +1,6 @@
 # External selection methods
 
-This directory owns the external methods, not the project's RAGS algorithms:
+This directory owns the external methods, not the project's RAGE algorithms:
 
 - `less/`, `tsds/`, `lp_mirror/`, `ltsv/`: one independent Python package per method.
   Each owns `algorithms.py` (pure kernels), `runner.py` (model/data execution),

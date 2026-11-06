@@ -9,10 +9,10 @@ import numpy as np
 
 from assets.gradient.cache import atomic_json
 from assets.gradient.dataset import GradientDataset
-from rags.crb import CRBEngine
-from rags.experiments.ablation import reconstruct_gradients
-from rags.experiments.v7_protocol import crb_for
-from rags.experiments.v7_scores import interpolated_chunks, uniform_anchors
+from rage.crb import CRBEngine
+from rage.experiments.ablation import reconstruct_gradients
+from rage.experiments.v7_protocol import crb_for
+from rage.experiments.v7_scores import interpolated_chunks, uniform_anchors
 
 from scripts.quick_crb_uniform_ref import (
     DATASET, FIDS, STUDENT, TASK, accuracy, make_context,

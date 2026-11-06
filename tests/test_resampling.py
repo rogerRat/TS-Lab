@@ -4,14 +4,14 @@ import numpy as np
 import pytest
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
-from rags.experiments.regions import save_selection, load_selection
-from rags.experiments.resampling import (
-    ResampledWindows, InfeasibleReference, rags_marginal, ranked_mass,
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.experiments.regions import save_selection, load_selection
+from rage.experiments.resampling import (
+    ResampledWindows, InfeasibleReference, rage_marginal, ranked_mass,
 )
-from rags.experiments.schedule import exposure_checkpoints
-from rags.experiments.train_eval import fine_tune
+from rage.experiments.schedule import exposure_checkpoints
+from rage.experiments.train_eval import fine_tune
 
 
 def pool_index():
@@ -31,7 +31,7 @@ def test_ref_mass_shared_sources_and_hierarchical_equivalence():
     src = np.array([[1., 1., 0.], [0., 1., 1.], [1., -1., 1.], [-1., -1., -1.]])
     src /= np.linalg.norm(src, axis=1, keepdims=True)
     n, m = np.array([2, 1, 1]), np.array([2, 4, 3, 1])
-    beta, audit = rags_marginal(refs, src, n, m)
+    beta, audit = rage_marginal(refs, src, n, m)
     pi = n / n.sum()
     scores = refs @ src.T
     weights = np.where(scores > 0, np.exp(scores / .1) * m, 0.)
@@ -45,19 +45,19 @@ def test_ref_mass_shared_sources_and_hierarchical_equivalence():
 
 
 def test_tiny_positive_zero_negative_and_infeasible_reference():
-    beta, audit = rags_marginal([[1., 0.]], [[1e-300, 1.], [0., 1.], [-1., 0.]], [7], [1, 2, 3])
+    beta, audit = rage_marginal([[1., 0.]], [[1e-300, 1.], [0., 1.], [-1., 0.]], [7], [1, 2, 3])
     np.testing.assert_array_equal(beta, [1., 0., 0.])
     assert audit["rows"][0]["nonpositive_pairs"] == 2
     with pytest.raises(InfeasibleReference) as error:
-        rags_marginal(np.eye(2), [[1., 0.]], [3, 1], [1], reference_ids=["a", "missing"])
+        rage_marginal(np.eye(2), [[1., 0.]], [3, 1], [1], reference_ids=["a", "missing"])
     assert error.value.reference_id == "missing" and error.value.share == .25
     with pytest.raises(ValueError, match="finite"):
-        rags_marginal([[1.]], [[np.nan]], [1], [1])
+        rage_marginal([[1.]], [[np.nan]], [1], [1])
 
 
 def test_temperature_cannot_silently_drop_positive_pairs():
     with pytest.raises(ValueError, match="underflows"):
-        rags_marginal([[1.]], [[.1], [.9]], [1], [1, 1], temperature=1e-6)
+        rage_marginal([[1.]], [[.1], [.9]], [1], [1, 1], temperature=1e-6)
 
 
 def test_ranks_keep_ties_native_signs_and_length_factor():
@@ -153,7 +153,7 @@ def test_tiny_positive_mass_is_not_lost_in_sampler_cdf():
 
 
 def test_alias_retains_zeros_and_mixed_tiny_masses():
-    from rags.experiments.resampling import alias_table
+    from rage.experiments.resampling import alias_table
     probabilities = np.array([.7, 1e-30, 0., .3, 1e-20, 0.])
     acceptance, aliases = alias_table(probabilities)
     represented = acceptance.copy()

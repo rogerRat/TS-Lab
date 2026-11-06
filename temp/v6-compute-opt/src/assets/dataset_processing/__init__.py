@@ -1,7 +1,7 @@
 """Dataset asset production workflow.
 
 This layer fetches source/reference data, writes numeric shard bundles and
-deduplicates them. RAGS reads these trajectories directly. Legacy descriptor,
+deduplicates them. RAGE reads these trajectories directly. Legacy descriptor,
 catalog, grid and transfer-selection production stages have been removed.
 
 Subpackages:

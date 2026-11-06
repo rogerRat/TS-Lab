@@ -1,0 +1,11 @@
+{
+  "repo": "/root/TS-Lab",
+  "total_budget_gib": 100,
+  "report_subdir": "report-chronos-timesfm",
+  "out": "/root/autodl-tmp/rage/outputs/reference-census-20260921",
+  "report_python": "/root/autodl-tmp/rage/envs/rage/bin/python",
+  "models": [
+    {"student": "chronos-base", "python": "/root/autodl-tmp/rage/envs/rage/bin/python", "memory_fraction": 0.65, "batches": [8], "workers": [2], "runs": ["/root/autodl-tmp/rage/outputs/main-rank-volume-20260918", "/root/autodl-tmp/rage/outputs/main-rank-volume-uni-20260920"]},
+    {"student": "timesfm-2.5", "python": "/root/autodl-tmp/conda/envs/rage-timesfm/bin/python", "batches": [4, 8, 16], "workers": [1], "runs": ["/root/autodl-tmp/rage/outputs/main-rank-volume-20260918", "/root/autodl-tmp/rage/outputs/main-rank-volume-uni-20260920"]}
+  ]
+}

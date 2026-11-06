@@ -24,8 +24,8 @@ def main(argv=None):
         ids = payload["window_ids"]
     if windows.ndim != 2 or ids.shape != (len(windows), 2):
         raise ValueError("windows and window_ids must align")
-    from rags.experiments.full_pool_models import build_model
-    from rags.execution import SelectionExecution, selection_execution
+    from rage.experiments.full_pool_models import build_model
+    from rage.execution import SelectionExecution, selection_execution
     _, probe, identity = build_model(args.model, model_path=args.ckpt, device=args.device)
     probe.execution = SelectionExecution(gradient_batch=args.gradient_batch_size,
                                          gradient_workers=args.gradient_workers)

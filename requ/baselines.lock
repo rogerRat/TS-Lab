@@ -1,4 +1,4 @@
-# External baseline sources audited for the RAGS static-selection experiment.
+# External baseline sources audited for the RAGE static-selection experiment.
 # Revisions are immutable audit anchors; see the fidelity contract for gaps.
 less https://github.com/princeton-nlp/LESS.git 8abf9628b9a814ac3045445eebc8ba3c908fdc78
 tsds https://github.com/ZifanL/TSDS.git 3dfe13953cffaefaeb9d401172e495aa7e0fd775

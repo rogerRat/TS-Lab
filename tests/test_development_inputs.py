@@ -2,8 +2,8 @@ from collections import Counter
 
 import numpy as np
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.development_inputs import load_fragments, save_fragments
+from rage.core import TimeSeriesFragment
+from rage.experiments.development_inputs import load_fragments, save_fragments
 
 
 def test_packed_development_fragments_preserve_identity_and_values(tmp_path):

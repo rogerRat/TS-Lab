@@ -12,9 +12,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from rags.experiments.development_inputs import load_fragments
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.train_eval import fine_tune
+from rage.experiments.development_inputs import load_fragments
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.train_eval import fine_tune
 
 INPUTS = Path("/root/autodl-tmp/TS3/outputs/timerxl-calibration-20260920/inputs-dev")
 EXPECTED_PARAMS = 84_142_080

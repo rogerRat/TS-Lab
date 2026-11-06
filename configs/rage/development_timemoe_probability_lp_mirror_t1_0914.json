@@ -1,0 +1,67 @@
+{
+  "purpose": "equal_budget_native_probability_development",
+  "checkpoint_retention": "completed_cell_cleanup",
+  "student": "timemoe-200m",
+  "model_path": "/root/autodl-tmp/hf-cache/hub/models--Maple728--TimeMoE-200M/snapshots/794591bfeb1225fdf742cec0f4c71f20c3f3b87e",
+  "inputs": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914/probability-inputs",
+  "datasets": [
+    "boomlet_1676"
+  ],
+  "training_data": "source_probability",
+  "epsilon_calibration": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914/epsilon-timemoe-200m/epsilon.json",
+  "selection_cache": "/root/autodl-tmp/rage/outputs/full-pool-exp-0914/probability-timemoe-cache",
+  "crb": {
+    "cover_density": 0.02,
+    "error_density": 0.02,
+    "split_density": 0.005,
+    "curvature_cap": 1
+  },
+  "selection_execution": {
+    "gradient_batch": 1,
+    "inference_batch": 32,
+    "cpu_threads": 4,
+    "generation": "eager"
+  },
+  "learning_rates": [
+    0.000003
+  ],
+  "epochs": [
+    0.5,
+    1,
+    1.5,
+    2,
+    2.5,
+    3,
+    4,
+    8,
+    16,
+    32
+  ],
+  "seeds": [
+    0
+  ],
+  "batch_size": 32,
+  "eval_batch": 32,
+  "validation_windows": 8,
+  "timing_context": "concurrent_development_not_a_speed_comparison",
+  "equal_budget_grid": {
+    "arms": [
+      "rage",
+      "trajectory_level",
+      "less",
+      "lp_mirror",
+      "ltsv"
+    ],
+    "temperatures": [
+      0.1,
+      1
+    ],
+    "learning_rate": 0.000003,
+    "final_sample_exposures": 8192,
+    "selection_rule": "complete both temperatures for every arm before freezing; never use formal exam"
+  },
+  "exposure_basis": "same fixed 8 reference series, N256 and 8192 final draws; do not transfer E32 to formal N",
+  "arm": "lp_mirror",
+  "temperature": 1,
+  "schedule_basis": "LR3e-6 selected by lowest final E4 development mean MASE in completed actual N16284 seed0 grid; independent schedule replication remains in progress. N256 E32 is equal-budget probability development, not the formal epoch schedule."
+}

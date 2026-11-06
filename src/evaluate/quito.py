@@ -1,4 +1,4 @@
-"""QuitoBench under the explicit TS3 raw-unit, univariate evaluation protocol."""
+"""QuitoBench under the explicit RAGE raw-unit, univariate evaluation protocol."""
 import csv
 import json
 import logging
@@ -116,7 +116,7 @@ def run_quito(config, checkpoint: Path, output_dir: Path, resume: bool):
     root, tasks, stride = validate_config(config.bench_config)
     adapter_type = resolve_public_class(config.adapter_class)
     parsed = adapter_type.parse_config(dict(config.adapter_config), config.source_path.parent)
-    metadata = {"benchmark": "quito", "protocol": "ts3-quito-raw-univariate-v1",
+    metadata = {"benchmark": "quito", "protocol": "rage-quito-raw-univariate-v1",
                 "config": config.as_mapping(), "checkpoint": str(checkpoint.resolve()),
                 "cutoff": str(CUTOFF), "targets": list(TARGETS),
                 "upstream_commit": UPSTREAM_COMMIT, "adapter_config": parsed,

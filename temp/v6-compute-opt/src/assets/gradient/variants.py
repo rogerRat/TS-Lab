@@ -1,4 +1,4 @@
-"""Compact RAGS ablation assets; never materialize interpolated window vectors."""
+"""Compact RAGE ablation assets; never materialize interpolated window vectors."""
 from dataclasses import dataclass
 import numpy as np
 
@@ -49,21 +49,21 @@ def trajectory_counts(result):
                 retained_windows=sum(len(b.start_positions) for b in result.blocks))
 
 
-def pair_counts(rags_source, uniform_source, rags_reference, uniform_reference):
+def pair_counts(rage_source, uniform_source, rage_reference, uniform_reference):
     """Frozen pairing: identical configured budgets, exact K for every trajectory.
 
     A mismatch is diagnostic only. No density search, repeated probes or hidden
     top-up computes are used to manufacture an equal-cost comparison.
     """
     rows = []
-    for side, base, variant in (("source", rags_source, uniform_source),
-                                 ("reference", rags_reference, uniform_reference)):
+    for side, base, variant in (("source", rage_source, uniform_source),
+                                 ("reference", rage_reference, uniform_reference)):
         base = {r['fragment_id']: r for r in base}
         variant = {r['fragment_id']: r for r in variant}
         for fid in sorted(base.keys() | variant.keys()):
             a, b = base.get(fid), variant.get(fid)
             matched = a is not None and b is not None and a['gradients'] == b['gradients']
-            rows.append(dict(side=side, fragment_id=fid, rags=a, uniform=b, matched=matched))
+            rows.append(dict(side=side, fragment_id=fid, rage=a, uniform=b, matched=matched))
     return dict(rule='same-phase-budgets-exact-K-per-side-per-trajectory-v1',
                 eligible_same_compute=bool(rows) and all(r['matched'] for r in rows), rows=rows)
 
@@ -74,9 +74,9 @@ def aggregate_anchors(result, *, expected_count=None):
         return None
     keys = sorted(result.anchors)
     if expected_count is not None and len(keys) != expected_count:
-        raise ValueError('RAGS-Traj distinct anchor count differs from configured budget')
+        raise ValueError('RAGE-Traj distinct anchor count differs from configured budget')
     if sum(len(b.start_positions) for b in result.blocks) != len(result.valid_starts):
-        raise ValueError('RAGS-Traj requires all legal starts, without filtering')
+        raise ValueError('RAGE-Traj requires all legal starts, without filtering')
     mean = np.zeros_like(np.asarray(result.anchors[keys[0]]), dtype=np.float32)
     for key in keys:
         mean += np.asarray(result.anchors[key], dtype=np.float32)

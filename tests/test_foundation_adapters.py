@@ -28,10 +28,16 @@ def test_registry_has_latest_and_trainable_timesfm_plus_sundial() -> None:
 
 
 def test_unavailable_training_capability_fails_before_model_load() -> None:
-    for key in ("timesfm-3.0", "sundial-base-128m"):
+    for key in ("timesfm-3.0",):
         adapter = build_adapter(key, device="cpu")
         with pytest.raises(NotImplementedError, match="training_loss"):
             adapter.training_loss(np.zeros((1, 8), dtype=np.float32), context_length=4, prediction_length=4)
+
+
+def test_sundial_training_fallback_is_distinct_from_official_recipe() -> None:
+    spec = get_model_spec("sundial-base-128m")
+    assert spec.supports(ModelCapability.TRAINING_LOSS)
+    assert not spec.official_training_recipe
 
 
 def test_static_window_split_preserves_values() -> None:

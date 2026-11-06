@@ -1,11 +1,11 @@
 """V5 adapted LESS: raw uniform-anchor means, weighted subtask cosine Max."""
 from __future__ import annotations
 import numpy as np
-from rags.experiments.arms import ArmOutput,SelectionCost,WindowIndex
+from rage.experiments.arms import ArmOutput,SelectionCost,WindowIndex
 from baselines.trajectory import budget_config,trajectory_features
 from .algorithms import unit_rows
-from rags.experiments.reference_opinions import reference_scores
-from rags.experiments.full_pool import ranked_selection
+from rage.experiments.reference_opinions import reference_scores
+from rage.experiments.full_pool import ranked_selection
 
 PROBABILITY_REVISION='less-subtask-max-rank-volume-v5'
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from ts3.spec.ref_extraction import ReferenceExtractionSpecification
+from tsl.spec.ref_extraction import ReferenceExtractionSpecification
 
 
 def fetch(spec: ReferenceExtractionSpecification, declaration_path: Path, data_root: Path) -> None:

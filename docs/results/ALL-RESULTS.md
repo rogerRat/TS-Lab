@@ -11,7 +11,7 @@
 
 ### 任务 × 臂 平均 MASE（训练臂 = 3 seeds 均值）
 
-| 任务 | less-main | lp-mirror | orig | rags-block-expSum | rags-block-expSum-block-uni | rags-block-expSum-win-uni | rags-block-linearSum | rags-block-linearSum-block-uni | rags-block-linearSum-win-uni | rags-block-maxSum | rags-block-zeroClipSum | rags-traj-expSum | rags-traj-linearSum | rags-traj-maxSum | rags-traj-zeroClipSum | rand | tsds |
+| 任务 | less-main | lp-mirror | orig | rage-block-expSum | rage-block-expSum-block-uni | rage-block-expSum-win-uni | rage-block-linearSum | rage-block-linearSum-block-uni | rage-block-linearSum-win-uni | rage-block-maxSum | rage-block-zeroClipSum | rage-traj-expSum | rage-traj-linearSum | rage-traj-maxSum | rage-traj-zeroClipSum | rand | tsds |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | time_darwin_water_15t | 1.3092 | 1.2982 | 1.3569 | 1.2117 | 1.3768 | 1.3174 | 1.2085 | 1.3849 | 1.3191 | 1.3013 | 1.2798 | 1.3137 | 1.3133 | 1.3095 | 1.3176 | 1.3200 | 1.3495 |
 | time_nem_demand_5t | 0.9769 | 0.9322 | 0.9172 | 0.9228 | 0.9406 | 0.9613 | 0.9326 | 1.0011 | 0.9594 | 0.9408 | 0.9357 | 0.9953 | 1.0068 | 0.9731 | 0.9598 | 0.9574 | 1.0586 |
@@ -30,44 +30,44 @@
 | less-main | 1.1178 | -1.64% | 3/9 | -0.58% | 4/9 |
 | lp-mirror | 1.0830 | +1.63% | 7/9 | +2.58% | 5/9 |
 | orig | 1.1158 | -1.29% | 3/9 | +0.00% | 0/9 |
-| rags-block-expSum | 1.0670 | +3.27% | 7/9 | +4.17% | 6/9 |
-| rags-block-expSum-block-uni | 1.2100 | -9.68% | 2/9 | -8.20% | 1/9 |
-| rags-block-expSum-win-uni | 1.1015 | -0.15% | 4/9 | +0.86% | 5/9 |
-| rags-block-linearSum | 1.0623 | +3.66% | 7/9 | +4.55% | 6/9 |
-| rags-block-linearSum-block-uni | 1.2274 | -11.32% | 1/9 | -9.86% | 0/9 |
-| rags-block-linearSum-win-uni | 1.1024 | -0.29% | 2/9 | +0.70% | 4/9 |
-| rags-block-maxSum | 1.1077 | -0.76% | 5/9 | +0.37% | 5/9 |
-| rags-block-zeroClipSum | 1.0940 | +0.70% | 6/9 | +1.69% | 5/9 |
-| rags-traj-expSum | 1.1129 | -1.37% | 4/9 | -0.41% | 6/9 |
-| rags-traj-linearSum | 1.1153 | -1.45% | 2/9 | -0.45% | 4/9 |
-| rags-traj-maxSum | 1.1003 | -0.11% | 4/9 | +0.92% | 6/9 |
-| rags-traj-zeroClipSum | 1.1085 | -0.79% | 4/9 | +0.20% | 5/9 |
+| rage-block-expSum | 1.0670 | +3.27% | 7/9 | +4.17% | 6/9 |
+| rage-block-expSum-block-uni | 1.2100 | -9.68% | 2/9 | -8.20% | 1/9 |
+| rage-block-expSum-win-uni | 1.1015 | -0.15% | 4/9 | +0.86% | 5/9 |
+| rage-block-linearSum | 1.0623 | +3.66% | 7/9 | +4.55% | 6/9 |
+| rage-block-linearSum-block-uni | 1.2274 | -11.32% | 1/9 | -9.86% | 0/9 |
+| rage-block-linearSum-win-uni | 1.1024 | -0.29% | 2/9 | +0.70% | 4/9 |
+| rage-block-maxSum | 1.1077 | -0.76% | 5/9 | +0.37% | 5/9 |
+| rage-block-zeroClipSum | 1.0940 | +0.70% | 6/9 | +1.69% | 5/9 |
+| rage-traj-expSum | 1.1129 | -1.37% | 4/9 | -0.41% | 6/9 |
+| rage-traj-linearSum | 1.1153 | -1.45% | 2/9 | -0.45% | 4/9 |
+| rage-traj-maxSum | 1.1003 | -0.11% | 4/9 | +0.92% | 6/9 |
+| rage-traj-zeroClipSum | 1.1085 | -0.79% | 4/9 | +0.20% | 5/9 |
 | rand | 1.0994 | +0.00% | 0/9 | +0.96% | 6/9 |
 | tsds | 1.1349 | -3.59% | 1/9 | -2.57% | 3/9 |
 
 ### 逐 seed 配对胜率（/27）
 
-| RAGS 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
+| RAGE 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
 |---|---|---|---|---|---|
-| rags-block-expSum | 20/27 | 22/27 | 22/27 | 19/27 | 7/9 |
-| rags-block-expSum-block-uni | 4/27 | 4/27 | 10/27 | 3/27 | 1/9 |
-| rags-block-expSum-win-uni | 12/27 | 14/27 | 20/27 | 8/27 | 5/9 |
-| rags-block-linearSum | 19/27 | 22/27 | 23/27 | 16/27 | 7/9 |
-| rags-block-linearSum-block-uni | 2/27 | 1/27 | 5/27 | 2/27 | 1/9 |
-| rags-block-linearSum-win-uni | 14/27 | 15/27 | 20/27 | 6/27 | 5/9 |
-| rags-block-maxSum | 13/27 | 14/27 | 18/27 | 10/27 | 4/9 |
-| rags-block-zeroClipSum | 14/27 | 17/27 | 20/27 | 10/27 | 6/9 |
-| rags-traj-expSum | 11/27 | 13/27 | 18/27 | 6/27 | 6/9 |
-| rags-traj-linearSum | 9/27 | 12/27 | 16/27 | 5/27 | 4/9 |
-| rags-traj-maxSum | 13/27 | 16/27 | 21/27 | 6/27 | 7/9 |
-| rags-traj-zeroClipSum | 13/27 | 14/27 | 19/27 | 5/27 | 6/9 |
+| rage-block-expSum | 20/27 | 22/27 | 22/27 | 19/27 | 7/9 |
+| rage-block-expSum-block-uni | 4/27 | 4/27 | 10/27 | 3/27 | 1/9 |
+| rage-block-expSum-win-uni | 12/27 | 14/27 | 20/27 | 8/27 | 5/9 |
+| rage-block-linearSum | 19/27 | 22/27 | 23/27 | 16/27 | 7/9 |
+| rage-block-linearSum-block-uni | 2/27 | 1/27 | 5/27 | 2/27 | 1/9 |
+| rage-block-linearSum-win-uni | 14/27 | 15/27 | 20/27 | 6/27 | 5/9 |
+| rage-block-maxSum | 13/27 | 14/27 | 18/27 | 10/27 | 4/9 |
+| rage-block-zeroClipSum | 14/27 | 17/27 | 20/27 | 10/27 | 6/9 |
+| rage-traj-expSum | 11/27 | 13/27 | 18/27 | 6/27 | 6/9 |
+| rage-traj-linearSum | 9/27 | 12/27 | 16/27 | 5/27 | 4/9 |
+| rage-traj-maxSum | 13/27 | 16/27 | 21/27 | 6/27 | 7/9 |
+| rage-traj-zeroClipSum | 13/27 | 14/27 | 19/27 | 5/27 | 6/9 |
 
 ### uni 臂 vs 非 uni 臂
 
-- `rags-block-expSum-win-uni` vs `rags-block-expSum`：8/27 次更好，平均 ΔMASE = +0.0345
-- `rags-block-expSum-block-uni` vs `rags-block-expSum`：1/27 次更好，平均 ΔMASE = +0.1430
-- `rags-block-linearSum-win-uni` vs `rags-block-linearSum`：9/27 次更好，平均 ΔMASE = +0.0401
-- `rags-block-linearSum-block-uni` vs `rags-block-linearSum`：0/27 次更好，平均 ΔMASE = +0.1652
+- `rage-block-expSum-win-uni` vs `rage-block-expSum`：8/27 次更好，平均 ΔMASE = +0.0345
+- `rage-block-expSum-block-uni` vs `rage-block-expSum`：1/27 次更好，平均 ΔMASE = +0.1430
+- `rage-block-linearSum-win-uni` vs `rage-block-linearSum`：9/27 次更好，平均 ΔMASE = +0.0401
+- `rage-block-linearSum-block-uni` vs `rage-block-linearSum`：0/27 次更好，平均 ΔMASE = +0.1652
 
 ### block vs traj
 
@@ -107,7 +107,7 @@
 | time_solar_h | 1.3269 | 1.3063 | 1.3095 | 1.3053 | 1.3243 | 1.2867 | 1.2814 | 1.2765 | 1.2765 | 4.0 |
 | time_port_activity_d | 0.8014 | 0.7905 | 0.8005 | 0.7949 | 0.7929 | 0.7940 | 0.7980 | 0.7980 | 0.7905 | 1.0 |
 
-**rags-block-expSum**
+**rage-block-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -121,7 +121,7 @@
 | time_solar_h | 1.3521 | 1.3308 | 1.3580 | 1.3254 | 1.3367 | 1.3105 | 1.3029 | 1.3029 | 1.3029 | 4.0 |
 | time_port_activity_d | 0.7785 | 0.7782 | 0.7816 | 0.7729 | 0.7773 | 0.7761 | 0.7768 | 0.7774 | 0.7729 | 2.0 |
 
-**rags-block-expSum-block-uni**
+**rage-block-expSum-block-uni**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -135,7 +135,7 @@
 | time_solar_h | 1.5304 | 1.6110 | 1.5125 | 1.4761 | 1.5227 | 1.4856 | 1.4778 | 1.4795 | 1.4761 | 2.0 |
 | time_port_activity_d | 0.8428 | 0.8441 | 0.8403 | 0.8337 | 0.8311 | 0.8259 | 0.8165 | 0.8172 | 0.8165 | 3.5 |
 
-**rags-block-expSum-win-uni**
+**rage-block-expSum-win-uni**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -149,7 +149,7 @@
 | time_solar_h | 1.3492 | 1.3016 | 1.3106 | 1.2812 | 1.2851 | 1.2744 | 1.2566 | 1.2587 | 1.2566 | 3.5 |
 | time_port_activity_d | 0.8006 | 0.8054 | 0.7951 | 0.7948 | 0.7966 | 0.7981 | 0.7958 | 0.7970 | 0.7948 | 2.0 |
 
-**rags-block-linearSum**
+**rage-block-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -163,7 +163,7 @@
 | time_solar_h | 1.3141 | 1.3380 | 1.3378 | 1.3111 | 1.3204 | 1.3021 | 1.2957 | 1.2914 | 1.2914 | 4.0 |
 | time_port_activity_d | 0.7662 | 0.7685 | 0.7636 | 0.7622 | 0.7631 | 0.7599 | 0.7617 | 0.7605 | 0.7599 | 3.0 |
 
-**rags-block-linearSum-block-uni**
+**rage-block-linearSum-block-uni**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -177,7 +177,7 @@
 | time_solar_h | 1.5870 | 1.8330 | 1.8532 | 1.8112 | 1.6804 | 1.5942 | 1.5873 | 1.6016 | 1.5870 | 0.5 |
 | time_port_activity_d | 0.8252 | 0.8565 | 0.8444 | 0.8253 | 0.8427 | 0.8332 | 0.8237 | 0.8251 | 0.8237 | 3.5 |
 
-**rags-block-linearSum-win-uni**
+**rage-block-linearSum-win-uni**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -191,7 +191,7 @@
 | time_solar_h | 1.3507 | 1.3157 | 1.3360 | 1.3125 | 1.3092 | 1.2957 | 1.2849 | 1.2791 | 1.2791 | 4.0 |
 | time_port_activity_d | 0.8040 | 0.7959 | 0.7993 | 0.7964 | 0.7952 | 0.8000 | 0.7973 | 0.7988 | 0.7952 | 2.5 |
 
-**rags-block-maxSum**
+**rage-block-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -205,7 +205,7 @@
 | time_solar_h | 1.3344 | 1.3017 | 1.3266 | 1.2947 | 1.2971 | 1.2887 | 1.2812 | 1.2759 | 1.2759 | 4.0 |
 | time_port_activity_d | 0.7946 | 0.7997 | 0.7899 | 0.7875 | 0.7965 | 0.7968 | 0.7970 | 0.7962 | 0.7875 | 2.0 |
 
-**rags-block-zeroClipSum**
+**rage-block-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -219,7 +219,7 @@
 | time_solar_h | 1.3311 | 1.2931 | 1.2894 | 1.2895 | 1.2899 | 1.2722 | 1.2651 | 1.2664 | 1.2651 | 3.5 |
 | time_port_activity_d | 0.7925 | 0.8014 | 0.7931 | 0.7956 | 0.7999 | 0.7944 | 0.7950 | 0.7961 | 0.7925 | 0.5 |
 
-**rags-traj-expSum**
+**rage-traj-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -233,7 +233,7 @@
 | time_solar_h | 1.3416 | 1.4124 | 1.3652 | 1.3264 | 1.3364 | 1.3444 | 1.3436 | 1.3329 | 1.3264 | 2.0 |
 | time_port_activity_d | 0.7920 | 0.7975 | 0.7874 | 0.7958 | 0.7986 | 0.7926 | 0.7940 | 0.7942 | 0.7874 | 1.5 |
 
-**rags-traj-linearSum**
+**rage-traj-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -247,7 +247,7 @@
 | time_solar_h | 1.3416 | 1.4124 | 1.3652 | 1.3264 | 1.3364 | 1.3444 | 1.3436 | 1.3329 | 1.3264 | 2.0 |
 | time_port_activity_d | 0.8012 | 0.8035 | 0.7890 | 0.7952 | 0.8010 | 0.7953 | 0.7984 | 0.8012 | 0.7890 | 1.5 |
 
-**rags-traj-maxSum**
+**rage-traj-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -261,7 +261,7 @@
 | time_solar_h | 1.3416 | 1.4124 | 1.3652 | 1.3264 | 1.3364 | 1.3444 | 1.3436 | 1.3329 | 1.3264 | 2.0 |
 | time_port_activity_d | 0.7891 | 0.7997 | 0.8038 | 0.7936 | 0.8011 | 0.7917 | 0.7922 | 0.7934 | 0.7891 | 0.5 |
 
-**rags-traj-zeroClipSum**
+**rage-traj-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep3.0 | ep3.5 | ep4.0 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -313,7 +313,7 @@
 
 ### 任务 × 臂 平均 MASE（训练臂 = 3 seeds 均值）
 
-| 任务 | less-main | lp-mirror | orig | rags-block-expSum | rags-block-linearSum | rags-block-maxSum | rags-block-zeroClipSum | rags-traj-expSum | rags-traj-linearSum | rags-traj-maxSum | rags-traj-zeroClipSum | rand | tsds |
+| 任务 | less-main | lp-mirror | orig | rage-block-expSum | rage-block-linearSum | rage-block-maxSum | rage-block-zeroClipSum | rage-traj-expSum | rage-traj-linearSum | rage-traj-maxSum | rage-traj-zeroClipSum | rand | tsds |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | time_eweld_15t | 1.2352 | 1.1758 | 1.4960 | 1.2032 | 1.2415 | 1.3737 | 1.2420 | 1.2564 | 1.3171 | 1.2287 | 1.3030 | 1.3018 | 1.2734 |
 | time_azure_i_cpu_5t | 1.2192 | 1.2164 | 1.3316 | 1.2277 | 1.2056 | 1.2207 | 1.1820 | 1.2137 | 1.2114 | 1.2241 | 1.1919 | 1.2303 | 1.2124 |
@@ -332,29 +332,29 @@
 | less-main | 1.2702 | +0.87% | 7/9 | +9.45% | 6/9 |
 | lp-mirror | 1.3965 | -8.61% | 4/9 | +2.70% | 4/9 |
 | orig | 1.4424 | -12.71% | 2/9 | +0.00% | 0/9 |
-| rags-block-expSum | 1.2563 | +1.96% | 7/9 | +10.38% | 7/9 |
-| rags-block-linearSum | 1.2712 | +0.56% | 6/9 | +9.67% | 8/9 |
-| rags-block-maxSum | 1.2852 | -0.34% | 5/9 | +8.54% | 8/9 |
-| rags-block-zeroClipSum | 1.2658 | +1.09% | 8/9 | +9.82% | 6/9 |
-| rags-traj-expSum | 1.2711 | +0.68% | 6/9 | +9.17% | 5/9 |
-| rags-traj-linearSum | 1.2814 | -0.14% | 4/9 | +8.45% | 5/9 |
-| rags-traj-maxSum | 1.2767 | +0.32% | 6/9 | +8.89% | 5/9 |
-| rags-traj-zeroClipSum | 1.2884 | -0.68% | 6/9 | +8.30% | 7/9 |
+| rage-block-expSum | 1.2563 | +1.96% | 7/9 | +10.38% | 7/9 |
+| rage-block-linearSum | 1.2712 | +0.56% | 6/9 | +9.67% | 8/9 |
+| rage-block-maxSum | 1.2852 | -0.34% | 5/9 | +8.54% | 8/9 |
+| rage-block-zeroClipSum | 1.2658 | +1.09% | 8/9 | +9.82% | 6/9 |
+| rage-traj-expSum | 1.2711 | +0.68% | 6/9 | +9.17% | 5/9 |
+| rage-traj-linearSum | 1.2814 | -0.14% | 4/9 | +8.45% | 5/9 |
+| rage-traj-maxSum | 1.2767 | +0.32% | 6/9 | +8.89% | 5/9 |
+| rage-traj-zeroClipSum | 1.2884 | -0.68% | 6/9 | +8.30% | 7/9 |
 | rand | 1.2806 | +0.00% | 0/9 | +8.91% | 7/9 |
 | tsds | 1.2608 | +1.45% | 6/9 | +9.57% | 6/9 |
 
 ### 逐 seed 配对胜率（/27）
 
-| RAGS 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
+| RAGE 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
 |---|---|---|---|---|---|
-| rags-block-expSum | 20/27 | 17/27 | 16/27 | 18/27 | 7/9 |
-| rags-block-linearSum | 18/27 | 17/27 | 19/27 | 17/27 | 8/9 |
-| rags-block-maxSum | 17/27 | 16/27 | 17/27 | 16/27 | 8/9 |
-| rags-block-zeroClipSum | 17/27 | 16/27 | 17/27 | 16/27 | 7/9 |
-| rags-traj-expSum | 15/27 | 13/27 | 15/27 | 14/27 | 7/9 |
-| rags-traj-linearSum | 14/27 | 11/27 | 11/27 | 15/27 | 5/9 |
-| rags-traj-maxSum | 12/27 | 10/27 | 14/27 | 15/27 | 5/9 |
-| rags-traj-zeroClipSum | 15/27 | 11/27 | 10/27 | 16/27 | 6/9 |
+| rage-block-expSum | 20/27 | 17/27 | 16/27 | 18/27 | 7/9 |
+| rage-block-linearSum | 18/27 | 17/27 | 19/27 | 17/27 | 8/9 |
+| rage-block-maxSum | 17/27 | 16/27 | 17/27 | 16/27 | 8/9 |
+| rage-block-zeroClipSum | 17/27 | 16/27 | 17/27 | 16/27 | 7/9 |
+| rage-traj-expSum | 15/27 | 13/27 | 15/27 | 14/27 | 7/9 |
+| rage-traj-linearSum | 14/27 | 11/27 | 11/27 | 15/27 | 5/9 |
+| rage-traj-maxSum | 12/27 | 10/27 | 14/27 | 15/27 | 5/9 |
+| rage-traj-zeroClipSum | 15/27 | 11/27 | 10/27 | 16/27 | 6/9 |
 
 ### uni 臂 vs 非 uni 臂
 
@@ -397,7 +397,7 @@
 | time_port_activity_d | 0.8880 | 0.8893 | 0.8864 | 0.8838 | 0.8838 | 2.0 |
 | time_solar_h | 1.2371 | 1.2086 | 1.3009 | 1.2288 | 1.2086 | 1.0 |
 
-**rags-block-expSum**
+**rage-block-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -411,7 +411,7 @@
 | time_port_activity_d | 0.8917 | 0.9062 | 0.9000 | 0.8886 | 0.8886 | 2.0 |
 | time_solar_h | 1.3776 | 1.1897 | 1.2153 | 1.2172 | 1.1897 | 1.0 |
 
-**rags-block-linearSum**
+**rage-block-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -425,7 +425,7 @@
 | time_port_activity_d | 0.8898 | 0.8888 | 0.8933 | 0.8998 | 0.8888 | 1.0 |
 | time_solar_h | 1.1882 | 1.1440 | 1.1574 | 1.2216 | 1.1440 | 1.0 |
 
-**rags-block-maxSum**
+**rage-block-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -439,7 +439,7 @@
 | time_port_activity_d | 0.8806 | 0.8938 | 0.8821 | 0.8978 | 0.8806 | 0.5 |
 | time_solar_h | 1.2589 | 1.2885 | 1.4118 | 1.2079 | 1.2079 | 2.0 |
 
-**rags-block-zeroClipSum**
+**rage-block-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -453,7 +453,7 @@
 | time_port_activity_d | 0.8870 | 0.8831 | 0.8848 | 0.8863 | 0.8831 | 1.0 |
 | time_solar_h | 1.1642 | 1.2896 | 1.2178 | 1.2709 | 1.1642 | 0.5 |
 
-**rags-traj-expSum**
+**rage-traj-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -467,7 +467,7 @@
 | time_port_activity_d | 0.8958 | 0.8922 | 0.8930 | 0.8962 | 0.8922 | 1.0 |
 | time_solar_h | 1.1786 | 1.1893 | 1.2437 | 1.3199 | 1.1786 | 0.5 |
 
-**rags-traj-linearSum**
+**rage-traj-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -481,7 +481,7 @@
 | time_port_activity_d | 0.8990 | 0.8936 | 0.9001 | 0.9012 | 0.8936 | 1.0 |
 | time_solar_h | 1.1786 | 1.1893 | 1.2437 | 1.3199 | 1.1786 | 0.5 |
 
-**rags-traj-maxSum**
+**rage-traj-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -495,7 +495,7 @@
 | time_port_activity_d | 0.8849 | 0.8821 | 0.8880 | 0.8838 | 0.8821 | 1.0 |
 | time_solar_h | 1.1786 | 1.1893 | 1.2437 | 1.3199 | 1.1786 | 0.5 |
 
-**rags-traj-zeroClipSum**
+**rage-traj-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | best | best@ep |
 |---|---|---|---|---|---|---|
@@ -547,7 +547,7 @@
 
 ### 任务 × 臂 平均 MASE（训练臂 = 3 seeds 均值）
 
-| 任务 | less-main | lp-mirror | orig | rags-block-expSum | rags-block-linearSum | rags-block-maxSum | rags-block-zeroClipSum | rags-traj-expSum | rags-traj-linearSum | rags-traj-maxSum | rags-traj-zeroClipSum | rand | tsds |
+| 任务 | less-main | lp-mirror | orig | rage-block-expSum | rage-block-linearSum | rage-block-maxSum | rage-block-zeroClipSum | rage-traj-expSum | rage-traj-linearSum | rage-traj-maxSum | rage-traj-zeroClipSum | rand | tsds |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | time_eweld_15t | 0.7213 | 0.7296 | 0.7282 | 0.7228 | 0.7219 | 0.7238 | 0.7236 | 0.7229 | 0.7235 | 0.7247 | 0.7229 | 0.7230 | 0.7242 |
 | time_azure_i_cpu_5t | 0.7635 | 0.7620 | 0.7638 | 0.7681 | 0.7664 | 0.7635 | 0.7640 | 0.7675 | 0.7662 | 0.7638 | 0.7641 | 0.7646 | 0.7668 |
@@ -566,29 +566,29 @@
 | less-main | 0.8626 | +0.48% | 7/9 | +3.20% | 8/9 |
 | lp-mirror | 0.8896 | -3.05% | 3/9 | +0.08% | 5/9 |
 | orig | 0.8918 | -3.14% | 2/9 | +0.00% | 0/9 |
-| rags-block-expSum | 0.8544 | +1.38% | 7/9 | +4.00% | 7/9 |
-| rags-block-linearSum | 0.8553 | +1.28% | 7/9 | +3.92% | 7/9 |
-| rags-block-maxSum | 0.8629 | +0.37% | 6/9 | +3.10% | 7/9 |
-| rags-block-zeroClipSum | 0.8598 | +0.68% | 7/9 | +3.40% | 7/9 |
-| rags-traj-expSum | 0.8635 | +0.45% | 6/9 | +3.17% | 7/9 |
-| rags-traj-linearSum | 0.8618 | +0.66% | 5/9 | +3.35% | 7/9 |
-| rags-traj-maxSum | 0.8614 | +0.68% | 7/9 | +3.37% | 8/9 |
-| rags-traj-zeroClipSum | 0.8607 | +0.73% | 7/9 | +3.44% | 7/9 |
+| rage-block-expSum | 0.8544 | +1.38% | 7/9 | +4.00% | 7/9 |
+| rage-block-linearSum | 0.8553 | +1.28% | 7/9 | +3.92% | 7/9 |
+| rage-block-maxSum | 0.8629 | +0.37% | 6/9 | +3.10% | 7/9 |
+| rage-block-zeroClipSum | 0.8598 | +0.68% | 7/9 | +3.40% | 7/9 |
+| rage-traj-expSum | 0.8635 | +0.45% | 6/9 | +3.17% | 7/9 |
+| rage-traj-linearSum | 0.8618 | +0.66% | 5/9 | +3.35% | 7/9 |
+| rage-traj-maxSum | 0.8614 | +0.68% | 7/9 | +3.37% | 8/9 |
+| rage-traj-zeroClipSum | 0.8607 | +0.73% | 7/9 | +3.44% | 7/9 |
 | rand | 0.8665 | +0.00% | 0/9 | +2.77% | 7/9 |
 | tsds | 0.8690 | -0.15% | 3/9 | +2.57% | 6/9 |
 
 ### 逐 seed 配对胜率（/27）
 
-| RAGS 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
+| RAGE 臂 | vs rand | vs less-main | vs tsds | vs lp-mirror | vs orig |
 |---|---|---|---|---|---|
-| rags-block-expSum | 18/27 | 17/27 | 24/27 | 20/27 | 7/9 |
-| rags-block-linearSum | 22/27 | 17/27 | 24/27 | 19/27 | 7/9 |
-| rags-block-maxSum | 16/27 | 11/27 | 18/27 | 20/27 | 7/9 |
-| rags-block-zeroClipSum | 20/27 | 13/27 | 22/27 | 20/27 | 8/9 |
-| rags-traj-expSum | 13/27 | 12/27 | 20/27 | 16/27 | 6/9 |
-| rags-traj-linearSum | 15/27 | 16/27 | 22/27 | 16/27 | 6/9 |
-| rags-traj-maxSum | 16/27 | 17/27 | 21/27 | 19/27 | 7/9 |
-| rags-traj-zeroClipSum | 19/27 | 15/27 | 24/27 | 20/27 | 8/9 |
+| rage-block-expSum | 18/27 | 17/27 | 24/27 | 20/27 | 7/9 |
+| rage-block-linearSum | 22/27 | 17/27 | 24/27 | 19/27 | 7/9 |
+| rage-block-maxSum | 16/27 | 11/27 | 18/27 | 20/27 | 7/9 |
+| rage-block-zeroClipSum | 20/27 | 13/27 | 22/27 | 20/27 | 8/9 |
+| rage-traj-expSum | 13/27 | 12/27 | 20/27 | 16/27 | 6/9 |
+| rage-traj-linearSum | 15/27 | 16/27 | 22/27 | 16/27 | 6/9 |
+| rage-traj-maxSum | 16/27 | 17/27 | 21/27 | 19/27 | 7/9 |
+| rage-traj-zeroClipSum | 19/27 | 15/27 | 24/27 | 20/27 | 8/9 |
 
 ### uni 臂 vs 非 uni 臂
 
@@ -631,7 +631,7 @@
 | time_port_activity_d | 0.7174 | 0.7191 | 0.7211 | 0.7222 | 0.7227 | 0.7227 | 0.7174 | 0.5 |
 | time_solar_h | 1.1229 | 1.1247 | 1.1284 | 1.1197 | 1.1181 | 1.1170 | 1.1170 | 2.6 |
 
-**rags-block-expSum**
+**rage-block-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -645,7 +645,7 @@
 | time_port_activity_d | 0.7217 | 0.7263 | 0.7291 | 0.7315 | 0.7331 | 0.7334 | 0.7217 | 0.5 |
 | time_solar_h | 1.1220 | 1.1166 | 1.1143 | 1.1144 | 1.1140 | 1.1146 | 1.1140 | 2.5 |
 
-**rags-block-linearSum**
+**rage-block-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -659,7 +659,7 @@
 | time_port_activity_d | 0.7216 | 0.7265 | 0.7295 | 0.7317 | 0.7330 | 0.7331 | 0.7216 | 0.5 |
 | time_solar_h | 1.1315 | 1.1262 | 1.1257 | 1.1250 | 1.1170 | 1.1184 | 1.1170 | 2.5 |
 
-**rags-block-maxSum**
+**rage-block-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -673,7 +673,7 @@
 | time_port_activity_d | 0.7202 | 0.7242 | 0.7274 | 0.7291 | 0.7304 | 0.7304 | 0.7202 | 0.5 |
 | time_solar_h | 1.1359 | 1.1352 | 1.1290 | 1.1374 | 1.1319 | 1.1314 | 1.1290 | 1.5 |
 
-**rags-block-zeroClipSum**
+**rage-block-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -687,7 +687,7 @@
 | time_port_activity_d | 0.7220 | 0.7267 | 0.7307 | 0.7329 | 0.7344 | 0.7347 | 0.7220 | 0.5 |
 | time_solar_h | 1.1325 | 1.1293 | 1.1266 | 1.1146 | 1.1194 | 1.1206 | 1.1146 | 2.0 |
 
-**rags-traj-expSum**
+**rage-traj-expSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -701,7 +701,7 @@
 | time_port_activity_d | 0.7197 | 0.7228 | 0.7258 | 0.7278 | 0.7288 | 0.7291 | 0.7197 | 0.5 |
 | time_solar_h | 1.1188 | 1.1234 | 1.1310 | 1.1220 | 1.1283 | 1.1275 | 1.1188 | 0.5 |
 
-**rags-traj-linearSum**
+**rage-traj-linearSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -715,7 +715,7 @@
 | time_port_activity_d | 0.7197 | 0.7227 | 0.7257 | 0.7276 | 0.7286 | 0.7289 | 0.7197 | 0.5 |
 | time_solar_h | 1.1188 | 1.1234 | 1.1310 | 1.1220 | 1.1283 | 1.1275 | 1.1188 | 0.5 |
 
-**rags-traj-maxSum**
+**rage-traj-maxSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|
@@ -729,7 +729,7 @@
 | time_port_activity_d | 0.7200 | 0.7232 | 0.7256 | 0.7270 | 0.7278 | 0.7279 | 0.7200 | 0.5 |
 | time_solar_h | 1.1188 | 1.1234 | 1.1310 | 1.1220 | 1.1283 | 1.1275 | 1.1188 | 0.5 |
 
-**rags-traj-zeroClipSum**
+**rage-traj-zeroClipSum**
 
 | 任务 | ep0.5 | ep1.0 | ep1.5 | ep2.0 | ep2.5 | ep2.6 | best | best@ep |
 |---|---|---|---|---|---|---|---|---|

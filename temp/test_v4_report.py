@@ -1,21 +1,21 @@
 import json
 from pathlib import Path
 
-from rags.experiments.students import atomic_json
-from rags.experiments.v4_seed_rounds import round_config
-from rags.experiments.v4_report import render
+from rage.experiments.students import atomic_json
+from rage.experiments.v4_seed_rounds import round_config
+from rage.experiments.v4_report import render
 from test_v4_seed_rounds import publish
 
 
 def test_identical_template_sorted_results_and_unique_baseline(tmp_path):
-    c=json.loads(Path('configs/rags/main_v4.json').read_text())
+    c=json.loads(Path('configs/rage/main_v4.json').read_text())
     atomic_json(tmp_path/'protocol.json',c)
     atomic_json(tmp_path/'execution_control.json',dict(training_enabled=True))
     for seed in (0,1):
         folder=tmp_path/'rounds'/f'seed{seed}';publish(round_config(c,seed),folder)
         for p in folder.glob('students/*/cells/*.json'):
             row=json.loads(p.read_text())
-            row['mase']=10. if row['arm']=='rand' else 12. if row['arm']=='rags-block-maxSum' else 7.
+            row['mase']=10. if row['arm']=='rand' else 12. if row['arm']=='rage-block-maxSum' else 7.
             atomic_json(p,row)
     output=tmp_path/'MAIN-v4.md';result=render(tmp_path,output);text=output.read_text()
     assert result['completed_cells']==450

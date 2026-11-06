@@ -15,10 +15,10 @@ import numpy as np
 import torch
 
 from assets.gradient.dataset import decode_bf16
-from rags.execution import SelectionExecution
-from rags.experiments.development_inputs import load_fragments
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.students import atomic_json
+from rage.execution import SelectionExecution
+from rage.experiments.development_inputs import load_fragments
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.students import atomic_json
 
 
 def main():

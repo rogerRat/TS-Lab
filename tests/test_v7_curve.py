@@ -4,9 +4,9 @@ import pytest
 import torch
 from test_training_resume import engine
 from test_production_recipe import base_recipe
-from rags.experiments.train_eval import _online_curve_recipe
-from rags.experiments.checkpoint_retention import cleanup_completed_weights
-from rags.experiments.v7_train import checkpoint_curve
+from rage.experiments.train_eval import _online_curve_recipe
+from rage.experiments.checkpoint_retention import cleanup_completed_weights
+from rage.experiments.v7_train import checkpoint_curve
 
 def test_four_epoch_online_resume_and_immediate_retention(tmp_path):
     native=engine()

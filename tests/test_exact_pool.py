@@ -2,7 +2,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from rags.experiments.exact_pool import ExactEquivalents, build_exact_pool
+from rage.experiments.exact_pool import ExactEquivalents, build_exact_pool
 
 
 def test_exact_not_greedy_overshoot_or_trajectory_reuse():
@@ -26,7 +26,7 @@ def test_formal_16284_not_16384():
 
 
 def test_real_builder_manifest_counts_complete_trajectories(monkeypatch, tmp_path):
-    from rags.experiments import data
+    from rage.experiments import data
     arrays = [np.arange(n, dtype=np.float32) for n in [8 * 6 + 3, 6 * 6 + 2, 4 * 6 + 1]]
     bundle = SimpleNamespace(series_count=lambda: 3, meta={"series_id": ["a", "b", "c"]})
     monkeypatch.setattr(data, "load_bundle_index", lambda path: bundle)

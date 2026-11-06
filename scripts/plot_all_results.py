@@ -1,6 +1,6 @@
 """Per-task grouped trajectory plots, fixed global color map by overall arm rank.
 Color = rank by mean final-epoch MASE across ALL models/tasks/seeds (lower=better).
-No error bars. Output: /root/TS3/docs/results/figures/"""
+No error bars. Output: /root/TS-Lab/docs/results/figures/"""
 import json, glob
 from collections import defaultdict
 from pathlib import Path
@@ -10,21 +10,21 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 RUNS = {
-    "timerxl-84m": "/root/autodl-tmp/TS3/outputs/main-rank-volume-timerxl-v6-20260921/rounds",
-    "chronos-base": "/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918/rounds",
-    "timesfm-2.5": "/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918/rounds",
+    "timerxl-84m": "/root/autodl-tmp/rage/outputs/main-rank-volume-timerxl-v6-20260921/rounds",
+    "chronos-base": "/root/autodl-tmp/rage/outputs/main-rank-volume-20260918/rounds",
+    "timesfm-2.5": "/root/autodl-tmp/rage/outputs/main-rank-volume-20260918/rounds",
 }
 SEEDS = (0, 1, 2)
-OUT = Path("/root/TS3/docs/results/figures")
+OUT = Path("/root/TS-Lab/docs/results/figures")
 OUT.mkdir(parents=True, exist_ok=True)
 
 GROUPS = {
-    "main": ["rags-block-expSum", "rags-block-linearSum", "rand", "less-main", "tsds", "lp-mirror", "orig"],
-    "aggregation": [f"rags-{lvl}-{agg}" for lvl in ("block", "traj") for agg in ("expSum", "linearSum", "maxSum", "zeroClipSum")],
-    "uni": ["rags-block-expSum", "rags-block-expSum-win-uni", "rags-block-expSum-block-uni",
-            "rags-block-linearSum", "rags-block-linearSum-win-uni", "rags-block-linearSum-block-uni"],
+    "main": ["rage-block-expSum", "rage-block-linearSum", "rand", "less-main", "tsds", "lp-mirror", "orig"],
+    "aggregation": [f"rage-{lvl}-{agg}" for lvl in ("block", "traj") for agg in ("expSum", "linearSum", "maxSum", "zeroClipSum")],
+    "uni": ["rage-block-expSum", "rage-block-expSum-win-uni", "rage-block-expSum-block-uni",
+            "rage-block-linearSum", "rage-block-linearSum-win-uni", "rage-block-linearSum-block-uni"],
 }
-TITLES = {"main": "Main: Top-2 RAGS vs baselines",
+TITLES = {"main": "Main: Top-2 RAGE vs baselines",
           "aggregation": "Ablation: block vs traj aggregation",
           "uni": "Ablation: uni weight variants"}
 

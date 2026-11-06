@@ -69,10 +69,10 @@ s=s.replace('    epsilon_policy: str = "fixed"  # Legacy explicit thresholds; pr
 s=s.replace('    ``closest_zero_v5`` recurses with a strict > P10 gate and current-minimum selection.', '    ``closest_zero_v5`` recurses with a strict > P10 gate and current-minimum selection.\n    ``min_kappa_v5`` has no threshold, minimizes relative cancellation, breaks\n    exact ties to the right, and consumes the entire capped split budget.')
 (p/'crb.py').write_text(s)
 
-mapping={'full_pool_worker.py':'src/rags/experiments/full_pool_worker.py',
-         'formal_main_entry.py':'src/rags/experiments/formal_main_entry.py',
-         'full_pool_run.py':'src/rags/experiments/full_pool_run.py',
-         'full_pool_assets.py':'src/rags/experiments/full_pool_assets.py',
+mapping={'full_pool_worker.py':'src/rage/experiments/full_pool_worker.py',
+         'formal_main_entry.py':'src/rage/experiments/formal_main_entry.py',
+         'full_pool_run.py':'src/rage/experiments/full_pool_run.py',
+         'full_pool_assets.py':'src/rage/experiments/full_pool_assets.py',
          'blocks.py':'src/assets/gradient/blocks.py',
          'prepare.py':'src/assets/gradient/prepare.py'}
 for name in mapping:
@@ -106,5 +106,5 @@ for name in mapping:
         s=s[:start]+new+s[end:]
     assert s != (p/(name+'.before')).read_text(), name
     path.write_text(s)
-mapping['crb.py']='src/rags/crb.py'
+mapping['crb.py']='src/rage/crb.py'
 (p/'mapping.json').write_text(__import__('json').dumps(mapping))

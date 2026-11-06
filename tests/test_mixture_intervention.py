@@ -1,5 +1,5 @@
 import numpy as np
-from rags.experiments.mixture_intervention import matching_probabilities
+from rage.experiments.mixture_intervention import matching_probabilities
 
 
 def test_matches_target_without_adding_samples():
@@ -18,7 +18,7 @@ def test_missing_group_is_disclosed_not_fabricated():
 def test_weighted_training_uses_requested_replacement_draws():
     import torch
     from types import SimpleNamespace
-    from rags.experiments.train_eval import fine_tune
+    from rage.experiments.train_eval import fine_tune
     model = torch.nn.Linear(2,1)
     windows = np.arange(6, dtype=np.float32).reshape(3,2)
     seen = []

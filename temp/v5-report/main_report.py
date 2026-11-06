@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import tempfile
 import numpy as np
-from rags.experiments.suite_report import collect
+from rage.experiments.suite_report import collect
 
 RUN = Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918')
 DEST = Path('docs/MAIN.md')
@@ -23,9 +23,9 @@ def notes(config):
         p = config['method_protocols'][name]
         temperature = '—' if name in ('orig', 'rand', 'tsds') else '.05（原生）' if name == 'lp-mirror' else '1/(2ln4)（Rank）'
         lines.append(f"| {name} | {p.get('scoring_unit', '—')} | {p.get('reference_aggregation', '—')} | {p.get('competition', '—')} | {temperature} |")
-    lines += ['', 'Block/Traj 四种聚合均保留，未指定 RAGS 主方法。LESS-Main 采用参考轨迹加权后 max。',
+    lines += ['', 'Block/Traj 四种聚合均保留，未指定 RAGE 主方法。LESS-Main 采用参考轨迹加权后 max。',
               '参考话语权只进入评分：轨迹 1/N；块 (1/N)×块合法起点占所属参考轨迹比例。Max 为 max(alpha*cos)，Linear 为 sum(alpha*cos)，ReLU 为 sum(alpha*relu(cos))，Exp 为 sum(alpha*exp(cos/1.0))，内层T=1.00。',
-              'LESS/RAGS 最终分数只保留对象排序及精确并列。冻结 F_T(x)=(1-exp(-x/T))/(1-exp(-1/T))，T=1/(2ln4)；每个对象获得其等宽排名区间的积分质量，并列组获得合并区间质量后组内等分。随后乘源对象合法窗口起点数量并归一化。前 50% 对象获得 80% 质量的约束作用于源长度先验之前，边界并列或奇数对象数需按冻结协议解释。没有最终 Softmax；LP-Mirror 和 TSDS 保持原生分布。',
+              'LESS/RAGE 最终分数只保留对象排序及精确并列。冻结 F_T(x)=(1-exp(-x/T))/(1-exp(-1/T))，T=1/(2ln4)；每个对象获得其等宽排名区间的积分质量，并列组获得合并区间质量后组内等分。随后乘源对象合法窗口起点数量并归一化。前 50% 对象获得 80% 质量的约束作用于源长度先验之前，边界并列或奇数对象数需按冻结协议解释。没有最终 Softmax；LP-Mirror 和 TSDS 保持原生分布。',
               'CRB 递归选择最小 kappa 区间，精确并列优先最右，实际探测取 floor，中点代表使用原始端点梯度线性插值，不追加 BP，无 P10，严格耗尽可用预算。轨迹代表保留范数后平均，再归一化进入匹配。',
               '仅汇总独立 V5 正式 cells；orig 只计 seed0 一次，后续轮基线引用不重复计数。样本标准差使用 ddof=1，单 seed 显示 —；胜/seeds 仅使用同 seed 的 rand 配对，MASE 越低越好。', '',
               '## 材料、执行与追溯', '', DEST.read_text().strip()]
@@ -40,8 +40,8 @@ def build_renderer():
     text = text.replace("MAIN report requires a V3 or V4 run", "MAIN report requires a V5 run")
     start = text.index('    config_label = ')
     end = text.index('    lines = ', start)
-    text = text[:start] + "    config_label = 'configs/rags/main.json'\n" + text[end:]
-    text = text.replace("f'- 所有使用采样温度的默认方法（lp-mirror / less-main / rags-main / rags-traj）统一 T={gradient_temperature}。'", "f'- LESS/RAGS 统一对象 Rank 温度 T=1/(2ln4)={gradient_temperature:.12f}；LP-Mirror 原生 T=.05，TSDS 原生分布不变。'")
+    text = text[:start] + "    config_label = 'configs/rage/main.json'\n" + text[end:]
+    text = text.replace("f'- 所有使用采样温度的默认方法（lp-mirror / less-main / rage-main / rage-traj）统一 T={gradient_temperature}。'", "f'- LESS/RAGE 统一对象 Rank 温度 T=1/(2ln4)={gradient_temperature:.12f}；LP-Mirror 原生 T=.05，TSDS 原生分布不变。'")
     text = text.replace('全部合法起点保留，批量分裂规则不变。', '全部合法起点保留，递归最小 kappa 分裂，优先最右，预算严格耗尽。')
     text = text.replace('V4轮间复用', 'V5轮间复用')
     text = text.replace('每 30 分钟自动更新', '每 30 分钟巡检更新')

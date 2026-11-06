@@ -10,8 +10,8 @@ LESS/Traj-max的1/N_ref缩放完全不改变排序，但锚点改变会影响排
 排序诊断见less_traj_rank_audit.json：Chronos NEM Spearman .918/top10%重叠91.7%，Finland .924/79.8%；TimesFM NEM .713/67.0%，Finland .600/39.4%。
 
 ## 当前实现的两侧权重
-src/rags/experiments/full_pool.py:_benchmark_block_marginal参考权重alpha_rb=(1/R_ref)(L_rb/L_r)，每条参考轨迹意见权重总和1/R_ref。
-src/rags/experiments/reference_opinions.py全局路径对源scores直接value_mass；源端没有counts或轨迹基准质量。线性全局路径rags_benchmark_marginal亦为equal_block。_rags把该beta直接作为源块概率交给ResampledWindows。
+src/rage/experiments/full_pool.py:_benchmark_block_marginal参考权重alpha_rb=(1/R_ref)(L_rb/L_r)，每条参考轨迹意见权重总和1/R_ref。
+src/rage/experiments/reference_opinions.py全局路径对源scores直接value_mass；源端没有counts或轨迹基准质量。线性全局路径rage_benchmark_marginal亦为equal_block。_rage把该beta直接作为源块概率交给ResampledWindows。
 因此参考双层意见平权已落实，源块全局Softmax没有保证源轨迹基准平权。两条源轨迹分别1/2个同分块，源轨迹质量为1/3、2/3。
 若源端也需要轨迹平权，应定义基准q_tb=(1/N_source)(L_tb/L_t)，并使用p_tb ∝ q_tb exp(S_tb/T)。平分数时源轨迹总质量才是1/N_source；评分差异允许选后轨迹质量不同。若要求任何评分下选后轨迹质量都固定1/N_source，Traj方法就不能在轨迹间选择。
 

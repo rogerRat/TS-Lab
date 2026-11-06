@@ -3,12 +3,12 @@ import json
 from pathlib import Path
 import numpy as np
 import pytest
-from rags.experiments.reference_opinions import (
+from rage.experiments.reference_opinions import (
     AGGREGATIONS, reference_marginal, selection_options,
 )
-from rags.experiments.resampling import value_mass
-from rags.experiments.full_pool import select_full_pool
-from rags.experiments.v3_protocol import opinion_method_protocols, validate_v3_config
+from rage.experiments.resampling import value_mass
+from rage.experiments.full_pool import select_full_pool
+from rage.experiments.v3_protocol import opinion_method_protocols, validate_v3_config
 from test_full_pool_resampling import Probe, inputs
 
 
@@ -70,21 +70,21 @@ def test_global_max_ignores_alpha_but_zero_clip_keeps_it():
 
 
 def test_new_defaults_and_frozen_v3_are_distinct():
-    config=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
-    for name,mode in [('less-main','maxSum'),('rags-main','linearSum'),('rags-traj','linearSum')]:
+    config=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
+    for name,mode in [('less-main','maxSum'),('rage-main','linearSum'),('rage-traj','linearSum')]:
         assert selection_options(name)['aggregation']==mode
         assert selection_options(name,config)['aggregation']=='linearSum'
-    assert selection_options('rags-main-expSum-local')==dict(aggregation='expSum',competition='local')
+    assert selection_options('rage-main-expSum-local')==dict(aggregation='expSum',competition='local')
     validate_v3_config(config)
     config['opinion_aggregation_protocol']='reference-opinion-v1'
     config['method_protocols']=opinion_method_protocols(config['arms'])
     validate_v3_config(config)
-    changed=deepcopy(config);changed['method_protocols']['rags-main']['reference_aggregation']='linearSum'
+    changed=deepcopy(config);changed['method_protocols']['rage-main']['reference_aggregation']='linearSum'
     with pytest.raises(ValueError,match='method_protocols'):validate_v3_config(changed)
 
 
-@pytest.mark.parametrize('name',['less-main','less-linearSum','rags-main','rags-traj',
-    'rags-main-maxSum','rags-traj-expSum','rags-main-linearSum-local','less-zeroClipSum-local'])
+@pytest.mark.parametrize('name',['less-main','less-linearSum','rage-main','rage-traj',
+    'rage-main-maxSum','rage-traj-expSum','rage-main-linearSum-local','less-zeroClipSum-local'])
 def test_production_dispatch_records_mode_without_changing_windows(name,tmp_path):
     out=select_full_pool(name,Probe(),run_dir=tmp_path,temperature=.05,**inputs())
     options=selection_options(name)
@@ -106,10 +106,10 @@ def test_exp_sum_is_exp_then_sum_then_outer_softmax_not_logsumexp():
 
 @pytest.mark.parametrize('filename',['main_reference_opinion_20260917.json','ablation_reference_opinion_20260917.json'])
 def test_generated_configs_are_valid_and_historical_default_stays_linear(filename):
-    config=json.loads((Path('configs/rags')/filename).read_text())
+    config=json.loads((Path('configs/rage')/filename).read_text())
     validate_v3_config(config)
     assert config['preparation_status']=='definition_only_not_launched'
-    old=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
+    old=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
     validate_v3_config(old)
     assert selection_options('less-main',old)['aggregation']=='linearSum'
 
@@ -126,33 +126,33 @@ def test_gpu_bounded_pairs_match_cpu(mode):
 
 
 def test_report_labels_do_not_rename_historical_artifact_slugs():
-    from rags.experiments.v3_report import display_method
-    old=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
-    new=json.loads(Path('configs/rags/main_reference_opinion_20260917.json').read_text())
+    from rage.experiments.v3_report import display_method
+    old=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
+    new=json.loads(Path('configs/rage/main_reference_opinion_20260917.json').read_text())
     assert display_method('less-main',old)=='less-linearSum'
-    assert display_method('rags-main',old)=='rags-block-linearSum'
-    assert display_method('rags-traj',old)=='rags-traj-linearSum'
+    assert display_method('rage-main',old)=='rage-block-linearSum'
+    assert display_method('rage-traj',old)=='rage-traj-linearSum'
     assert display_method('less-main',new)=='less-main'
-    assert old['arms']==['orig','rand','tsds','lp-mirror','less-main','rags-main','rags-traj']
+    assert old['arms']==['orig','rand','tsds','lp-mirror','less-main','rage-main','rage-traj']
 
 
 
 def test_neutral_matrix_exact_variants_and_no_main_method():
-    from rags.experiments.v3_protocol import NEUTRAL_MATRIX
-    config=json.loads(Path('configs/rags/matrix_reference_opinion_20260917.json').read_text())
+    from rage.experiments.v3_protocol import NEUTRAL_MATRIX
+    config=json.loads(Path('configs/rage/matrix_reference_opinion_20260917.json').read_text())
     validate_v3_config(config)
     assert len(NEUTRAL_MATRIX)==13
     assert config['arms']==list(NEUTRAL_MATRIX)
-    assert config['rags_main_method'] is None
+    assert config['rage_main_method'] is None
     for name in config['arms']:
-        if name.startswith('rags-'):
+        if name.startswith('rage-'):
             p=config['method_protocols'][name]
             assert p['main_method_selected'] is False
             assert p['method_role']=='unranked_variant'
             assert p['competition']=='global'
     for student in config['students']:
         assert set(config['settings'][student]['temperature'].values())=={.05}
-    changed=deepcopy(config);changed['rags_main_method']='rags-block-zeroClipSum'
+    changed=deepcopy(config);changed['rage_main_method']='rage-block-zeroClipSum'
     with pytest.raises(ValueError,match='main method'):validate_v3_config(changed)
     changed=deepcopy(config);changed['arms'].append('less-linearSum')
     with pytest.raises(ValueError,match='thirteen'):validate_v3_config(changed)
@@ -160,10 +160,10 @@ def test_neutral_matrix_exact_variants_and_no_main_method():
 
 @pytest.mark.parametrize('mode',AGGREGATIONS)
 def test_neutral_block_name_matches_explicit_historical_block_alias(mode,tmp_path):
-    current=select_full_pool(f'rags-block-{mode}',Probe(),run_dir=tmp_path,
+    current=select_full_pool(f'rage-block-{mode}',Probe(),run_dir=tmp_path,
         temperature=.05,**inputs())
-    previous=select_full_pool(f'rags-main-{mode}',Probe(),run_dir=tmp_path,
+    previous=select_full_pool(f'rage-main-{mode}',Probe(),run_dir=tmp_path,
         temperature=.05,**inputs())
     np.testing.assert_allclose(current.selected.probabilities,previous.selected.probabilities)
     np.testing.assert_array_equal(current.selected.unit_offsets,previous.selected.unit_offsets)
-    assert current.name==f'rags-block-{mode}'
+    assert current.name==f'rage-block-{mode}'

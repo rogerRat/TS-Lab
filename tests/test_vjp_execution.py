@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from test_batched_gradient import make_probe
-from rags.execution import SelectionExecution
+from rage.execution import SelectionExecution
 
 
 @pytest.mark.parametrize("vjp", [1, 2, 4, 8, 16])

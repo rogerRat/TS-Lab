@@ -5,8 +5,8 @@ import numpy as np
 AGGREGATIONS = ('linearSum', 'zeroClipSum', 'maxSum', 'expSum')
 COMPETITIONS = ('global', 'local')
 REVISION = 'reference-opinion-v1'
-FAMILIES = {'less': 'less', 'rags-main': 'rags', 'rags-traj': 'rags_traj',
-            'rags-uniform': 'rags_uniform'}
+FAMILIES = {'less': 'less', 'rage-main': 'rage', 'rage-traj': 'rage_traj',
+            'rage-uniform': 'rage_uniform'}
 OPINION_ARMS = tuple(f'{family}-{mode}{suffix}' for family in FAMILIES
     for mode in AGGREGATIONS for suffix in ('', '-global', '-local'))
 OPINION_BASES = {name: base for family, base in FAMILIES.items()
@@ -31,7 +31,7 @@ def selection_options(name, config=None):
     if config is not None:  # Historical runs without explicit method definitions.
         return dict(aggregation='linearSum', competition='global')
     return dict(aggregation=('maxSum' if name == 'less-main' else
-        'zeroClipSum' if name in ('rags-main', 'rags-traj') else 'linearSum'), competition='global')
+        'zeroClipSum' if name in ('rage-main', 'rage-traj') else 'linearSum'), competition='global')
 
 
 def probability_revision(legacy, aggregation, competition):

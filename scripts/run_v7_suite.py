@@ -6,13 +6,13 @@ import os
 from pathlib import Path
 import subprocess
 from assets.gradient.cache import atomic_json
-from rags.experiments.v7_protocol import MODELS, CURVE_PROTOCOL, REDUCED_PROTOCOL, validate, asset_protocol
-from rags.experiments.v7_amendment import freeze_training
-from rags.experiments.v7_run import freeze, gate
+from rage.experiments.v7_protocol import MODELS, CURVE_PROTOCOL, REDUCED_PROTOCOL, validate, asset_protocol
+from rage.experiments.v7_amendment import freeze_training
+from rage.experiments.v7_run import freeze, gate
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config',default='configs/rags/main_v7_curve4.json')
+    parser.add_argument('--config',default='configs/rage/main_v7_curve4.json')
     parser.add_argument('--run')
     parser.add_argument('--parallel-models',type=int,choices=[1,2,3],default=1)
     parser.add_argument('--phase',choices=['assets','select','train','all'],default='all')
@@ -24,7 +24,7 @@ def main():
         freeze_training(run,config)
     logs=run/'logs';logs.mkdir(exist_ok=True)
     def execute(student,phase,seed=None):
-        command=[config['student_environments'][student],'-m','rags.experiments.v7_run',
+        command=[config['student_environments'][student],'-m','rage.experiments.v7_run',
             '--config',str(Path(args.config).resolve()),'--run',str(run),'--phase',phase,'--student',student]
         if seed is not None:command+=['--seed',str(seed)]
         with (logs/f'{phase}__{student}__seed{seed}.log').open('a') as log:
@@ -47,7 +47,7 @@ def main():
                            parallel_models=args.parallel_models))
     try:
         if args.phase=='all':
-            from rags.experiments.v7_inputs import prepare
+            from rage.experiments.v7_inputs import prepare
             prepare(config,run)
         if args.phase in ('all','assets'):
             parallel('assets');gate(config,run,'assets')

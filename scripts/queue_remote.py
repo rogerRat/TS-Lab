@@ -14,8 +14,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--host', default='exp')
     parser.add_argument('--db', required=True)
-    parser.add_argument('--repo', default='/root/TS3')
-    parser.add_argument('--python', default='/root/miniconda3/envs/ts3/bin/python')
+    parser.add_argument('--repo', default='/root/TS-Lab')
+    parser.add_argument('--python', default='/root/autodl-tmp/rage/envs/rage/bin/python')
     parser.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     if not args.command:

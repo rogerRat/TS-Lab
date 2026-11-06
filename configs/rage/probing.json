@@ -1,0 +1,20 @@
+{
+  "inputs": "/root/autodl-tmp/rage/outputs/probe-20260914/probe-inputs",
+  "parameter_tasks": ["quito_hour"],
+  "candidate_tasks": ["quito_hour", "quito_min", "time_cphl_h", "fev_boomlet_1676"],
+  "models": {
+    "chronos-base": {"python": "/root/autodl-tmp/rage/envs/rage/bin/python", "model_path": "/root/autodl-tmp/pretrained_models/chronos-t5-base", "learning_rates": [0.001, 0.0001, 0.00001, 0.000001]},
+    "timesfm-2.5": {"python": "/root/autodl-tmp/conda/envs/rage-timesfm/bin/python", "learning_rates": [0.0001, 0.0003, 0.00003, 0.00001]},
+    "timemoe-200m": {"python": "/root/autodl-tmp/conda/envs/rage-timemoe/bin/python", "learning_rates": [0.0001, 0.0003, 0.00003, 0.00001]}
+  },
+  "seeds": [0, 1, 2],
+  "coarse_epochs": [1, 2],
+  "max_bisections": 4,
+  "task_probe_model": "timemoe-200m",
+  "top_k": 3,
+  "context_length": 512,
+  "prediction_length": 64,
+  "validation_windows": 8,
+  "eval_batch": 32,
+  "device": "cuda"
+}

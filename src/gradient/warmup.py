@@ -117,7 +117,7 @@ class WarmupCandidateRunner:
             self.engine.model.load_state_dict(base_state, strict=True)
             self.engine.model.eval()
         manifest = {
-            "schema_version": "ts3.gradient-warmup.v1",
+            "schema_version": "tsl.gradient-warmup.v1",
             "run_id": run_name,
             "model_path": str(config.model_path),
             "window_length": config.window_length,
@@ -211,7 +211,7 @@ class FromScratchWarmupRunner:
         model_dir = run_dir / "model"
         self._save_model(model_dir)
         record = {
-            "schema_version": "ts3.gradient-warmup.v2",
+            "schema_version": "tsl.gradient-warmup.v2",
             "run_id": run_name,
             "seed": seed,
             "initialization_mode": "from_scratch",

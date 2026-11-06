@@ -10,12 +10,12 @@ import time
 import numpy as np
 import torch
 
-from rags.crb import CRBConfig
-from rags.execution import SelectionExecution, selection_execution
+from rage.crb import CRBConfig
+from rage.execution import SelectionExecution, selection_execution
 from .arms import WindowIndex
 from .checkpoint_retention import cleanup_completed_weights
 from .development_inputs import load_fragments
-from .full_pool import RAGS_PROBABILITY_REVISION, COSINE_NUMERICS, select_full_pool, TEMPERATURE_ARM_BASE
+from .full_pool import RAGE_PROBABILITY_REVISION, COSINE_NUMERICS, select_full_pool, TEMPERATURE_ARM_BASE
 from .full_pool_models import build_model
 from .regions import load_selection, save_selection
 from .reference_opinions import selection_options, probability_revision, weight_placement_for
@@ -95,7 +95,7 @@ def _run_worker(run_dir, student, *, model_bundle=None, original_only=False, dat
     if identity_path.exists() and json.loads(identity_path.read_text()) != identity:
         raise ValueError("Loaded model identity changed; use a new run")
     atomic_json(identity_path, identity)
-    from rags.epsilon_protocol import load_p10_calibration
+    from rage.epsilon_protocol import load_p10_calibration
     local_p10 = config["crb"].get("epsilon_policy") == "trajectory_p10"
     calibration = None if local_p10 else load_p10_calibration(settings["epsilon_calibration"], identity)
     c, h = config["context_length"], config["prediction_length"]
@@ -181,7 +181,7 @@ def _run_worker(run_dir, student, *, model_bundle=None, original_only=False, dat
                   (out / "selections" / f"{dataset}__{arm}.npz").exists()]
         method_names = [TEMPERATURE_ARM_BASE.get(arm, arm) for arm in needed]
         assets = None
-        if any(arm in ("rags", "less", "rags_traj", "rags_uniform") for arm in method_names):
+        if any(arm in ("rage", "less", "rage_traj", "rage_uniform") for arm in method_names):
             preparation_started = time.perf_counter()
             with selection_execution(probe):
                 assets = prepare_gradients(method_names, probe, run_dir=run_dir,
@@ -213,14 +213,14 @@ def _run_worker(run_dir, student, *, model_bundle=None, original_only=False, dat
                     if TEMPERATURE_ARM_BASE.get(arm, arm) == "less":
                         from baselines.less.runner import assert_probability_revision
                         assert_probability_revision(output.selected.metadata, **options, weight_placement=weight_placement)
-                    if TEMPERATURE_ARM_BASE.get(arm, arm) in ("rags", "rags_uniform", "rags_traj"):
-                        expected_weighting = ("equal_trajectory" if TEMPERATURE_ARM_BASE.get(arm, arm) == "rags_traj"
+                    if TEMPERATURE_ARM_BASE.get(arm, arm) in ("rage", "rage_uniform", "rage_traj"):
+                        expected_weighting = ("equal_trajectory" if TEMPERATURE_ARM_BASE.get(arm, arm) == "rage_traj"
                                               else "equal_block")
-                        if (output.selected.metadata.get("rags_probability_revision") != probability_revision(
-                                RAGS_PROBABILITY_REVISION, **options, weight_placement=weight_placement)
+                        if (output.selected.metadata.get("rage_probability_revision") != probability_revision(
+                                RAGE_PROBABILITY_REVISION, **options, weight_placement=weight_placement)
                                 or output.selected.metadata.get("source_weighting") != expected_weighting):
-                            raise ValueError("RAGS reference/trajectory probability changed; use a new selection/run directory")
-                    if method_name in ("rags", "rags_traj", "rags_uniform", "less"):
+                            raise ValueError("RAGE reference/trajectory probability changed; use a new selection/run directory")
+                    if method_name in ("rage", "rage_traj", "rage_uniform", "less"):
                         recorded = dict(aggregation=output.selected.metadata.get("opinion_aggregation", "linearSum"),
                                         competition=output.selected.metadata.get("competition", "global"))
                         if (recorded != options or output.selected.metadata.get("opinion_weight_placement", "after_transform") != weight_placement):
@@ -229,7 +229,7 @@ def _run_worker(run_dir, student, *, model_bundle=None, original_only=False, dat
                     if recorded_temperature is not None and recorded_temperature != temperature:
                         raise ValueError(f"Cached selection temperature {recorded_temperature} does not"
                                          f" match configured {temperature} for arm {arm}")
-                    if TEMPERATURE_ARM_BASE.get(arm, arm) in ("rags", "less", "rags_traj", "rags_uniform") and output.selected.metadata.get("cosine_numerics") != COSINE_NUMERICS:
+                    if TEMPERATURE_ARM_BASE.get(arm, arm) in ("rage", "less", "rage_traj", "rage_uniform") and output.selected.metadata.get("cosine_numerics") != COSINE_NUMERICS:
                         raise ValueError("Gradient cosine normalization changed; use a new selection/run directory")
                 else:
                     with selection_execution(probe):

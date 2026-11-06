@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from rags.crb import CRBConfig,CRBEngine
-from rags.core import TimeSeriesFragment
-from rags.window_reconstruction import interpolate_window_gradients
+from rage.crb import CRBConfig,CRBEngine
+from rage.core import TimeSeriesFragment
+from rage.window_reconstruction import interpolate_window_gradients
 from visualize.grad_reconst.reviewer_compare import metrics,unit,interp
 from visualize.grad_reconst.reviewer_audit import save
 

@@ -1,6 +1,6 @@
 """2026-09-15 production training-recipe regressions (handoff main-experiment-20260915).
 
-Covers the frozen per-model recipe from configs/rags/shared_tasks_10.json:
+Covers the frozen per-model recipe from configs/rage/shared_tasks_10.json:
 micro-batch accumulation equivalence, schedule/stop decoupling (including the
 fractional TimesFM stop epoch 2.625), bias/norm weight-decay exclusion, and
 interrupted-resume equivalence under the recipe path.  All cases run on a tiny
@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments.train_eval import (TrainingRecipe, _build_optimizer,
+from rage.experiments.train_eval import (TrainingRecipe, _build_optimizer,
                                          fine_tune, observation_epochs,
                                          run_arm_training)
 
@@ -172,7 +172,7 @@ def test_clip_grad_norm_matches_manual_reference():
     model, optimizer = reference.model, _build_optimizer(reference.model, recipe)
     rng = np.random.default_rng(11)
     indices = rng.integers(0, len(windows), size=8)
-    from rags.engines import per_sample_cross_entropy
+    from rage.engines import per_sample_cross_entropy
     tensors = reference.batch_tensors(windows[indices])
     loss = per_sample_cross_entropy(model(**tensors).logits, tensors["labels"]).mean()
     loss.backward()

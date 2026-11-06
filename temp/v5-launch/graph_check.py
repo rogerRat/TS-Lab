@@ -2,12 +2,12 @@ from pathlib import Path
 import json,time
 from dataclasses import replace
 import numpy as np,torch
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.development_inputs import load_fragments
-from rags.execution import prepare_contexts,selection_execution,SelectionExecution
-from rags.generation import generate_tokens
-from rags.experiments.students import atomic_json
-config=json.loads(Path('configs/rags/main.json').read_text())
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.development_inputs import load_fragments
+from rage.execution import prepare_contexts,selection_execution,SelectionExecution
+from rage.generation import generate_tokens
+from rage.experiments.students import atomic_json
+config=json.loads(Path('configs/rage/main.json').read_text())
 engine,probe,identity=build_model('chronos-base',model_path=config['model_paths']['chronos-base'])
 probe.execution=SelectionExecution(gradient_batch=8,gradient_workers=1,inference_batch=32,cpu_threads=4,generation='eager')
 pool=load_fragments(Path(config['inputs'])/'pool.npz')

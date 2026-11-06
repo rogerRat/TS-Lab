@@ -1,7 +1,7 @@
 schema_version: 1
 benchmark: time
 model:
-  id: ts3_10pct_ts3e_final
+  id: rage_10pct_ragee_final
 adapter:
   class: adapters.chronos.eval.time:ChronosTIMEEvaluationAdapter
   config:

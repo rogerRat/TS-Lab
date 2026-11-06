@@ -82,7 +82,7 @@ def rank_resampled_windows(selected, *, temperature=.05, source_prior="legal_win
         source_weighting=source_prior if source_prior == 'legal_window_counts'
             else selected.metadata.get('source_weighting', 'equal_native_unit'))
     # Ensure legacy cache checks cannot accept this as a value-score selection.
-    for key in ('less_probability_revision', 'rags_probability_revision'):
+    for key in ('less_probability_revision', 'rage_probability_revision'):
         if key in meta:
             meta[key] += ':' + REVISION + ':' + source_prior
     result = ResampledWindows(selected.values, selected.window_locations, selected.window_ids,

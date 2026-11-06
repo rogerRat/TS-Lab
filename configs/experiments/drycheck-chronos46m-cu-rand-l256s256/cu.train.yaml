@@ -1,7 +1,7 @@
 sampling:
   policy: candidate-uniform
-  source_catalog: /root/TS3/configs/catalog/src/profile-10b-segl256s256.yaml
-  reference_catalog_dir: /root/TS3/configs/experiments/drycheck-chronos46m-cu-rand-l256s256/reference-catalogs-00-01-02-03-04-05-06-07-09-10-11-12-14-15-16
+  source_catalog: /root/TS-Lab/configs/catalog/src/profile-10b-segl256s256.yaml
+  reference_catalog_dir: /root/TS-Lab/configs/experiments/drycheck-chronos46m-cu-rand-l256s256/reference-catalogs-00-01-02-03-04-05-06-07-09-10-11-12-14-15-16
   reference_task_record:
     benchmark: fev
     task_indices:
@@ -37,10 +37,10 @@ missing_value_policy: reject
 seed: 0
 batch_size: 64
 training_steps: 10000
-adapter_class: adapters.chronos.train.adapter:ChronosTS3TrainAdapter
+adapter_class: adapters.chronos.train.adapter:ChronosRAGETrainAdapter
 adapter_config:
   model:
-    architecture_source: /root/TS3/third_parties/chronos-forecasting/test/dummy-chronos-model
+    architecture_source: /root/TS-Lab/third_parties/chronos-forecasting/test/dummy-chronos-model
     pretrained_weights: null
     initialization_mode: from_scratch
     initializer_factor: 0.05

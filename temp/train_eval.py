@@ -9,7 +9,7 @@ quantile forecasts); MASE denominators are the per-series full-history
 seasonal-naive scales (domain E1).
 
 Production training uses :class:`TrainingRecipe` (frozen per-model settings
-from ``configs/rags/shared_tasks_10.json``): per-model weight decay, AdamW
+from ``configs/rage/shared_tasks_10.json``): per-model weight decay, AdamW
 betas/eps, micro-batch gradient accumulation, grad-norm clipping, warmup 0,
 and a learning-rate schedule whose total length (``schedule_epochs``) is
 independent of the stop epoch, including fractional stop epochs such as 2.625
@@ -30,7 +30,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from rags.core import TimeSeriesFragment
+from rage.core import TimeSeriesFragment
 
 from .metrics import point_metrics, quantile_forecasts
 from .schedule import epoch_checkpoints
@@ -54,7 +54,7 @@ def crb_gradient_computer(engine, context_length: int, prediction_length: int):
 class TrainingRecipe:
     """Frozen production training settings for one student model.
 
-    Built from the per-model block of ``configs/rags/shared_tasks_10.json``
+    Built from the per-model block of ``configs/rage/shared_tasks_10.json``
     (authoritative record for the safe-history development probes).  The
     learning-rate schedule spans ``schedule_epochs`` epochs regardless of the
     stop epoch, so stopping early leaves the LR on its full-length trajectory.
@@ -318,7 +318,7 @@ def fine_tune(
             if native_loss is not None:
                 loss = native_loss(windows[micro_indices])
             else:
-                from rags.engines import per_sample_cross_entropy
+                from rage.engines import per_sample_cross_entropy
                 if prepared is None:
                     tensors = engine.batch_tensors(windows[micro_indices])
                 else:

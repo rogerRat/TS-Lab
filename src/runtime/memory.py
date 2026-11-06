@@ -1,7 +1,7 @@
 """Shared cgroup memory admission and runtime guard.
 
 This module deliberately reads the active cgroup rather than host memory. It
-is project runtime infrastructure, not part of the TS3 domain kernel.
+is project runtime infrastructure, not part of the RAGE domain kernel.
 """
 
 from __future__ import annotations

@@ -21,8 +21,8 @@ from assets.dataset_processing.load_reuse import (
     make_load_metadata,
     reuse_load_stage,
 )
-from ts3.spec.files.shard_dataset import DEFAULT_SHARD_BYTES
-from ts3.spec.ref_extraction import ReferenceExtractionSpecification
+from tsl.spec.files.shard_dataset import DEFAULT_SHARD_BYTES
+from tsl.spec.ref_extraction import ReferenceExtractionSpecification
 
 log = logging.getLogger("load.ref")
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from rags.experiments.rank_v5 import REVISION, DEFAULT_TEMPERATURE, rank_mass_v5
+from rage.experiments.rank_v5 import REVISION, DEFAULT_TEMPERATURE, rank_mass_v5
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     for model in ['chronos-base', 'timesfm-2.5']:
         for source in sorted((args.rank_replay / model / 'equal_native_unit').glob('*.npz')):
             task, method = source.stem.split('__')
-            if method != 'less-main' and not method.startswith('rags-block-'):
+            if method != 'less-main' and not method.startswith('rage-block-'):
                 continue
             with np.load(source) as data:
                 # This key is strictly monotone in the cached final score,

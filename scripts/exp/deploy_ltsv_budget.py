@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from baselines.ltsv.fast import REVISION
-from rags.experiments.students import atomic_json
+from rage.experiments.students import atomic_json
 
 
 def main():

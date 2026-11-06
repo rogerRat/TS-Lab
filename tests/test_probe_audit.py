@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from rags.experiments.probe_audit import balanced_reference_rows
+from rage.experiments.probe_audit import balanced_reference_rows
 
 
 def test_reference_sampling_balances_tasks_without_replacement():

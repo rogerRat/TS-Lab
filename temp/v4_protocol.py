@@ -18,7 +18,7 @@ def validate_v4_config(config):
         task_protocol='shared-ten-formal-20260915', temperature_protocol='reference-mean-t005',
         opinion_aggregation_protocol='reference-opinion-v4-mixed-weight-order',
         method_protocols=neutral_method_protocols(weighted_first=True, exp_after=True),
-        rags_main_method=None, rags_main_method_selected=False, seed_schedule=SEED_SCHEDULE,
+        rage_main_method=None, rage_main_method_selected=False, seed_schedule=SEED_SCHEDULE,
         original_first=True)
     for key, expected in required.items():
         if config.get(key) != expected:

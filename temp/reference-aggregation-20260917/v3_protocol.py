@@ -3,14 +3,14 @@ import json
 from pathlib import Path
 
 
-V3_MATRIX = ('orig', 'rand', 'tsds', 'lp-mirror', 'less-main', 'rags-main', 'rags-traj')
+V3_MATRIX = ('orig', 'rand', 'tsds', 'lp-mirror', 'less-main', 'rage-main', 'rage-traj')
 V3_BASES = {'rand': 'random', 'lp-mirror': 'lp_mirror', 'less-main': 'less',
-            'rags-main': 'rags', 'rags-traj': 'rags_traj'}
+            'rage-main': 'rage', 'rage-traj': 'rage_traj'}
 V3_DATASETS = ('time_nem_demand_5t', 'time_azure_i_cpu_5t', 'time_darwin_water_15t',
                'time_finland_15t', 'time_eweld_15t', 'time_cphl_h',
                'time_nem_price_5t', 'time_solar_h', 'time_port_activity_d')
-V3_TEMPERATURE_ARMS = ('lp-mirror', 'less-main', 'rags-main', 'rags-traj')
-V3_GRADIENT_ARMS = ('less-main', 'rags-main', 'rags-traj')
+V3_TEMPERATURE_ARMS = ('lp-mirror', 'less-main', 'rage-main', 'rage-traj')
+V3_GRADIENT_ARMS = ('less-main', 'rage-main', 'rage-traj')
 
 
 def v3_temperatures(config):
@@ -35,7 +35,7 @@ V3_METHOD_PROTOCOLS = {
         'reference_aggregation': 'mean_cosine', 'probability': 'softmax(score/T)',
         'source_length_weighting': False, 'post_softmax_weighting': False,
     },
-    'rags-main': {
+    'rage-main': {
         'gating': False, 'competition': 'global', 'scoring_unit': 'block',
         'anchors': 'CRB_coverage_error_closest_zero_batched_split',
         'block_gradient': 'linear_interpolation_geometric_midpoint',
@@ -46,7 +46,7 @@ V3_METHOD_PROTOCOLS = {
         'post_softmax_weighting': False, 'p10_filters_split': False,
         'retains_all_legal_starts': True,
     },
-    'rags-traj': {
+    'rage-traj': {
         'gating': False, 'competition': 'global', 'scoring_unit': 'trajectory',
         'anchors': 'CRB_coverage_error_closest_zero_batched_split',
         'trajectory_gradient': 'arithmetic_mean_of_raw_sampled_window_gradients',
@@ -66,8 +66,8 @@ def opinion_method_protocols(arms=V3_MATRIX):
     from .reference_opinions import OPINION_BASES, selection_options
     protocols = {}
     for arm in arms:
-        family = ({'less': 'less-main', 'rags': 'rags-main', 'rags_traj': 'rags-traj',
-                   'rags_uniform': 'rags-main'}.get(OPINION_BASES.get(arm)) or arm)
+        family = ({'less': 'less-main', 'rage': 'rage-main', 'rage_traj': 'rage-traj',
+                   'rage_uniform': 'rage-main'}.get(OPINION_BASES.get(arm)) or arm)
         protocol = deepcopy(V3_METHOD_PROTOCOLS[family])
         if family in V3_GRADIENT_ARMS:
             options = selection_options(arm)
@@ -80,10 +80,10 @@ def opinion_method_protocols(arms=V3_MATRIX):
             if options['aggregation']=='expSum':
                 protocol['exp_inner_scale'] = 1.
                 protocol['probability'] = 'softmax(sum(alpha*exp(raw_cosine))/T)'
-            if family=='rags-traj':
+            if family=='rage-traj':
                 protocol['difference_from_less_main'] = 'anchor_positions_and_reference_aggregation'
                 protocol['difference_from_less_with_same_aggregation'] = 'anchor_positions_only'
-            if OPINION_BASES.get(arm)=='rags_uniform':
+            if OPINION_BASES.get(arm)=='rage_uniform':
                 protocol['anchors'] = 'CRB_error_stage_uniform_same_actual_K'
         protocols[arm] = protocol
     return protocols

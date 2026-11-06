@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
-from rags.experiments.resampling import ResampledWindows
-from rags.experiments import v7_io
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.experiments.resampling import ResampledWindows
+from rage.experiments import v7_io
 
 
 def selection(probabilities=(0., .4, .6, 0.)):
@@ -36,7 +36,7 @@ def test_native_zeros_roundtrip_and_sampling(tmp_path, arm):
     assert restored.pool_n == 4
 
 
-@pytest.mark.parametrize('arm', ['rand', 'less-main', 'rags-block-linearSum',
+@pytest.mark.parametrize('arm', ['rand', 'less-main', 'rage-block-linearSum',
                                'grad-dot', 'grad-cos', 'grand-static'])
 def test_other_arms_reject_zero_probability(tmp_path, arm):
     _, _, selected = selection()

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ts3.spec.ref_extraction import MANIFEST_VERSION, validate_manifest
+from tsl.spec.ref_extraction import MANIFEST_VERSION, validate_manifest
 
 
 def test_reference_manifest_v2_rejects_hash_fields(tmp_path: Path) -> None:

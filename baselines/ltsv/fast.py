@@ -21,8 +21,8 @@ import torch
 
 from baselines.common import reference_windows
 from baselines.ltsv.algorithms import ltsv_window_scores
-from rags.execution import prepare_contexts, selection_execution
-from rags.experiments.students import atomic_json
+from rage.execution import prepare_contexts, selection_execution
+from rage.experiments.students import atomic_json
 
 REVISION = 'ltsv-budget-execution-v1'
 
@@ -120,7 +120,7 @@ class BlockScorer:
     def close(self):
         self.restore()
         self.probe.execution = self.original_execution
-        from rags.execution import clear_execution_cache
+        from rage.execution import clear_execution_cache
         clear_execution_cache(self.probe)
 
 
@@ -167,7 +167,7 @@ _SCORER = None
 
 def _init_worker(student, model_path, identity, val, options, threads):
     global _SCORER
-    from rags.experiments.full_pool_models import build_model
+    from rage.experiments.full_pool_models import build_model
     torch.set_num_threads(threads)
     _, probe, loaded = build_model(student, model_path=model_path)
     if loaded != identity:
@@ -215,8 +215,8 @@ def optimized_select(engine, *, reference_fragments, index, context_length,
         prediction_length, cache_dir, pool_manifest, dataset_tag, seed, resampling,
         execution, block_length=None, block_stride=None, icf_lr=1e-5,
         context_windows=64, n_select=None):
-    from rags.experiments.arms import ArmOutput, SelectionCost
-    from rags.experiments.resampling import window_distribution
+    from rage.experiments.arms import ArmOutput, SelectionCost
+    from rage.experiments.resampling import window_distribution
     if resampling is None:
         raise ValueError('Optimized LTSV currently requires the full-pool protocol')
     started = time.perf_counter()

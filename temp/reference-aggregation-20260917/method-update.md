@@ -1,6 +1,6 @@
 ## 2026-09-17 最新方法决策：参考意见冲突与概率构建（reference-opinion-v1）
 
-**优先级与历史边界。** 本节记录用户本轮讨论与变更，覆盖下文旧协议中的“逐参考质量固定”“Global仅为消融”“LESS全部参考线性求和”“T=0.25默认”“RAGS-Traj重建窗口长度加权均值”等现行性表述；旧正文与伪代码保留作历史，不删除。当前冻结资产来自V3：C=512/H=64/D=1、投影4096/seed42、CRB密度2%/1%/1%、closest_zero_v2批量分裂、预算用尽且全部合法窗口保留。所有使用采样温度的默认方法为T005=0.05；T025历史保留原身份。文档变更不表示启动新训练。
+**优先级与历史边界。** 本节记录用户本轮讨论与变更，覆盖下文旧协议中的“逐参考质量固定”“Global仅为消融”“LESS全部参考线性求和”“T=0.25默认”“RAGE-Traj重建窗口长度加权均值”等现行性表述；旧正文与伪代码保留作历史，不删除。当前冻结资产来自V3：C=512/H=64/D=1、投影4096/seed42、CRB密度2%/1%/1%、closest_zero_v2批量分裂、预算用尽且全部合法窗口保留。所有使用采样温度的默认方法为T005=0.05；T025历史保留原身份。文档变更不表示启动新训练。
 
 ### A. 为什么增加本项消融
 
@@ -41,10 +41,10 @@ $$s_j^{\mathrm{expSum}}=\sum_i\alpha_i\exp(c_{ij}).$$
 |---|---|---|---|
 | LESS-Main（slug less-main） | 均匀rounded-linspace锚点原始梯度均值；轨迹级 | maxSum / global | 尊重原LESS跨子任务取最大影响的意见合并方式；仍披露时间序列采样与Softmax适配 |
 | LESS-linearSum（slug less-linearSum） | 同LESS-Main | linearSum / global | 保留原项目V3轨迹等权线性聚合；名称中的Sum是加权和，权重总和1，不恢复未经1/N_ref缩放的历史求和 |
-| RAGS-Main（slug rags-main） | CRB锚点；线性插值中点块方向 | zeroClipSum / global | 本轮暂定设计主项：保留两级权重，最小改动隔离负意见抵扣；不是根据测试集成绩优选 |
-| RAGS-Traj（slug rags-traj） | CRB实际锚点原始梯度均值；轨迹级 | zeroClipSum / global | 与新Main使用相同意见规则，形成粒度对照 |
+| RAGE-Main（slug rage-main） | CRB锚点；线性插值中点块方向 | zeroClipSum / global | 本轮暂定设计主项：保留两级权重，最小改动隔离负意见抵扣；不是根据测试集成绩优选 |
+| RAGE-Traj（slug rage-traj） | CRB实际锚点原始梯度均值；轨迹级 | zeroClipSum / global | 与新Main使用相同意见规则，形成粒度对照 |
 
-显式RAGS变体：rags-main-{linearSum,zeroClipSum,maxSum,expSum}与rags-traj-{linearSum,zeroClipSum,maxSum,expSum}。可增加-global/-local后缀；不写后缀默认global。LESS同样支持四组件，主比较保留less-main和less-linearSum。rags-uniform使用同规则、只替换误差阶段锚点；实际K必须配对。
+显式RAGE变体：rage-main-{linearSum,zeroClipSum,maxSum,expSum}与rage-traj-{linearSum,zeroClipSum,maxSum,expSum}。可增加-global/-local后缀；不写后缀默认global。LESS同样支持四组件，主比较保留less-main和less-linearSum。rage-uniform使用同规则、只替换误差阶段锚点；实际K必须配对。
 
 LESS原论文§4.2对子任务形成代表，跨warmup检查点累积影响，跨子任务取max，再全局Top-k；官方matching.py为子任务内样例影响mean、子任务间max。两者内部平均写法不同。新LESS-Main只恢复跨参考max原则，不宣称完整复现原文LoRA/Adam多检查点及Top-k。参考轨迹作为子任务专家是本项目适配，轨迹未必等于语义模式。原论文：[§4.2](https://arxiv.org/html/2402.04333v3#S4.SS2)，[官方实现](https://github.com/princeton-nlp/LESS/blob/main/less/data_selection/matching.py)。
 
@@ -61,6 +61,6 @@ Local等价于GlobalKernel使用有效参考先验alpha_i/Z_i；所以预算可�
 
 ### E. 尚未被两轴覆盖的已有消融
 
-核心另外两轴：表示粒度block/trajectory（RAGS-Traj），锚点采集adaptive/uniform（RAGS-Uniform，仅第二阶段改均匀、保留分裂、实际K配对）。还有源基础采样测度（块等权、轨迹等权、合法窗口均匀/长度先验）、范数与聚合顺序、温度/数值vs排名映射、正对齐硬门控；与zeroClip子分数截断不能混同。
+核心另外两轴：表示粒度block/trajectory（RAGE-Traj），锚点采集adaptive/uniform（RAGE-Uniform，仅第二阶段改均匀、保留分裂、实际K配对）。还有源基础采样测度（块等权、轨迹等权、合法窗口均匀/长度先验）、范数与聚合顺序、温度/数值vs排名映射、正对齐硬门控；与zeroClip子分数截断不能混同。
 
 历史代码保留random_cover、no_error、no_split_detect、drop_only、fixed_blocks、window_return、uniform_segments和旧grid。前三类分别检验覆盖、风险分配、分裂；后续涉及表示/支持。drop_only及旧检测网格与全部窗口保留冲突，window_return/fixed_blocks等旧Top-k部署不能直接当现V3消融，必须先适配。密度/投影/head-only/探针检查点/长上下文属于既有后续或敏感性计划，不自动启动扫描。

@@ -6,10 +6,10 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments import train_eval
-from rags.experiments.schedule import epoch_checkpoints
-from rags.experiments.metrics import quantile_forecasts
-from rags.experiments.checkpoint_report import write_checkpoint_report
+from rage.experiments import train_eval
+from rage.experiments.schedule import epoch_checkpoints
+from rage.experiments.metrics import quantile_forecasts
+from rage.experiments.checkpoint_report import write_checkpoint_report
 
 
 class Model(torch.nn.Module):
@@ -48,7 +48,7 @@ def test_document_epoch_steps(n, steps):
 
 
 def test_native_baseline_coverage_counts_overlap_and_repeats_once():
-    from rags.experiments.deploy import selection_coverage
+    from rage.experiments.deploy import selection_coverage
     stats=selection_coverage([(1,1),(1,1),(1,3),(2,1)],4)
     assert stats == {'selected_windows':4,'unique_windows':3,'unique_points':10,
                      'disjoint_window_equivalents':2.5, 'budget_windows':4, 'budget_points':16,
@@ -115,7 +115,7 @@ def test_future_labels_cannot_change_forecasts_and_tokenizer_decodes_bins():
 
 def test_checkpoint_report_retains_all_epochs(tmp_path):
     (tmp_path/'cells').mkdir()
-    cell={'dataset':'ETT_1H','arm':'rags','seed':0,'n_windows':4096,'checkpoints':[
+    cell={'dataset':'ETT_1H','arm':'rage','seed':0,'n_windows':4096,'checkpoints':[
         {'epoch':e,'step':e*128,'checkpoint':f'epoch-{e}.pt',
          'metrics':{'mase':1/e,'sql':2/e,'mae':3/e}} for e in range(1,5)]}
     (tmp_path/'cells'/'cell.json').write_text(json.dumps(cell))
@@ -131,7 +131,7 @@ def test_checkpoint_report_retains_all_epochs(tmp_path):
 def test_formal_config_is_epoch_based():
     from configs.paths import PROJECT_ROOT
     import yaml
-    config=yaml.safe_load((PROJECT_ROOT/'configs/rags/run.yaml').read_text())
+    config=yaml.safe_load((PROJECT_ROOT/'configs/rage/run.yaml').read_text())
     assert config['source_epochs']==4
     assert config['learning_rate']==1e-5
     assert 'source_steps' not in config and 'schedule_variants' not in config
@@ -149,7 +149,7 @@ def test_zero_time_budget_does_not_train_or_fabricate_epoch_checkpoints(monkeypa
 
 
 def test_deployment_reports_missing_resources_without_launching(tmp_path,monkeypatch):
-    from rags.experiments import deployment
+    from rage.experiments import deployment
     monkeypatch.setattr(deployment.shutil,'disk_usage',lambda path: SimpleNamespace(free=0))
     result=deployment.check_deployment({
         'source_load':str(tmp_path/'source'), 'reference_root':str(tmp_path/'ref'),

@@ -13,7 +13,7 @@ RAM_LIMIT_GB=92
 EXPECT_CELLS=63
 [ -f "$COUNT" ] || echo 0 > "$COUNT"
 
-python_worker_pids() { pgrep -f -- 'bin/python -m rags.experiments.full_pool_worker'; }
+python_worker_pids() { pgrep -f -- 'bin/python -m rage.experiments.full_pool_worker'; }
 
 state_of() {  # $1=student -> "stage dataset"
   $PY -c "import json;d=json.load(open('$RUN/students/$1/state.json'));print(d.get('stage','?'),d.get('dataset','?'))" 2>/dev/null
@@ -47,7 +47,7 @@ CONTROL
                "timesfm-2.5:/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python" \
                "timemoe-200m:/root/autodl-tmp/conda/envs/ts3-timemoe/bin/python"; do
     student=${entry%%:*}; pybin=${entry#*:}
-    pgrep -f -- "rags.experiments.full_pool_worker --run $RUN --student $student\$" >/dev/null && continue
+    pgrep -f -- "rage.experiments.full_pool_worker --run $RUN --student $student\$" >/dev/null && continue
     [ "$(cells_of $student)" -ge $EXPECT_CELLS ] && continue
     [ "$(mem_gb)" -gt $RAM_LIMIT_GB ] && { echo "$(date '+%H:%M:%S') hold $student (ram $(mem_gb)G)" >> "$LOG"; continue; }
     read stage dset <<< "$(state_of $student)"
@@ -55,7 +55,7 @@ CONTROL
     echo "$(date '+%H:%M:%S') launch $student stage=$stage/$dset ram=$(mem_gb)G" >> "$LOG"
     cd /root/TS3 && env PYTHONPATH=/root/TS3/src HF_HOME=/root/autodl-tmp/hf-cache \
       PYTHONUNBUFFERED=1 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
-      nohup "$pybin" -m rags.experiments.full_pool_worker --run "$RUN" --student "$student" \
+      nohup "$pybin" -m rage.experiments.full_pool_worker --run "$RUN" --student "$student" \
       >> "$RUN/$student.log" 2>&1 < /dev/null 9>&- &
     echo $(( $(cat $COUNT) + 1 )) > "$COUNT"
     sleep 10

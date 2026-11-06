@@ -1,5 +1,5 @@
 import multiprocessing as mp
-from rags.experiments.v7_queue import claim, cell_config
+from rage.experiments.v7_queue import claim, cell_config
 
 
 def contender(path, output):

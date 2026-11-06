@@ -1,11 +1,11 @@
 """Adapted trajectory-level LESS: uniform window means, SGD, one checkpoint."""
 from __future__ import annotations
 import numpy as np
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
 from baselines.trajectory import budget_config, trajectory_features
-from rags.experiments.regions import REVISION, deliver_trajectories
+from rage.experiments.regions import REVISION, deliver_trajectories
 from .algorithms import less_influence_scores, unit_rows
-from rags.experiments.reference_opinions import reference_marginal, probability_revision
+from rage.experiments.reference_opinions import reference_marginal, probability_revision
 
 
 PROBABILITY_REVISION = "less-benchmark-reference-mean-v2"
@@ -48,7 +48,7 @@ def less_select(engine, *, reference_fragments, index: WindowIndex,
     if resampling is not None:
         # Benchmark adaptation: each source trajectory is one competing unit.
         # Keep within-trajectory draws uniform; do not multiply mass by length.
-        from rags.experiments.resampling import trajectory_distribution
+        from rage.experiments.resampling import trajectory_distribution
         selected = trajectory_distribution(index, source_info["trajectory_ids"], scores,
             pool_manifest=pool_manifest, metadata=dict(resampling, reference_aggregation="mean_reference_cosines" if aggregation=="linearSum" else aggregation,
                 opinion_aggregation=aggregation, competition=competition, opinion_weight_placement=weight_placement, reference_audit=audit, reference_count=len(reference),

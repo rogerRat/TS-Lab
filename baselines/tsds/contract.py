@@ -11,7 +11,7 @@ CONTRACT = BaselineContract(
                         "KDE diversity", "multinomial repeated trajectory copies"),
         static_framework_adaptations=(
             "one trajectory per OT point; uniform-sampled frozen Chronos window embedding mean",
-            "sampling counts match the three configured RAGS budgets",
+            "sampling counts match the three configured RAGE budgets",
             "experiment-frozen max_k=64, kde_k=16, sigma=4, alpha=0.1, c=5 (not upstream defaults)",
             "shuffle multinomial trajectory copies, deliver whole copies until point budget",
             "duplicate trajectories retained in delivery and legal-start training sampling; repeated points reported",

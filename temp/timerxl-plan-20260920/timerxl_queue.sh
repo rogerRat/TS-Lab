@@ -39,8 +39,8 @@ fi
 
 if [ ! -f "$WORK/stage1-devhistory/results.json" ]; then
   echo "[queue] stage CALIBRATION-1 devhistory seed0"
-  "$PY" -m rags.experiments.full_pool_exploration \
-    --config /root/TS3/configs/rags/development_timerxl_history_dev_0920.json \
+  "$PY" -m rage.experiments.full_pool_exploration \
+    --config /root/TS3/configs/rage/development_timerxl_history_dev_0920.json \
     --out "$WORK/stage1-devhistory" 2>&1 | tee "$WORK/stage1.log" || {
     echo "[queue] STAGE1_FAILED"; exit 1; }
 fi
@@ -52,8 +52,8 @@ fi
 
 if [ ! -f "$WORK/stage2-earlierhistory/results.json" ]; then
   echo "[queue] stage CALIBRATION-2 earlierhistory seed1"
-  "$PY" -m rags.experiments.full_pool_exploration \
-    --config /root/TS3/configs/rags/development_timerxl_history_early_0920.json \
+  "$PY" -m rage.experiments.full_pool_exploration \
+    --config /root/TS3/configs/rage/development_timerxl_history_early_0920.json \
     --out "$WORK/stage2-earlierhistory" 2>&1 | tee "$WORK/stage2.log" || {
     echo "[queue] STAGE2_FAILED"; exit 1; }
 fi

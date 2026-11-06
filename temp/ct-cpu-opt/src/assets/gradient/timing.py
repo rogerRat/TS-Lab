@@ -5,7 +5,7 @@ import torch
 
 
 def timing_identity(manifest, engine):
-    from rags.execution import execution_policy
+    from rage.execution import execution_policy
     device = torch.device(engine.device)
     return dict(model=manifest['model'], probe=manifest['probe'],
         gradient_protocol=manifest['gradient_protocol'],

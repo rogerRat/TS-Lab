@@ -1,7 +1,7 @@
 # QuitoBench 与 TIME 接入
 
 QuitoBench 接入两条现有路径：`evaluate.run` 对已有检查点评测；
-`rags.experiments.main_table --benchmark quito` 执行 FEV 风格的选集、后训练和评测。
+`rage.experiments.main_table --benchmark quito` 执行 FEV 风格的选集、后训练和评测。
 首个适配器复用 TIME 的 Chronos-T5 分位数预测接口，不是 Chronos-2/TimesFM 适配器。
 
 ## 固定来源与实验协议
@@ -24,9 +24,9 @@ QuitoBench 接入两条现有路径：`evaluate.run` 对已有检查点评测；
   WAPE/WQL 使用任务内 pooled 分子/绝对标签分母；分母为零时结果为空。
   `summary.csv` 对有效任务指标等权平均，原始分组结果保留在 `quito_results.csv`。
 - 主表入口采用 H 步长滚动评测；reference 始终只取测试边界前的前缀。
-  非有限前缀不能进入当前 RAGS 主表选集。因此主表与独立评测的有效样本可能不同。
+  非有限前缀不能进入当前 RAGE 主表选集。因此主表与独立评测的有效样本可能不同。
 
-这是明确标记的 **TS3 项目比较协议**，不是 Quito 官方榜单复现。上游评测包含训练段
+这是明确标记的 **RAGE 项目比较协议**，不是 Quito 官方榜单复现。上游评测包含训练段
 归一化及其他 horizon/window 设置；不要直接横向比较数值。当前公开 Parquet 不含
 TSF regime 标签，本实现不猜测八个分组。
 
@@ -37,7 +37,7 @@ TSF regime 标签，本实现不猜测八个分组。
 
 ```bash
 python -m pip install -e . --no-deps
-python -m evaluate.fetch_quito --root /DATA_DISK/ts3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87
+python -m evaluate.fetch_quito --root /DATA_DISK/rage/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87
 ```
 
 将 `configs/eval/quito/default.yaml` 的 `bench_config.dataset.root` 改为上述目录，
@@ -45,11 +45,11 @@ python -m evaluate.fetch_quito --root /DATA_DISK/ts3/data/bench/quito/ed4bf8eea2
 
 ```bash
 python -m evaluate.run --config configs/eval/quito/default.yaml \
-  --checkpoint /DATA_DISK/ts3/pretrained_models/chronos-t5-small \
-  --output-dir /DATA_DISK/ts3/outputs/eval/quito/base
+  --checkpoint /DATA_DISK/rage/pretrained_models/chronos-t5-small \
+  --output-dir /DATA_DISK/rage/outputs/eval/quito/base
 python -m evaluate.run --config configs/eval/quito/default.yaml \
-  --checkpoint /DATA_DISK/ts3/outputs/train/checkpoint-final \
-  --output-dir /DATA_DISK/ts3/outputs/eval/quito/posttrain
+  --checkpoint /DATA_DISK/rage/outputs/train/checkpoint-final \
+  --output-dir /DATA_DISK/rage/outputs/eval/quito/posttrain
 ```
 
 TIME/Quito 接受含 `config.json`、`model.safetensors` 的原始 Chronos 本地模型；
@@ -59,7 +59,7 @@ FEV 的现有 manifest 要求保持原样。`--resume` 仅用于同一 Quito 协
 主表入口在现有 FEV 命令上替换/增加：
 
 ```text
---benchmark quito --datasets hour min --quito-root /DATA_DISK/ts3/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87
+--benchmark quito --datasets hour min --quito-root /DATA_DISK/rage/data/bench/quito/ed4bf8eea27862aa01a063393ee48732910ecd87
 ```
 
 QuitoBench 与 `hq-bench/quito-corpus` 是不同仓库。现有 source pool 不会自动替换成测试集。

@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from rags.experiments import v7_run
+from rage.experiments import v7_run
 
 
 @pytest.mark.parametrize('seed', [0, 1, 2])

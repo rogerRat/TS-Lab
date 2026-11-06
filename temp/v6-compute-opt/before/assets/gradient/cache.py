@@ -235,7 +235,7 @@ class GradientCache:
             return
         if self.frozen or self._lock.closed:
             raise RuntimeError("selection requested an unprepared gradient; add it to assets requirements")
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         batch = execution_policy(self.engine).batch_size(
             self.engine, "gradient", fallback=32, count=len(pending))
         # Dataset shards keep source and reference identities separate.

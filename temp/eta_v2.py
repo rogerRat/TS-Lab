@@ -90,8 +90,8 @@ for student in config['students']:
         scale=(report['tasks_geometry'][task]['windows']/refs0)**.5
         for arm in config['arms']:
             if (p/'selections'/f'{task}__{arm}.npz').exists():continue
-            base=measured.get(arm,{'rags_gateless':120,'lessvg_t025':25,'random':1,'tsds':90,'lpv_t025':50,'rags_traj_gls':5}.get(arm,30))
-            sel+=base*scale if arm in ['rags_gateless','lessvg_t025'] else base
+            base=measured.get(arm,{'rage_gateless':120,'lessvg_t025':25,'random':1,'tsds':90,'lpv_t025':50,'rage_traj_gls':5}.get(arm,30))
+            sel+=base*scale if arm in ['rage_gateless','lessvg_t025'] else base
     ntrain=162-trained
     gradlo=sum(t['deterministic_missing'] for t in tasks)*rate
     gradmid=sum(t['central_missing'] for t in tasks)*rate

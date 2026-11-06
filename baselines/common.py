@@ -11,10 +11,10 @@ import numpy as np
 import torch
 from torch import nn
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex
 
-from rags.experiments.deploy import cut_disjoint
+from rage.experiments.deploy import cut_disjoint
 
 def _pool_fingerprint(pool_manifest: dict | None) -> str:
     if pool_manifest is None:

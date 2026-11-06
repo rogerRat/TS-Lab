@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from rags.experiments.rank_probability import rank_probability, rank_resampled_windows
+from rage.experiments.rank_probability import rank_probability, rank_resampled_windows
 
 
 def test_monotone_score_changes_leave_rank_mass_unchanged():
@@ -54,7 +54,7 @@ def test_invalid_inputs_fail(scores, counts, temperature):
 
 
 def test_trainable_view_preserves_windows_parent_mass_and_serializes_protocol():
-    from rags.experiments.resampling import ResampledWindows
+    from rage.experiments.resampling import ResampledWindows
     parent = ResampledWindows(np.arange(8, dtype=np.float32),
         np.array([[0, 0], [0, 1], [0, 2], [0, 3]]), np.arange(4),
         [0, 1, 4], np.arange(4), [.7, .3], window_length=2, pool_n=4,

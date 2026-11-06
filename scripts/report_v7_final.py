@@ -22,8 +22,8 @@ EXTENSIONS = (
     ("time_coastal_ts_h", "time_coastal_ts_h-20260925"),
 )
 SHAPE_ARMS = (
-    "rags-shape-expSum", "rags-shape-linearSum",
-    "rags-shape-zeroClipSum", "rags-shape-maxSum",
+    "rage-shape-expSum", "rage-shape-linearSum",
+    "rage-shape-zeroClipSum", "rage-shape-maxSum",
 )
 SEEDS = (0, 1)
 
@@ -155,18 +155,18 @@ def render(parent: Path, main_tasks: tuple[str, ...], arms: tuple[str, ...], *, 
               "|---|---:|---:|",
     ]
     for shape in SHAPE_ARMS:
-        suffix = shape.removeprefix("rags-shape-")
+        suffix = shape.removeprefix("rage-shape-")
         anchors = {(t, m, s): v for t, m, s, v in paired[shape]}
         cells = []
         for family in ("block", "traj"):
-            baseline = {(t, m, s): v for t, m, s, v in paired[f"rags-{family}-{suffix}"]}
+            baseline = {(t, m, s): v for t, m, s, v in paired[f"rage-{family}-{suffix}"]}
             delta = [v - baseline[key] for key, v in anchors.items() if key in baseline]
             cells.append(f"{mean(delta):+.3f}; {sum(d > 0 for d in delta)}/{len(delta)}" if delta else "—")
         lines.append(f"| {shape} | {cells[0]} | {cells[1]} |")
     lines += ["", "## 逐任务结果（每项三模型×两 seed 等权）", "",
               "| 任务 | Shape-Exp | Shape-Linear | Shape-ZeroClip | Shape-Max | Block-Exp | Block-Linear | Rand | LESS | TSDS | LP |",
               "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
-    featured = (*SHAPE_ARMS, "rags-block-expSum", "rags-block-linearSum", "rand", "less-main", "tsds", "lp-mirror")
+    featured = (*SHAPE_ARMS, "rage-block-expSum", "rage-block-linearSum", "rand", "less-main", "tsds", "lp-mirror")
     for task in tasks:
         cells = []
         for arm in featured:
@@ -208,7 +208,7 @@ def render(parent: Path, main_tasks: tuple[str, ...], arms: tuple[str, ...], *, 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parent", type=Path, required=True)
-    parser.add_argument("--config", type=Path, default=Path("configs/rags/main_v7_curve4.json"))
+    parser.add_argument("--config", type=Path, default=Path("configs/rage/main_v7_curve4.json"))
     parser.add_argument("--out", type=Path, default=Path("docs/results/v7_final_10task.md"))
     parser.add_argument("--json-out", type=Path, default=Path("docs/results/v7_final_10task.json"))
     parser.add_argument("--allow-partial", action="store_true")

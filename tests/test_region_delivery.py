@@ -5,9 +5,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import ArmOutput, SelectionCost, WindowIndex, trajectory_level_select
-from rags.experiments.regions import (RegionWindows, block_regions, deliver_regions,
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import ArmOutput, SelectionCost, WindowIndex, trajectory_level_select
+from rage.experiments.regions import (RegionWindows, block_regions, deliver_regions,
                                      deliver_trajectories, load_selection, save_selection)
 
 
@@ -35,8 +35,8 @@ def test_block_envelopes_budget_overlap_and_no_cross_boundary(tmp_path):
     small = selected.prefix(1)
     assert small.coverage()["delivered_points"] == 8
     assert small.budget_windows == 1
-    path = tmp_path / "rags.npz"
-    save_selection(path, ArmOutput("rags", selected, [], SelectionCost(), {"delivery": stats}))
+    path = tmp_path / "rage.npz"
+    save_selection(path, ArmOutput("rage", selected, [], SelectionCost(), {"delivery": stats}))
     restored = load_selection(path)
     assert restored.diagnostics["delivery"] == stats
     np.testing.assert_array_equal(restored.selected[:], oracle)
@@ -68,7 +68,7 @@ def test_formal_width_crb_envelope():
 
 
 def test_curve_region_cache_and_whole_unit_prefix(tmp_path, monkeypatch):
-    from rags.experiments import curves
+    from rage.experiments import curves
     index = index_fixture()
     selected = deliver_trajectories(index, [10, 20], n=8)
     arm = ArmOutput("random", selected, [], SelectionCost(), {})
@@ -93,7 +93,7 @@ def test_retired_raw_reference_mean_delivery_is_rejected():
 @pytest.mark.parametrize("student", ["chronos-small", "timesfm-2.5", "timemoe-200m"])
 def test_region_worker_sampling_and_epoch_budget(tmp_path, student):
     from test_multistudent import TinyAdapter, make_manifest
-    from rags.experiments.students import adapter_engine, atomic_json, run_student_task
+    from rage.experiments.students import adapter_engine, atomic_json, run_student_task
     path, manifest = make_manifest(tmp_path)
     # Two copies plus a second trajectory, all longer than one training window.
     values = np.r_[np.arange(12), np.arange(12), np.arange(10) + 20].astype(np.float32) / 100
@@ -121,9 +121,9 @@ def test_region_worker_sampling_and_epoch_budget(tmp_path, student):
     assert len(seen) == 11
 
 
-def test_rags_max_score_block_delivery_matches_ablation_full():
-    from rags.experiments.arms import rags_crb_select
-    from rags.experiments.ablation import select_variant
+def test_rage_max_score_block_delivery_matches_ablation_full():
+    from rage.experiments.arms import rage_crb_select
+    from rage.experiments.ablation import select_variant
     index = index_fixture()
     refs = [TimeSeriesFragment(np.arange(22, dtype=np.float32), fragment_id=77)]
     def field(fragment, starts):
@@ -132,7 +132,7 @@ def test_rags_max_score_block_delivery_matches_ablation_full():
         cover_density=.2, error_density=.1, split_density=.05, mean_epsilon=.001,
         endpoint_epsilon=.001, curvature_cap=1., block_budget=8, n_windows=4, window_entry_budget=None)
     pool = list(index.by_fragment.values())
-    actual = rags_crb_select(refs, pool, index, gradient_computer=field, context_length=4,
+    actual = rage_crb_select(refs, pool, index, gradient_computer=field, context_length=4,
         prediction_length=2, window_stride=1, cover_density=.2, error_density=.1,
         split_density=.05, block_budget=8, n_select=4, mean_epsilon=.001,
         endpoint_epsilon=.001, tie_seed=5, device="cpu")

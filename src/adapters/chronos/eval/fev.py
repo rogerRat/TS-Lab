@@ -184,7 +184,7 @@ class ChronosFEVEvaluationAdapter(fev.ForecastingModel):
             device_map=device,
             torch_dtype=self.torch_dtype,
         )
-        # The benchmark declaration keeps dataset_config for the TS3
+        # The benchmark declaration keeps dataset_config for the RAGE
         # reference-catalog lookup, but evaluation must load the already
         # materialized file from data/bench/fev.  FEV's stock loader selects
         # Hub loading whenever dataset_config is present, so temporarily

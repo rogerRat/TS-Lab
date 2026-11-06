@@ -81,7 +81,7 @@ def test_parameter_hash_projector_is_fixed_shape_and_seeded() -> None:
 
 
 def test_full_projection_compact_tables_preserve_original_global_random_stream():
-    from rags.engines import _FullModelProjector
+    from rage.engines import _FullModelProjector
     params = [("a", torch.nn.Parameter(torch.ones(7))), ("b", torch.nn.Parameter(torch.ones(16)))]
     projector = _FullModelProjector(params, 9, 10, torch.device("cpu"))
     rng = np.random.default_rng(10)
@@ -154,7 +154,7 @@ def test_warmup_persists_candidates_and_restores_base_model(tmp_path) -> None:
         batch_size=2,
         run_id="toy",
     )
-    assert manifest["schema_version"] == "ts3.gradient-warmup.v1"
+    assert manifest["schema_version"] == "tsl.gradient-warmup.v1"
     assert len(manifest["candidates"]) == 2
     assert (tmp_path / "toy" / "manifest.json").is_file()
     for candidate in manifest["candidates"]:

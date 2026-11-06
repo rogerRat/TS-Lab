@@ -27,7 +27,7 @@ CHRONOS_REPRESENTATIVE_SUBSETS = [
 ]
 
 # This list is the explicit set of Chronos configurations whose target schema
-# is supported by TS3.  The representative list remains the bounded default;
+# is supported by RAGE.  The representative list remains the bounded default;
 # callers must request ``--subsets all`` to select this full list.
 CHRONOS_SUPPORTED_SUBSETS = [
     *CHRONOS_REPRESENTATIVE_SUBSETS,

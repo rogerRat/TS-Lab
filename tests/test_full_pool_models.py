@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import torch
 
-from rags.experiments import full_pool_models as module
+from rage.experiments import full_pool_models as module
 
 
 def test_live_model_identity_equals_persisted_identity(monkeypatch):

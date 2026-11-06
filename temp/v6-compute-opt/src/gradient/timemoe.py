@@ -16,7 +16,7 @@ class TimeMoEGradientEngine(IndependentGradientWorkers, NativeProbe):
         self._pool_size = 0
 
     def batch_gradient_sketch(self, windows, batch_size=None):
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         values = np.asarray(windows, dtype=np.float32)
         if values.ndim != 2 or not len(values) or not np.isfinite(values).all():
             raise ValueError("gradient windows must be a non-empty finite matrix")

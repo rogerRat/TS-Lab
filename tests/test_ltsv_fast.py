@@ -8,9 +8,9 @@ import torch
 from baselines.ltsv.fast import (BlockScorer, block_rng, block_starts, score_fragment,
     reference_mse, optimized_select, REVISION)
 from baselines.ltsv.runner import _ltsv_reference_mse
-from rags.execution import SelectionExecution
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex
+from rage.execution import SelectionExecution
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex
 
 
 def engine():

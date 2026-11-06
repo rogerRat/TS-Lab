@@ -10,10 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from assets.gradient.cache import atomic_json
-from rags.crb import CRBEngine
-from rags.experiments.ablation import reconstruct_gradients
-from rags.experiments.v7_protocol import crb_for
-from rags.experiments.v7_scores import interpolated_chunks, uniform_anchors
+from rage.crb import CRBEngine
+from rage.experiments.ablation import reconstruct_gradients
+from rage.experiments.v7_protocol import crb_for
+from rage.experiments.v7_scores import interpolated_chunks, uniform_anchors
 from scripts.quick_crb_ratio_ref import TruthComputer, cached_truth, phase_allocation
 from scripts.quick_crb_uniform_ref import FIDS, STUDENT, TASK, make_context
 
@@ -216,7 +216,7 @@ def report(result):
         lines.append(f"| {ratio} | {row['allocations']} | {row['equal_trajectory_mean_rmse']:.4f} | {row['pooled_rmse']:.4f} |")
     winner = result["constrained_top_equal_trajectory_ratios"][0]
     lines += ["", f"Lowest in-sample equal-trajectory mean among this constrained grid: {winner['ratio']} → {winner['allocations']}, mean {winner['equal_trajectory_mean_rmse']:.4f}, pooled {winner['pooled_rmse']:.4f}."]
-    lines += ["", "For the equal-trajectory **reference mean gradient** (a complementary target used by V7 gradient baselines, not identical to RAGS block matching), relative vector errors are:", ""]
+    lines += ["", "For the equal-trajectory **reference mean gradient** (a complementary target used by V7 gradient baselines, not identical to RAGE block matching), relative vector errors are:", ""]
     for label, row in result["equal_trajectory_reference_mean"].items():
         lines.append(f"- {label}: relative error {row['relative_error']:.4f}, cosine {row['cosine']:.4f}.")
     lines += ["", result["limitation"], ""]

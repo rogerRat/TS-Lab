@@ -3,13 +3,13 @@ import json
 from pathlib import Path
 import pytest
 
-from rags.experiments.students import atomic_json
-from rags.experiments.protocol import validate_config
-from rags.experiments.seed_rounds import run_rounds,round_completion,round_config
+from rage.experiments.students import atomic_json
+from rage.experiments.protocol import validate_config
+from rage.experiments.seed_rounds import run_rounds,round_completion,round_config
 
 
 def template(tmp_path):
-    c=json.loads(Path('configs/rags/main.json').read_text())
+    c=json.loads(Path('configs/rage/main.json').read_text())
     cache=tmp_path/'existing-gradients';cache.mkdir()
     c['gradient_cache_source']=str(cache)
     return c
@@ -104,7 +104,7 @@ def test_prepared_execution_controls_cannot_launch(tmp_path):
 
 
 def test_v5_summary_recognizes_orig_rand_and_actual_round_seed(tmp_path):
-    from rags.experiments.full_pool_run import summarize
+    from rage.experiments.full_pool_run import summarize
     c=round_config(template(tmp_path),2);folder=tmp_path/'seed2';publish(c,folder)
     summary=summarize(folder,c)
     assert summary['complete']

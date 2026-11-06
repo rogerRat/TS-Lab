@@ -16,8 +16,8 @@ import subprocess
 import sys
 
 from adapters.foundation import build_adapter
-from rags.experiments.students import adapter_engine
-from rags.experiments.train_eval import run_arm_training
+from rage.experiments.students import adapter_engine
+from rage.experiments.train_eval import run_arm_training
 
 
 def exercise(adapter, tmp_path):
@@ -41,8 +41,8 @@ def exercise(adapter, tmp_path):
     assert predictions.shape==(2,64) and np.isfinite(predictions).all()
     np.testing.assert_allclose(predictions,adapter.forecast(windows[:,:512],prediction_length=64),rtol=0,atol=0)
     base={k:v.detach().cpu().clone() for k,v in model.state_dict().items()}
-    from rags.experiments.regions import RegionWindows, save_selection
-    from rags.experiments.arms import ArmOutput, SelectionCost
+    from rage.experiments.regions import RegionWindows, save_selection
+    from rage.experiments.arms import ArmOutput, SelectionCost
     trajectory = rng.normal(size=600).astype(np.float32)
     regions = RegionWindows(np.tile(trajectory, 2), [0, 600, 1200], [[0, 0, 600], [0, 0, 600]],
                             window_length=576, budget_windows=2)
@@ -76,7 +76,7 @@ def exercise(adapter, tmp_path):
     assert len(cell['checkpoints'])==4 and cell['student']==adapter.spec.key
 
 
-@pytest.mark.skipif(transformers.__version__!='5.3.0',reason='isolated ts3-timesfm profile')
+@pytest.mark.skipif(transformers.__version__!='5.3.0',reason='isolated rage-timesfm profile')
 def test_timesfm_official_tiny_fp32_512_64(tmp_path):
     from transformers import TimesFm2_5Config, TimesFm2_5ModelForPrediction
     adapter=build_adapter('timesfm-2.5',device='cpu')
@@ -87,7 +87,7 @@ def test_timesfm_official_tiny_fp32_512_64(tmp_path):
     exercise(adapter,tmp_path)
 
 
-@pytest.mark.skipif(transformers.__version__!='4.40.1',reason='isolated ts3-timemoe profile')
+@pytest.mark.skipif(transformers.__version__!='4.40.1',reason='isolated rage-timemoe profile')
 def test_timemoe_official_tiny_fp32_512_64(tmp_path):
     from adapters.foundation.timemoe import official_classes,native_training_batch
     config_class,model_class=official_classes()

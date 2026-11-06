@@ -1,6 +1,6 @@
 import copy
 import torch
-from rags.experiments.precision import make_adamw
+from rage.experiments.precision import make_adamw
 
 
 def test_bf16_optimizer_has_no_master_weights_and_resumes():

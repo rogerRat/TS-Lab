@@ -2,7 +2,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 import pytest
-from rags.experiments.v7_train_leases import model_lease, train_once
+from rage.experiments.v7_train_leases import model_lease, train_once
 
 
 def save(path, value):

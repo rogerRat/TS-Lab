@@ -29,19 +29,19 @@ for i in range(10):
  if not processes(OLD):break
  time.sleep(1)
 for pid in processes(OLD):os.kill(pid,signal.SIGKILL)
-from rags.experiments.v3_report import render
+from rage.experiments.v3_report import render
 out=ROOT/'temp/MAIN-v3-T005-active.md'
 render(run,out)
-s=out.read_text().replace('<!-- v3-notes:end -->','\n### 温度切换\n所有涉及采样温度的默认方法统一 T005（0.05）：lp-mirror、less-main、rags-main、rags-traj。新方法沿用原定名称，旧版所有方法对照展示加 -T025 后缀；orig/rand/tsds无该温度，旧后缀仅标记历史批次。四温度臂重新训练；其余已完成同协议结果有显式复用来源。旧结果见 [T025快照](archive/MAIN-v3-t025-snapshot-20260917.md)。\n<!-- v3-notes:end -->')
+s=out.read_text().replace('<!-- v3-notes:end -->','\n### 温度切换\n所有涉及采样温度的默认方法统一 T005（0.05）：lp-mirror、less-main、rage-main、rage-traj。新方法沿用原定名称，旧版所有方法对照展示加 -T025 后缀；orig/rand/tsds无该温度，旧后缀仅标记历史批次。四温度臂重新训练；其余已完成同协议结果有显式复用来源。旧结果见 [T025快照](archive/MAIN-v3-t025-snapshot-20260917.md)。\n<!-- v3-notes:end -->')
 out.write_text(s);out.replace(ROOT/'docs/MAIN-v3.md')
 scheduler=(ROOT/'temp/v3_scheduler.sh').read_text().replace(OLD,NEW).replace('v3_scheduler.','v3_t005_scheduler.').replace('sleep 45','sleep 10')
-scheduler=scheduler.replace('pgrep -f -- "--student $student\\$"','pgrep -f -- "rags.experiments.full_pool_worker --run $RUN --student $student\\$"')
+scheduler=scheduler.replace('pgrep -f -- "--student $student\\$"','pgrep -f -- "rage.experiments.full_pool_worker --run $RUN --student $student\\$"')
 p=ROOT/'temp/v3_t005_scheduler.sh';p.write_text(scheduler)
 subprocess.run(['/bin/bash','-n',str(p)],check=True)
 guard=detach(['/bin/bash',str(p)],ROOT/'temp/v3_t005_scheduler.launch.log')
 (ROOT/'temp/v3_t005_scheduler.pid').write_text(str(guard.pid)+'\n')
 loop=ROOT/'temp/v3_t005_report_loop.sh'
-loop.write_text('#!/bin/bash\ncd /root/TS3\nwhile true; do\nPYTHONPATH=/root/TS3/src /root/miniconda3/envs/ts3/bin/python -m rags.experiments.v3_report --run '+NEW+'\nsleep 1800\ndone\n')
+loop.write_text('#!/bin/bash\ncd /root/TS3\nwhile true; do\nPYTHONPATH=/root/TS3/src /root/miniconda3/envs/ts3/bin/python -m rage.experiments.v3_report --run '+NEW+'\nsleep 1800\ndone\n')
 report=detach(['/bin/bash',str(loop)],ROOT/'temp/v3_t005_report.log')
 (ROOT/'temp/v3_t005_report.pid').write_text(str(report.pid)+'\n')
 with (ROOT/'docs/Progress.md').open('a') as f:f.write('\nT005远端后台已启动：'+NEW+'；guard PID'+str(guard.pid)+'，30分钟report PID'+str(report.pid)+'。三个模型10秒错峰并行，独立session/关闭继承fds，不依赖用户本机或Claude Cron。默认四温度方法全部.05，旧展示-T025，配置/选集及来源均已验证，31项回归通过；等待新训练成绩。\n')

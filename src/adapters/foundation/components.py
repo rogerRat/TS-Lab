@@ -20,7 +20,7 @@ def split_static_windows(
     context_length: int,
     prediction_length: int,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Split materialized TS3 windows without resampling or normalization."""
+    """Split materialized RAGE windows without resampling or normalization."""
     values = as_finite_batch(windows, name="windows")
     if context_length <= 0 or prediction_length <= 0:
         raise ValueError("context_length and prediction_length must be positive")

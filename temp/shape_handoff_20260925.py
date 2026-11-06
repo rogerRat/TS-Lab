@@ -38,7 +38,7 @@ def main():
             if model is None:
                 if '--student' in words:
                     raise RuntimeError('Original supervisor PID is a worker')
-            elif '--student' not in words or words[words.index('--student')+1] != model or '--arm' not in words or words[words.index('--arm')+1] != 'rags-shape-expSum':
+            elif '--student' not in words or words[words.index('--student')+1] != model or '--arm' not in words or words[words.index('--arm')+1] != 'rage-shape-expSum':
                 raise RuntimeError(f'Unexpected shape worker model/arm: {pid}')
             selector.register(fd, selectors.EVENT_READ, pid)
         while selector.get_map():

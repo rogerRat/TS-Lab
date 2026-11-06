@@ -13,14 +13,14 @@ def test_canonical_and_compatibility_package_imports() -> None:
         "assets.dataset_processing.shard_dataset",
         "gradient",
         "gradient.chronos",
-        "rags.experiments.data",
+        "rage.experiments.data",
     )
     for module_name in module_names:
         assert importlib.import_module(module_name) is not None
 
 
 def test_project_implementations_live_under_src_and_baselines_are_separate():
-    for name in ('rags', 'ts3', 'gradient', 'adapters', 'assets', 'evaluate'):
+    for name in ('rage', 'tsl', 'gradient', 'adapters', 'assets', 'evaluate'):
         module = importlib.import_module(name)
         assert Path(module.__file__).resolve().is_relative_to(PROJECT_ROOT / 'src')
         assert not (PROJECT_ROOT / name).exists()
@@ -31,27 +31,27 @@ def test_project_implementations_live_under_src_and_baselines_are_separate():
 
 def test_moved_modules_keep_repository_data_roots():
     for name in ('evaluate.fev', 'evaluate.time', 'evaluate.run',
-                 'rags.experiments.run', 'rags.experiments.time_bench'):
+                 'rage.experiments.run', 'rage.experiments.time_bench'):
         assert importlib.import_module(name).PROJECT_ROOT == PROJECT_ROOT
 
 
 def test_cli_router_dispatches_without_implementing_selection(monkeypatch):
-    from scripts.exp import rags
+    from scripts.exp import rage
     calls = []
     class Workflow:
         @staticmethod
         def main(argv):
             calls.append(argv)
             return 0
-    monkeypatch.setattr(rags, 'import_module', lambda name: Workflow)
-    assert rags.main(['main_table', '--help']) == 0
+    monkeypatch.setattr(rage, 'import_module', lambda name: Workflow)
+    assert rage.main(['main_table', '--help']) == 0
     assert calls == [['--help']]
 
 
 def test_installed_packages_import_outside_repository(tmp_path):
     result = subprocess.run(
         [sys.executable, '-c',
-         'import rags, ts3, baselines, configs.paths; '
+         'import rage, tsl, baselines, configs.paths; '
          'from baselines.runners import run_baseline'],
         cwd=tmp_path, capture_output=True, text=True,
     )
@@ -59,7 +59,7 @@ def test_installed_packages_import_outside_repository(tmp_path):
 
 
 def test_legacy_selection_stacks_are_removed_but_external_baselines_remain():
-    removed = ('src/ts3/core', 'src/ts3/features', 'src/train', 'src/analysis',
+    removed = ('src/tsl/core', 'src/tsl/features', 'src/train', 'src/analysis',
                'src/assets/dataset_processing/features',
                'src/assets/dataset_processing/catalog')
     for relative in removed:

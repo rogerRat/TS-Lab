@@ -8,7 +8,7 @@ COUNT=/root/TS3/temp/worker_watchdog.count
 PY=/root/miniconda3/envs/ts3/bin/python
 [ -f "$COUNT" ] || echo 0 > "$COUNT"
 while true; do
-  alive=$(pgrep -f 'rags.experiments.full_pool_worker' | wc -l)
+  alive=$(pgrep -f 'rage.experiments.full_pool_worker' | wc -l)
   for entry in "chronos-base:/root/miniconda3/envs/ts3/bin/python" \
                "timesfm-2.5:/root/autodl-tmp/conda/envs/ts3-timesfm/bin/python" \
                "timemoe-200m:/root/autodl-tmp/conda/envs/ts3-timemoe/bin/python"; do
@@ -27,7 +27,7 @@ PYEOF
       echo "$(date '+%H:%M:%S') relaunch $student (alive=$alive cells=$done_cells)" >> "$LOG"
       cd /root/TS3 && env PYTHONPATH=/root/TS3/src HF_HOME=/root/autodl-tmp/hf-cache \
         PYTHONUNBUFFERED=1 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
-        nohup "$pybin" -m rags.experiments.full_pool_worker --run "$RUN" --student "$student" \
+        nohup "$pybin" -m rage.experiments.full_pool_worker --run "$RUN" --student "$student" \
         >> "$RUN/$student.log" 2>&1 < /dev/null &
       echo $(( $(cat $COUNT) + 1 )) > "$COUNT"
       sleep 45   # 错峰,避开 MPS 初始化竞态

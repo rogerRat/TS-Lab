@@ -10,7 +10,7 @@ note = '''
 
 ## 内存热点修复与验证（2026-09-17，Codex 与主控 Claude 协调）
 
-旧 CUDA OOM 的堆栈定位在 Chronos Darwin / rags_traj_gls / seed2 的最终评估：
+旧 CUDA OOM 的堆栈定位在 Chronos Darwin / rage_traj_gls / seed2 的最终评估：
 `train_eval.evaluate -> quantile_forecasts -> T5 attention softmax(scores.float())`。
 当次申请 1.51GiB，而 GPU 只剩 921.94MiB；Chronos 报告 PyTorch 已分配 17.56GiB、
 保留但未使用 15.42GiB。该记录发生于旧六臂 run，不能归因为新 Global 臂。
@@ -21,7 +21,7 @@ note = '''
 - `full_pool.py` 原块匹配将全部方向 `np.stack`，随后 `resampling.py` 再整体转 FP64。
   以约 360774 个 4096 维源块计算，FP32 stack 约 5.5GiB，额外 FP64 副本约 11GiB；
   尚未计入已有 CRB 块、参考方向与缓存。现在传递原生方向列表，4096 行一批转 FP64，
-  每批方向工作区约 128MiB。原 RAGS 仍按参考行批次计算同样的 softmax，Global 仍按原定义
+  每批方向工作区约 128MiB。原 RAGE 仍按参考行批次计算同样的 softmax，Global 仍按原定义
   聚合参考方向并进行全局 softmax；GPU 源方向工作区仍受原来的剩余显存 30% 条件约束。
 - `full_pool_worker.py` 在模型构建前获取每个 run/student 的独占 `worker.lock`，
   防止 supervisor/watchdog 重复启动同一学生时重复加载模型。该锁不限制不同学生或不同 run。
@@ -33,7 +33,7 @@ note = '''
 
 验证：选择/调度相关测试 32 passed、1 skipped（CUDA 隐藏）；另一次实际开放 CUDA 的
 匹配、评估、训练与恢复相关测试 44 passed，其中包含 CPU/GPU 分批概率等价检验。
-新增测试禁止整套方向矩阵转换，并验证原 RAGS/Global 相对显式 FP64 矩阵的概率
+新增测试禁止整套方向矩阵转换，并验证原 RAGE/Global 相对显式 FP64 矩阵的概率
 在 rtol=1e-12 下等价；独立进程持锁时，重复启动不能进入 worker 主体。
 `git diff --check` 通过。两组测试有重叠，不应相加为唯一测试数量。
 

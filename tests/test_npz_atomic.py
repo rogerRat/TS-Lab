@@ -2,9 +2,9 @@ import json
 
 import numpy as np
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import GradientBlock, load_pool_blocks, save_pool_blocks
-from rags.experiments.regions import save_selection
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import GradientBlock, load_pool_blocks, save_pool_blocks
+from rage.experiments.regions import save_selection
 
 
 def test_gradient_npz_is_atomic_and_has_format_field(tmp_path):

@@ -13,8 +13,8 @@ import torch
 from assets.gradient.cache import GradientCache, FragmentGradients, index_request, readable
 from assets.gradient.variants import aggregate_retained, aggregate_anchors, trajectory_counts
 from baselines.trajectory import trajectory_positions
-from rags.crb import CRBConfig, CRBEngineMulti
-from rags.execution import SelectionExecution, selection_execution
+from rage.crb import CRBConfig, CRBEngineMulti
+from rage.execution import SelectionExecution, selection_execution
 from .arms import WindowIndex
 from .development_inputs import load_fragments
 from .full_pool_models import build_model
@@ -82,7 +82,7 @@ def run_assets(run_dir, student, *, datasets=None, reference_batch=32, model_bun
         c,h = protocol['context_length'],protocol['prediction_length']
         thresholds = {}
         if protocol['crb'].get('epsilon_policy') not in ('trajectory_p10', 'none'):
-            from rags.epsilon_protocol import load_p10_calibration
+            from rage.epsilon_protocol import load_p10_calibration
             calibration = load_p10_calibration(protocol['settings'][student]['epsilon_calibration'], identity)
             thresholds = dict(mean_epsilon=calibration['epsilon'],endpoint_epsilon=calibration['epsilon'])
         crb = CRBConfig(context_length=c,prediction_length=h,**thresholds,**protocol['crb'])

@@ -32,4 +32,4 @@ for s in chronos-base timesfm-2.5 timemoe-200m; do
 done
 echo "fail-scan-done"
 echo "## 刷新 MAIN-v3"
-cd /root/TS3 && $PY -m rags.experiments.v3_report --run "$RUN" 2>&1 | tail -2
+cd /root/TS3 && $PY -m rage.experiments.v3_report --run "$RUN" 2>&1 | tail -2

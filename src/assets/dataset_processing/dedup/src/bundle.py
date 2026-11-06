@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 
 from assets.dataset_processing.shard_dataset import ShardDatasetReader
-from ts3.spec.files.shard_dataset import DEDUP_SCHEMA, validate_shard_dataset_bundle, write_arrow
+from tsl.spec.files.shard_dataset import DEDUP_SCHEMA, validate_shard_dataset_bundle, write_arrow
 
 log = logging.getLogger("assets.dataset_processing.dedup")
 

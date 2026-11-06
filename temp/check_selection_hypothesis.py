@@ -12,7 +12,7 @@ for student in protocol['students']:
             continue
         baseline = json.loads(original.read_text())['mase']
         row = dict(student=student, task=task, original_mase=baseline, improvement_pct={})
-        for arm in ['random','lessvg_t025','rags_gateless','rags_global','rags_traj_gls','rags_traj_global']:
+        for arm in ['random','lessvg_t025','rage_gateless','rage_global','rage_traj_gls','rage_traj_global']:
             cell = cells/f'{task}__{arm}__seed0.json'
             if cell.exists():
                 result = json.loads(cell.read_text())

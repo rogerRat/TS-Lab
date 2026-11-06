@@ -9,7 +9,7 @@ import selectors
 import subprocess
 import sys
 import time
-from rags.experiments.v7_costs import atomic_text
+from rage.experiments.v7_costs import atomic_text
 
 
 def pidfd(pid):
@@ -70,7 +70,7 @@ def main():
                     raise RuntimeError('Cell identity mismatch: '+str(path))
         # Native worker additionally checks full scientific identities before advancing.
     env=dict(os.environ,PYTHONPATH='src:.',
-        TS3_GRADIENT_CACHE_ROOT='/root/autodl-tmp/TS3/cache/grad-pool')
+        RAGE_GRADIENT_CACHE_ROOT='/root/autodl-tmp/rage/cache/grad-pool')
     def command(seed):
         return [sys.executable,'-m','scripts.run_v7','--config',str(config_path),
             '--run',str(root),'--phase','train','--student','chronos-base',

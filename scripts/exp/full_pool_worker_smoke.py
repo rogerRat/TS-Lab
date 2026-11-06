@@ -5,12 +5,12 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.development_inputs import load_fragments, save_fragments
-from rags.experiments.full_pool_worker import run_worker
-from rags.experiments.metrics import history_seasonal_scale, seasonality_for
-from rags.experiments.resampling import REVISION
-from rags.experiments.students import STUDENTS, atomic_json
+from rage.core import TimeSeriesFragment
+from rage.experiments.development_inputs import load_fragments, save_fragments
+from rage.experiments.full_pool_worker import run_worker
+from rage.experiments.metrics import history_seasonal_scale, seasonality_for
+from rage.experiments.resampling import REVISION
+from rage.experiments.students import STUDENTS, atomic_json
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--epsilon", required=True)
     parser.add_argument("--model-path")
     parser.add_argument("--out", required=True)
-    parser.add_argument("--arms", nargs="+", default=["random", "rags"])
+    parser.add_argument("--arms", nargs="+", default=["random", "rage"])
     args = parser.parse_args()
     torch.set_num_threads(4)
     out = Path(args.out).resolve()

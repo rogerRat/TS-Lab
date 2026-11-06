@@ -5,10 +5,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from rags.experiments.checkpoint_retention import cleanup_completed_weights
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.students import atomic_json
-from rags.experiments.train_eval import evaluate, fine_tune
+from rage.experiments.checkpoint_retention import cleanup_completed_weights
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.students import atomic_json
+from rage.experiments.train_eval import evaluate, fine_tune
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--student", required=True)
@@ -28,7 +28,7 @@ assert {p.dtype for p in engine.model.parameters()} == {torch.bfloat16}
 if hasattr(engine, "training_loss"):
     loss = engine.training_loss(windows[:1])
 else:
-    from rags.engines import per_sample_cross_entropy
+    from rage.engines import per_sample_cross_entropy
     tensors = engine.batch_tensors(windows[:1])
     inputs = getattr(engine, "_logits_inputs", lambda value: value)(tensors)
     output = engine.model(**inputs, return_dict=True)

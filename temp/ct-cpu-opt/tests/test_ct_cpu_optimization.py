@@ -4,7 +4,7 @@ import pytest
 
 from assets.gradient import WindowRequest, GradientDataset
 from test_gradient_assets import Probe, cache_at
-from rags.experiments.reference_opinions import reference_scores_many, AGGREGATIONS
+from rage.experiments.reference_opinions import reference_scores_many, AGGREGATIONS
 
 
 def request(row, dataset='source'):
@@ -130,7 +130,7 @@ def test_shared_cosines_bitwise_equal_legacy_tiled_reductions(modes, device):
     actual = reference_scores_many(refs, src, w, aggregations=modes,
                                    reference_batch=7, source_batch=19, device=device)
     assert set(actual) == set(modes)
-    from rags.experiments.ranking import rank_mass
+    from rage.experiments.ranking import rank_mass
     counts = np.arange(len(src)) + 1
     for mode in modes:
         np.testing.assert_array_equal(actual[mode][0], expected[mode])
@@ -140,20 +140,20 @@ def test_shared_cosines_bitwise_equal_legacy_tiled_reductions(modes, device):
 
 def test_shared_arms_use_one_score_pass_and_preserve_distribution(tmp_path, monkeypatch):
     from assets.gradient.prepare import prepare_gradients
-    from rags.core import TimeSeriesFragment
-    from rags.crb import CRBConfig
-    from rags.experiments.arms import WindowIndex
-    from rags.experiments import full_pool
+    from rage.core import TimeSeriesFragment
+    from rage.crb import CRBConfig
+    from rage.experiments.arms import WindowIndex
+    from rage.experiments import full_pool
     pool = [TimeSeriesFragment(np.linspace(1, 3, 60, dtype=np.float32), fragment_id=1)]
     refs = [TimeSeriesFragment(np.linspace(2, 4, 60, dtype=np.float32), fragment_id=2)]
     index = WindowIndex(pool, context_length=4, prediction_length=2)
     kwargs = dict(reference_fragments=refs, pool=pool, index=index,
                   pool_manifest={'total_equivalents': 10}, model_identity={'model_id':'fixture'},
                   crb_config=CRBConfig(context_length=4, prediction_length=2), dataset_tag='one')
-    assets = prepare_gradients(['rags'], Probe(), run_dir=tmp_path, **kwargs)
-    arms = ['rags-block-' + mode for mode in AGGREGATIONS]
+    assets = prepare_gradients(['rage'], Probe(), run_dir=tmp_path, **kwargs)
+    arms = ['rage-block-' + mode for mode in AGGREGATIONS]
     expected = [full_pool.select_full_pool(arm, None, gradient_assets=assets, **kwargs) for arm in arms]
-    assets.selection_aggregations['rags'] = list(AGGREGATIONS)
+    assets.selection_aggregations['rage'] = list(AGGREGATIONS)
     calls = []
     implementation = full_pool.reference_scores_many
     def observed(*args, **kwargs):

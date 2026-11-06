@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import pytest
-from rags.experiments.v7_costs import (selection_storage, collect, render,
+from rage.experiments.v7_costs import (selection_storage, collect, render,
                                      update_markdown, BEGIN, END, endpoint_mase,
                                      shared_inventory)
 
@@ -79,7 +79,7 @@ def test_missing_endpoint_is_not_best_or_final_four():
 
 
 def test_legacy_cosine_is_display_only():
-    from rags.experiments.v7_display import display_arm
+    from rage.experiments.v7_display import display_arm
     assert display_arm('grad-cos') == 'gradcos-legacy'
     assert display_arm('grad-dot') == 'grad-dot'
     report = {'generated_at': 'now', 'rows': [dict(model='m', arm='grad-cos',

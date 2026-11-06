@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 
 from test_full_pool_resampling import Probe, inputs
-from rags.experiments.development_inputs import save_fragments
-from rags.experiments.full_pool_worker import run_worker
-from rags.experiments.resampling import REVISION
-from rags.experiments.students import atomic_json
+from rage.experiments.development_inputs import save_fragments
+from rage.experiments.full_pool_worker import run_worker
+from rage.experiments.resampling import REVISION
+from rage.experiments.students import atomic_json
 
 
 def fixture(tmp_path):
@@ -27,11 +27,11 @@ def fixture(tmp_path):
         arms=["rand"], seeds=[0, 1], context_length=4, prediction_length=2, train_batch=32,
         inputs=str(folder), crb={}, settings={"chronos-base": dict(
             epochs=.5, learning_rate=1e-7, temperature={})}, selection_execution={"cpu_threads": 2})
-    from rags.experiments.ranking import frozen_rank_protocol
-    from rags.experiments.protocol import method_protocols
-    from rags.experiments.full_pool import ARMS
-    from rags.experiments.ranking import DEFAULT_TEMPERATURE
-    config["settings"]["chronos-base"]["temperature"]={a:DEFAULT_TEMPERATURE for a in ARMS if a.startswith("rags-") or a=="less-main"}
+    from rage.experiments.ranking import frozen_rank_protocol
+    from rage.experiments.protocol import method_protocols
+    from rage.experiments.full_pool import ARMS
+    from rage.experiments.ranking import DEFAULT_TEMPERATURE
+    config["settings"]["chronos-base"]["temperature"]={a:DEFAULT_TEMPERATURE for a in ARMS if a.startswith("rage-") or a=="less-main"}
     config.update(rank_protocol=frozen_rank_protocol(),method_protocols=method_protocols(config["arms"]))
     atomic_json(tmp_path / "execution_control.json",dict(mode="run",selection_enabled=True,training_enabled=True,evaluation_enabled=True))
     atomic_json(tmp_path / "protocol.json", config)
@@ -65,7 +65,7 @@ def test_worker_trains_task_before_preparing_the_next_task(tmp_path, monkeypatch
     config["datasets"] = ["tiny", "later"]
     atomic_json(tmp_path / "protocol.json", config)
     events = []
-    from rags.experiments import full_pool_worker as module
+    from rage.experiments import full_pool_worker as module
     select = module.select_full_pool
     train = module.run_arm_training
 
@@ -95,8 +95,8 @@ def test_original_first_does_not_select_or_train(tmp_path, monkeypatch):
     config, bundle = fixture(tmp_path)
     def forbidden(*args, **kwargs):
         raise AssertionError("Original-only stage must not select or train")
-    monkeypatch.setattr("rags.experiments.full_pool_worker.select_full_pool", forbidden)
-    monkeypatch.setattr("rags.experiments.full_pool_worker.run_arm_training", forbidden)
+    monkeypatch.setattr("rage.experiments.full_pool_worker.select_full_pool", forbidden)
+    monkeypatch.setattr("rage.experiments.full_pool_worker.run_arm_training", forbidden)
     out = run_worker(tmp_path, "chronos-base", model_bundle=bundle, original_only=True)
     assert len(list((out / "cells").glob("*.json"))) == 1
     assert json.loads((out / "state.json").read_text())["status"] == "original_complete"
@@ -118,7 +118,7 @@ def test_completed_cleanup_preserves_results_and_resume_skips_training(tmp_path,
     assert list((out / "selections").glob("*.npz"))
     def must_not_train(*args, **kwargs):
         raise AssertionError("Completed cells must not retrain")
-    monkeypatch.setattr("rags.experiments.full_pool_worker.run_arm_training", must_not_train)
+    monkeypatch.setattr("rage.experiments.full_pool_worker.run_arm_training", must_not_train)
     run_worker(tmp_path, "chronos-base", model_bundle=bundle)
 
 
@@ -130,7 +130,7 @@ def test_failed_cell_keeps_training_state(tmp_path, monkeypatch):
         checkpoint_dir.mkdir(parents=True)
         (checkpoint_dir / "resume.pt").touch()
         raise RuntimeError("evaluation interrupted")
-    monkeypatch.setattr("rags.experiments.full_pool_worker.run_arm_training", fail)
+    monkeypatch.setattr("rage.experiments.full_pool_worker.run_arm_training", fail)
     with pytest.raises(RuntimeError, match="evaluation interrupted"):
         run_worker(tmp_path, "chronos-base", model_bundle=bundle)
     assert len(list(tmp_path.rglob("resume.pt"))) == 1
@@ -138,7 +138,7 @@ def test_failed_cell_keeps_training_state(tmp_path, monkeypatch):
 
 
 def test_interruption_between_result_and_cleanup_does_not_retrain(tmp_path, monkeypatch):
-    from rags.experiments import full_pool_worker as module
+    from rage.experiments import full_pool_worker as module
     config, bundle = fixture(tmp_path)
     config.update(checkpoint_retention="completed_cell_cleanup", seeds=[0])
     atomic_json(tmp_path / "protocol.json", config)

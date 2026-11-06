@@ -8,10 +8,10 @@ import torch
 
 from baselines.common import reference_windows
 from gradient.count_sketch import add_count_sketch
-from rags.core import TimeSeriesFragment
-from rags.execution import SelectionExecution, forecast_mse, prepare_contexts, selection_execution
-from rags.experiments.arms import WindowIndex
-from rags.generation import generate_tokens
+from rage.core import TimeSeriesFragment
+from rage.execution import SelectionExecution, forecast_mse, prepare_contexts, selection_execution
+from rage.experiments.arms import WindowIndex
+from rage.generation import generate_tokens
 
 
 @pytest.mark.parametrize("stride,cap", [(1, None), (1, 11), (3, 11), (3, 1000)])
@@ -123,9 +123,9 @@ def test_nondefault_generation_rules_use_official_generate():
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 def test_native_training_four_checkpoints_graph_evaluation_and_restore(tmp_path):
-    from rags.engines import ChronosT5Engine, ChronosT5Config
-    from rags.experiments.train_eval import run_arm_training
-    from rags.execution import clear_execution_cache
+    from rage.engines import ChronosT5Engine, ChronosT5Config
+    from rage.experiments.train_eval import run_arm_training
+    from rage.execution import clear_execution_cache
     native = native_engine()
     engine = ChronosT5Engine.__new__(ChronosT5Engine)
     engine.__dict__.update(native.__dict__)

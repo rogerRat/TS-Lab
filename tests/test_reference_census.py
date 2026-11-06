@@ -4,9 +4,9 @@ import json
 import numpy as np
 import pytest
 
-from rags.experiments.reference_geometry import summarize_trajectory, summarize_task, alignment_summary
-from rags.experiments.reference_census import safe_references, fragment_request, collect_references, inventory
-from rags.experiments.reference_associations import association, fdr_bh, paired_effect, read_cells, analyze, write_report
+from rage.experiments.reference_geometry import summarize_trajectory, summarize_task, alignment_summary
+from rage.experiments.reference_census import safe_references, fragment_request, collect_references, inventory
+from rage.experiments.reference_associations import association, fdr_bh, paired_effect, read_cells, analyze, write_report
 
 
 def summary(g, **kwargs):
@@ -80,8 +80,8 @@ def test_exact_alignment_matches_explicit_pairwise():
 
 
 def write_inputs(path, *, unsafe=False):
-    from rags.core import TimeSeriesFragment
-    from rags.experiments.development_inputs import save_fragments
+    from rage.core import TimeSeriesFragment
+    from rage.experiments.development_inputs import save_fragments
     f = TimeSeriesFragment(np.arange(14),entity_id='e',fragment_id=9)
     save_fragments(path/'task__reference.npz',[f])
     manifest = dict(dataset='task',full_reference_history=True, formal_exam_excluded_from_reference=True,
@@ -113,8 +113,8 @@ def test_manifest_cannot_claim_sampled_history(tmp_path):
 
 def test_all_window_cache_restart_and_crb_replay_without_bp(tmp_path):
     from assets.gradient.cache import GradientCache
-    from rags.execution import SelectionExecution
-    from rags.crb import CRBConfig
+    from rage.execution import SelectionExecution
+    from rage.crb import CRBConfig
     class Probe:
         device='cpu'
         execution=SelectionExecution(gradient_batch=3)
@@ -179,7 +179,7 @@ def test_inventory_deduplicates_but_rejects_conflicting_inputs(tmp_path):
 def test_end_to_end_association_report_and_missing_cell(tmp_path):
     run=tmp_path/'run'; run.mkdir(); census=tmp_path/'census'; (census/'m').mkdir(parents=True)
     tasks=[f't{i}' for i in range(6)]
-    config=dict(students=['m'],datasets=tasks,arms=['rand','rags-block-linearSum','rags-traj-linearSum','tsds'],
+    config=dict(students=['m'],datasets=tasks,arms=['rand','rage-block-linearSum','rage-traj-linearSum','tsds'],
                 seeds=[0,1,2],experiment_version='v5')
     (run/'protocol.json').write_text(json.dumps(config))
     for i,t in enumerate(tasks):
@@ -188,7 +188,7 @@ def test_end_to_end_association_report_and_missing_cell(tmp_path):
         for seed in config['seeds']:
             folder=run/'rounds'/f'seed{seed}'/'students'/'m'/'cells';folder.mkdir(parents=True,exist_ok=True)
             for arm in config['arms']:
-                value=1-i*.03 if arm=='rags-block-linearSum' else 1
+                value=1-i*.03 if arm=='rage-block-linearSum' else 1
                 (folder/f'{t}__{arm}__seed{seed}.json').write_text(json.dumps(dict(student='m',dataset=t,arm=arm,
                     seed=seed,experiment_version='v5',mase=value)))
     result=analyze([run],census,permutations=99,bootstraps=29)
@@ -205,12 +205,12 @@ def test_end_to_end_association_report_and_missing_cell(tmp_path):
 
 def test_compute_entrypoint_and_actual_selection_sampling(tmp_path):
     from assets.gradient.cache import GradientCache
-    from rags.execution import SelectionExecution
-    from rags.core import TimeSeriesFragment
-    from rags.experiments.arms import WindowIndex, ArmOutput, SelectionCost
-    from rags.experiments.resampling import ResampledWindows
-    from rags.experiments.regions import save_selection
-    from rags.experiments.reference_census import compute
+    from rage.execution import SelectionExecution
+    from rage.core import TimeSeriesFragment
+    from rage.experiments.arms import WindowIndex, ArmOutput, SelectionCost
+    from rage.experiments.resampling import ResampledWindows
+    from rage.experiments.regions import save_selection
+    from rage.experiments.reference_census import compute
     inputs=tmp_path/'inputs';inputs.mkdir();write_inputs(inputs)
     manifest={'total_equivalents':4}
     (inputs/'pool_manifest.json').write_text(json.dumps(manifest))
@@ -253,8 +253,8 @@ def test_compute_entrypoint_and_actual_selection_sampling(tmp_path):
 def test_oom_halves_batch_and_retries_only_missing(tmp_path):
     import torch
     from assets.gradient.cache import GradientCache
-    from rags.execution import SelectionExecution
-    from rags.experiments.reference_census import prepare_with_oom
+    from rage.execution import SelectionExecution
+    from rage.experiments.reference_census import prepare_with_oom
     class Probe:
         device='cpu';execution=SelectionExecution(gradient_batch=8)
         config=SimpleNamespace(projection_dimension=2,projection_seed=1)
@@ -273,7 +273,7 @@ def test_oom_halves_batch_and_retries_only_missing(tmp_path):
 
 
 def test_native_probe_check_rejects_batch_mean_as_independent_gradients():
-    from rags.experiments.reference_census import validate_probe
+    from rage.experiments.reference_census import validate_probe
     class BadProbe:
         def batch_gradient_sketch(self,windows):
             return windows.mean(1),np.tile(windows.mean(0),(len(windows),1))

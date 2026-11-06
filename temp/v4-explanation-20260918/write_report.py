@@ -44,7 +44,7 @@ TV=0表示相同，TV=1表示完全不重叠。匹配尺度后的差异仍来自
 """
 for m in d["models"]:
  for r in m["probabilities"]:
-  if r["method"]=="rags-traj-maxSum":text+=f"| {m['model']} | {r['task']} | {r['reference_count']} | {r['tv_to_less_actual']:.4f} | {r['tv_anchor_only_at_less_scale']:.4f} | {r['tv_anchor_only_at_traj_scale']:.4f} |\n"
+  if r["method"]=="rage-traj-maxSum":text+=f"| {m['model']} | {r['task']} | {r['reference_count']} | {r['tv_to_less_actual']:.4f} | {r['tv_anchor_only_at_less_scale']:.4f} | {r['tv_anchor_only_at_traj_scale']:.4f} |\n"
 text+="""
 Finland只有一个参考：尺度因素消失，linearSum与maxSum相同；其LESS/Traj概率差异确实来自锚点（Chronos TV=.282，TimesFM TV=.209）。CRB选择误差/分裂处的自适应锚点，当前Traj对所有不同锚点等权算术平均，未按窗口覆盖测度重建/校正；它与均匀抽样的LESS估计目标并不严格相同。相同K只保证计算预算相同，不能保证估计偏差相同。
 
@@ -97,7 +97,7 @@ Traj/LESS的选择期望 G_p=Σ_t p_t Σ_b∈t(L_b/L_t)g_b。
 for m in d["models"]:
  for task in m["references"]:
   rows={r["method"]:r for r in m["alignment"] if r["task"]==task}
-  vals=[rows[k]["raw_mean_cosine"] for k in ["uniform_windows","uniform_trajectories","rags-block-linearSum","rags-traj-linearSum","rags-block-expSum","rags-traj-expSum"]]
+  vals=[rows[k]["raw_mean_cosine"] for k in ["uniform_windows","uniform_trajectories","rage-block-linearSum","rage-traj-linearSum","rage-block-expSum","rage-traj-expSum"]]
   text+=f"| {m['model']} | {task} | "+" | ".join(f"{v:.4f}" for v in vals)+" |\n"
 text+="""
 NEM支持Traj选择后的梯度更对齐：Chronos均匀池.268→Block-linear.436→Traj-linear.550；TimesFM为−.052→−.048→+.174，exp下Traj为+.182。

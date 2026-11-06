@@ -2,8 +2,8 @@
 import json, os, subprocess, time
 from pathlib import Path
 
-CT = Path("/root/autodl-tmp/TS3/outputs/main-rank-volume-20260921")
-EXP = Path("/root/autodl-tmp/TS3/outputs/exp-1105-budget-cut-20260922")
+CT = Path("/root/autodl-tmp/rage/outputs/main-rank-volume-20260921")
+EXP = Path("/root/autodl-tmp/rage/outputs/exp-1105-budget-cut-20260922")
 LOG = EXP / "handoff.log"
 
 def log(msg):
@@ -37,12 +37,12 @@ def launch():
     (EXP / "LAUNCHED").write_text(time.strftime("%F %T"))
     log("launching 1105BudgetCutExp")
     subprocess.run(["tmux", "new-session", "-d", "-s", "exp-1105",
-        "export PATH=/root/miniconda3/bin:$PATH PYTHONPATH=/root/TS3/src TS3_GRADIENT_CACHE_ROOT=/root/autodl-tmp/TS3/cache/grad-pool; "
+        "export PATH=/root/miniconda3/bin:$PATH PYTHONPATH=/root/TS-Lab/src RAGE_GRADIENT_CACHE_ROOT=/root/autodl-tmp/rage/cache/grad-pool; "
         "for m in timerxl_84m chronos_base timesfm_2_5; do "
         "echo === 1105 $m ===; "
-        "cd /root/TS3 && /root/miniconda3/envs/ts3/bin/python -m scripts.run_1105_budget_cut "
-        "--config /root/TS3/configs/rags/exp_1105_budget_cut/1105_$m.json "
-        "--run /root/autodl-tmp/TS3/outputs/exp-1105-budget-cut-20260922/$m || break; done; exec bash"])
+        "cd /root/TS-Lab && /root/autodl-tmp/rage/envs/rage/bin/python -m scripts.run_1105_budget_cut "
+        "--config /root/TS-Lab/configs/rage/exp_1105_budget_cut/1105_$m.json "
+        "--run /root/autodl-tmp/rage/outputs/exp-1105-budget-cut-20260922/$m || break; done; exec bash"])
     log("tmux exp-1105 created")
 
 log("watcher started")

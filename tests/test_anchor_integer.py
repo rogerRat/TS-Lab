@@ -4,10 +4,10 @@ from math import comb
 import numpy as np
 import pytest
 
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine
-from rags.experiments.anchor_budget_simulate import evaluate_reconstruction
-from rags.experiments.anchor_budget_integer import mean_block_cosine, positive_integer_budgets
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine
+from rage.experiments.anchor_budget_simulate import evaluate_reconstruction
+from rage.experiments.anchor_budget_integer import mean_block_cosine, positive_integer_budgets
 
 
 def compare(truth, **options):

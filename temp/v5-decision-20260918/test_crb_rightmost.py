@@ -2,8 +2,8 @@
 from dataclasses import replace
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine, _Interval
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine, _Interval
 
 
 def run(config, gradients):

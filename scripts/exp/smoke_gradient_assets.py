@@ -6,9 +6,9 @@ import numpy as np
 import torch
 
 from assets.gradient import GradientCache, WindowRequest, GradientDataset
-from rags.execution import SelectionExecution, selection_execution
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.train_eval import fine_tune
+from rage.execution import SelectionExecution, selection_execution
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.train_eval import fine_tune
 
 
 def main():

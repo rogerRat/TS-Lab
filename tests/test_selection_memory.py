@@ -5,7 +5,7 @@ import threading
 import numpy as np
 import pytest
 
-from rags.experiments.resampling import rags_global_marginal, rags_marginal
+from rage.experiments.resampling import rage_global_marginal, rage_marginal
 
 
 class GuardedRows(list):
@@ -39,19 +39,19 @@ def test_batched_native_directions_preserve_probabilities_without_full_conversio
         scores = (n/n.sum()) @ cosines
         logits = (scores-scores.max())/.25 + np.log(m)
         expected = np.exp(logits-logits.max()); expected /= expected.sum()
-        actual, _ = rags_global_marginal(GuardedRows(refs, 11), GuardedRows(sources, 11),
+        actual, _ = rage_global_marginal(GuardedRows(refs, 11), GuardedRows(sources, 11),
             n, m, temperature=.25, gating=False, direction_batch=11)
     else:
         logits = (cosines-cosines.max(axis=1, keepdims=True))/.25 + np.log(m)
         weights = np.exp(logits-logits.max(axis=1, keepdims=True))
         expected = (n/n.sum()) @ (weights/weights.sum(axis=1, keepdims=True))
-        actual, _ = rags_marginal(GuardedRows(refs, 7), GuardedRows(sources, 11),
+        actual, _ = rage_marginal(GuardedRows(refs, 7), GuardedRows(sources, 11),
             n, m, temperature=.25, gating=False, device='cpu', row_batch=7, source_batch=11)
     np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-15)
 
 
 def test_duplicate_launcher_waits_before_worker_body(tmp_path, monkeypatch):
-    from rags.experiments import full_pool_worker
+    from rage.experiments import full_pool_worker
     out = tmp_path/'students'/'chronos-base'
     out.mkdir(parents=True)
     lock_path = out/'worker.lock'

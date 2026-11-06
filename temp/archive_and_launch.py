@@ -2,11 +2,11 @@ from pathlib import Path
 import csv,json,os,signal,shutil,subprocess,tarfile,time,math
 
 repo=Path('/root/TS3');os.chdir(repo)
-from rags.experiments.full_pool_run import summarize
-from rags.experiments.students import atomic_json
-from rags.experiments.v3_report import render
-from rags.experiments.v4_protocol import validate_v4_config
-from rags.experiments.v4_report import render as render_v4
+from rage.experiments.full_pool_run import summarize
+from rage.experiments.students import atomic_json
+from rage.experiments.v3_report import render
+from rage.experiments.v4_protocol import validate_v4_config
+from rage.experiments.v4_report import render as render_v4
 
 outputs=Path('/root/autodl-tmp/TS3/outputs')
 v3=outputs/'main-shared-nine-v3-t005-20260917'
@@ -51,7 +51,7 @@ with (archive/'all_results_ranked.csv').open('w',newline='') as stream:
     writer=csv.DictWriter(stream,fieldnames=['run','student','dataset','arm','seed','mase','improvement_vs_rand','source'])
     writer.writeheader();writer.writerows(tables)
 shutil.copytree(repo/'docs',archive/'docs',dirs_exist_ok=True)
-shutil.copytree(repo/'configs/rags',archive/'configs/rags',dirs_exist_ok=True)
+shutil.copytree(repo/'configs/rage',archive/'configs/rage',dirs_exist_ok=True)
 shutil.copy2(repo/'docs/MAIN-v3.md',repo/'docs/archive/MAIN-v3-final-20260918.md')
 atomic_json(archive/'inventory.json',dict(runs=inventory,raw_artifacts_deleted=False,
     raw_gradients_duplicated=False,source_outputs=str(outputs),cells=len(rows)))
@@ -88,7 +88,7 @@ for p in (repo/'temp').glob('main-v3-*.partial'):
 atomic_json(archive/'cleanup.json',dict(stopped_pids=stopped,removed_disposable_files=removed,
     original_result_data_preserved=True))
 
-v4config=json.loads((repo/'configs/rags/main_v4.json').read_text());validate_v4_config(v4config)
+v4config=json.loads((repo/'configs/rage/main_v4.json').read_text());validate_v4_config(v4config)
 parent=outputs/'main-v4-three-seeds-20260918';parent.mkdir(exist_ok=True)
 assert not (parent/'protocol.json').exists(), 'Use the existing suite resume entry rather than transition again'
 atomic_json(parent/'protocol.json',v4config)
@@ -103,7 +103,7 @@ env=dict(os.environ,PYTHONPATH=str(repo/'src'),HF_HOME='/root/autodl-tmp/hf-cach
     PYTHONUNBUFFERED='1',OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
 python='/root/miniconda3/envs/ts3/bin/python'
 with (parent/'suite.log').open('a') as log:
-    process=subprocess.Popen([python,'-m','rags.experiments.v4_seed_rounds','--config','configs/rags/main_v4.json',
+    process=subprocess.Popen([python,'-m','rage.experiments.v4_seed_rounds','--config','configs/rage/main_v4.json',
         '--run',str(parent)],cwd=repo,env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
 atomic_json(parent/'launcher.json',dict(pid=process.pid,seeds=[0,1,2],started_at=time.strftime('%Y-%m-%d %H:%M:%S')))
 (repo/'temp/v4_suite.pid').write_text(str(process.pid)+'\n')

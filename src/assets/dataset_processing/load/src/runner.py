@@ -17,7 +17,7 @@ from assets.dataset_processing.load_reuse import (
     find_and_reuse_load_stage,
     make_load_metadata,
 )
-from ts3.spec.files.shard_dataset import DEFAULT_SHARD_BYTES
+from tsl.spec.files.shard_dataset import DEFAULT_SHARD_BYTES
 
 log = logging.getLogger("load")
 

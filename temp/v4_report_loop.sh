@@ -5,7 +5,7 @@ flock -n 9 || exit 0
 RUN=/root/autodl-tmp/TS3/outputs/main-v4-three-seeds-20260918
 PY=/root/miniconda3/envs/ts3/bin/python
 while true; do
-  PYTHONPATH=/root/TS3/src "$PY" -m rags.experiments.v4_report --run "$RUN"
+  PYTHONPATH=/root/TS3/src "$PY" -m rage.experiments.v4_report --run "$RUN"
   if "$PY" - "$RUN/results.json" <<'PYEOF'
 import json,sys
 try:

@@ -4,7 +4,7 @@ Inference is the checkpoint's official sampling path (unchanged).  Sundial
 ships and runs in float32 (its patch embedding concatenates a float32 mask,
 so bf16 casts break the checkpoint code); the production pipeline keeps this
 native precision instead of its bf16 student default.  Training
-has no released official recipe, so TS3 assembles the checkpoint-native
+has no released official recipe, so RAGE assembles the checkpoint-native
 TimeFlow components (``flow_loss.py`` ships inside the pinned snapshot) on
 selected 576-point windows: shifted per-patch flow targets truncated by
 ``mask_y`` to each patch's in-window future, raw values (revin off, matching
@@ -84,7 +84,7 @@ def flow_losses(model, windows, *, deterministic):
             for row in range(count):
                 digest = hashlib.blake2b(
                     np.ascontiguousarray(windows[row], dtype=np.float32).tobytes(),
-                    digest_size=8, key=b"ts3-sundial-flow")
+                    digest_size=8, key=b"rage-sundial-flow")
                 generator = torch.Generator(device=device)
                 generator.manual_seed((int.from_bytes(digest.digest(), "little")
                                        * multiplier + repeat) % (2**63 - 1))

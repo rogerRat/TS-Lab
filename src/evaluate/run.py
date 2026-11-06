@@ -32,18 +32,18 @@ def _resolve_project_path(value: Path) -> Path:
 
 
 def validate_checkpoint(path: Path, require_manifest: bool = True) -> Path:
-    """Require a local Chronos checkpoint and optionally its TS3 manifest.
+    """Require a local Chronos checkpoint and optionally its RAGE manifest.
 
     @input: path points to a candidate checkpoint directory.
     @output: Resolved checkpoint directory.
     @scenario: Reject incomplete training output before benchmark-specific work.
-    @logic: Requires config/weights; FEV also requires the TS3 manifest.
+    @logic: Requires config/weights; FEV also requires the RAGE manifest.
     @param path: Candidate checkpoint path.
     """
     checkpoint = _resolve_project_path(path)
     required = ("config.json", "model.safetensors")
     if require_manifest:
-        required += ("ts3_checkpoint_manifest.json",)
+        required += ("rage_checkpoint_manifest.json",)
     if not checkpoint.is_dir() or any(not (checkpoint / name).is_file() for name in required):
         raise FileNotFoundError("checkpoint is incomplete: %s" % checkpoint)
     return checkpoint

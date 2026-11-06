@@ -16,7 +16,7 @@ adapter:
       top_p: 1.0
       seed: 20260722
 bench_config:
-  task_file: /root/TS3/configs/eval/fev/profile-10b-local.yaml
+  task_file: /root/TS-Lab/configs/eval/fev/profile-10b-local.yaml
   expected_tasks: 15
   task_indices:
   - 0

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from rags.experiments.rank_probability import REVISION, rank_probability
+from rage.experiments.rank_probability import REVISION, rank_probability
 
 
 def atomic_json(path, value):
@@ -29,7 +29,7 @@ def main():
     pool_total = int(legal.sum())
     starts = np.cumsum(np.r_[0, legal[:-1]])
     rows, comparisons, skipped = [], [], []
-    methods = ['less-main'] + ['rags-' + grain + '-' + mode
+    methods = ['less-main'] + ['rage-' + grain + '-' + mode
         for grain in ['block', 'traj'] for mode in ['linearSum', 'zeroClipSum', 'maxSum', 'expSum']]
     for model in protocol['students']:
         folder = args.run / 'students' / model / 'selections'
@@ -82,7 +82,7 @@ def main():
                                 artifact_role='probability_overlay_not_training_result')))
                     target.with_suffix('.npz.partial').replace(target)
             for policy in ['equal_native_unit', 'legal_window_counts']:
-                pair = [('less-main', policy), ('rags-traj-maxSum', policy)]
+                pair = [('less-main', policy), ('rage-traj-maxSum', policy)]
                 if all(key in distributions for key in pair):
                     (a, aid), (b, bid) = [distributions[key] for key in pair]
                     if not np.array_equal(aid, bid):

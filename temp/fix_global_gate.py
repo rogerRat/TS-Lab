@@ -1,5 +1,5 @@
 from pathlib import Path
-p=Path("src/rags/experiments/full_pool.py")
+p=Path("src/rage/experiments/full_pool.py")
 s=p.read_text().replace('temperature=temperature, gating=True)\n    audit["reference_coverage"]', 'temperature=temperature, gating=False)\n    audit["reference_coverage"]', 1)
 s=s.replace('reference_ids=[int(t.fragment_id) for t in refs], temperature=temperature)\n', 'reference_ids=[int(t.fragment_id) for t in refs], temperature=temperature, gating=False)\n', 1)
 p.write_text(s)

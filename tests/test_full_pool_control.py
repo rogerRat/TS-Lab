@@ -1,7 +1,7 @@
 import numpy as np
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex
-from rags.experiments.native_selection import full_pool_control
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex
+from rage.experiments.native_selection import full_pool_control
 
 
 def test_full_pool_retains_every_legal_start_without_crossing_trajectories():

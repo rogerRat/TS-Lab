@@ -48,7 +48,7 @@
 
 逐窗重建余弦相对下降约 8.93%，相对 L2 误差增加约 26.65%。分裂预算在本次实际耗尽，不能引用旧协议“split 未触发”的结果替代。
 
-**下游 MASE 减半后的数值仍无法由这项 CPU 模拟可靠估出。** CRB 重建误差会影响块评分、采样概率与训练轨迹，三者不是线性关系；目前没有同配方的完整/减半训练对照，也尚无当前 v2 RAGS 完整训练结果可校准。不能把 8.93% 的梯度余弦降幅等同于 MASE 增加 8.93%。本次支持的结论是梯度近似有明显损失；最终预测精度的变化需要配对训练评测。
+**下游 MASE 减半后的数值仍无法由这项 CPU 模拟可靠估出。** CRB 重建误差会影响块评分、采样概率与训练轨迹，三者不是线性关系；目前没有同配方的完整/减半训练对照，也尚无当前 v2 RAGE 完整训练结果可校准。不能把 8.93% 的梯度余弦降幅等同于 MASE 增加 8.93%。本次支持的结论是梯度近似有明显损失；最终预测精度的变化需要配对训练评测。
 
 精度机器可读产物：exp `temp/crb-half-20260916/{protocol,rows,summary}.json`；复现：
 
@@ -64,7 +64,7 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 ## 事故记录：azure 选集阶段 CUDA 非法访存（2026-09-17 02:07–03:20）
 
 - 现象：三 worker 在进入 azure_i_cpu 选集阶段后接连"无声"死亡；supervisor 三次重试耗尽后退出（attempt 3, exit 1, 剩 453 cells）。
-- 根因链：azure 选集（rags 参考侧 CRB probe）触发异步 CUDA illegal memory access（exit 1，爆点 selection_metrics.py:54 的 synchronize）→ 容器 GPU 走 NVIDIA MPS，非法访存打挂 MPS server → 其余 worker 以 Error 807 连锁死亡 → GPU 清空。
+- 根因链：azure 选集（rage 参考侧 CRB probe）触发异步 CUDA illegal memory access（exit 1，爆点 selection_metrics.py:54 的 synchronize）→ 容器 GPU 走 NVIDIA MPS，非法访存打挂 MPS server → 其余 worker 以 Error 807 连锁死亡 → GPU 清空。
 - 证据：CUDA_LAUNCH_BLOCKING=1 下同一路径稳定运行 15+ 分钟（此前 2–3 分钟内必崩）→ 判定为竞态型非法访存，非越界（越界在 blocking 下也会崩）。nem 任务选集全程无恙；azure 是首个大参考集任务（492 refs / 3.8M 点 / 池 334,945 blocks）。
 - 头号嫌疑：commit 82761ee 新增的 CRBEngineMulti 跨片段批式 probe 协程管线（v2 新代码，v1 azure 走旧引擎无此问题）。
 - 已落盘数据安全：60 cells（nem 三模型全臂 + azure 三模型 original）原子保存，无损失。
@@ -95,8 +95,8 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 | lessvg_t025（LESS-main 轨迹主实现） | 3 | 1.169068 | 0.033417 | +32.33% | +15.43% | 3/3 |
 | random（Random 槽格均匀基线） | 3 | 1.382337 | 0.103409 | +19.98% | +0.00% | — |
 | tsds（TSDS 原生 OT） | 3 | 1.382384 | 0.084658 | +19.98% | -0.00% | 1/3 |
-| rags_traj_gls（RAGS-Traj 轨迹消融臂） | 3 | 1.458938 | 0.050065 | +15.55% | -5.54% | 1/3 |
-| rags_gateless（RAGS-main CRB 块主实现） | 3 | 1.502679 | 0.041795 | +13.01% | -8.71% | 0/3 |
+| rage_traj_gls（RAGE-Traj 轨迹消融臂） | 3 | 1.458938 | 0.050065 | +15.55% | -5.54% | 1/3 |
+| rage_gateless（RAGE-main CRB 块主实现） | 3 | 1.502679 | 0.041795 | +13.01% | -8.71% | 0/3 |
 | lpv_t025（LP-Mirror-main 窗口主实现） | 3 | 1.512232 | 0.067067 | +12.46% | -9.40% | 0/3 |
 
 #### timesfm-2.5
@@ -104,10 +104,10 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 | 方法 | seeds | MASE 均值 | sd | vs Original | vs Random | 胜/seeds |
 |---|---:|---:|---:|---:|---:|---:|
 | lessvg_t025（LESS-main 轨迹主实现） | 3 | 0.670757 | 0.021367 | +23.94% | +9.51% | 3/3 |
-| rags_traj_gls（RAGS-Traj 轨迹消融臂） | 3 | 0.715856 | 0.026068 | +18.83% | +3.42% | 2/3 |
+| rage_traj_gls（RAGE-Traj 轨迹消融臂） | 3 | 0.715856 | 0.026068 | +18.83% | +3.42% | 2/3 |
 | tsds（TSDS 原生 OT） | 3 | 0.721019 | 0.001882 | +18.24% | +2.73% | 3/3 |
 | lpv_t025（LP-Mirror-main 窗口主实现） | 3 | 0.734408 | 0.002324 | +16.73% | +0.92% | 2/3 |
-| rags_gateless（RAGS-main CRB 块主实现） | 3 | 0.736918 | 0.026703 | +16.44% | +0.58% | 2/3 |
+| rage_gateless（RAGE-main CRB 块主实现） | 3 | 0.736918 | 0.026703 | +16.44% | +0.58% | 2/3 |
 | random（Random 槽格均匀基线） | 3 | 0.741243 | 0.016305 | +15.95% | +0.00% | — |
 
 #### timemoe-200m
@@ -115,8 +115,8 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 | 方法 | seeds | MASE 均值 | sd | vs Original | vs Random | 胜/seeds |
 |---|---:|---:|---:|---:|---:|---:|
 | random（Random 槽格均匀基线） | 3 | 1.219479 | 0.024238 | -14.44% | +0.00% | — |
-| rags_traj_gls（RAGS-Traj 轨迹消融臂） | 3 | 1.229896 | 0.007915 | -15.42% | -0.85% | 1/3 |
-| rags_gateless（RAGS-main CRB 块主实现） | 3 | 1.236595 | 0.024083 | -16.05% | -1.40% | 1/3 |
+| rage_traj_gls（RAGE-Traj 轨迹消融臂） | 3 | 1.229896 | 0.007915 | -15.42% | -0.85% | 1/3 |
+| rage_gateless（RAGE-main CRB 块主实现） | 3 | 1.236595 | 0.024083 | -16.05% | -1.40% | 1/3 |
 | lpv_t025（LP-Mirror-main 窗口主实现） | 3 | 1.251016 | 0.014249 | -17.40% | -2.59% | 1/3 |
 | lessvg_t025（LESS-main 轨迹主实现） | 3 | 1.304216 | 0.033460 | -22.39% | -6.95% | 0/3 |
 | tsds（TSDS 原生 OT） | 3 | 1.354949 | 0.033407 | -27.15% | -11.11% | 0/3 |
@@ -135,7 +135,7 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
 
 ### 动机
 
-当前 RAGS 的 rags_marginal 对每个参考单位先形成一个条件源分布，再按参考单位的质量
+当前 RAGE 的 rage_marginal 对每个参考单位先形成一个条件源分布，再按参考单位的质量
 pi_j = reference_count_j / sum(reference_count) 叠加。这个机制保留了参考窗口的比例，也让
 不同参考轨迹都得到自己的质量；但它同时会强制一个没有可靠源匹配的参考轨迹把质量投向
 “最不差”的候选。对多模态、需要覆盖多个对抗模式的参考集合，这种约束可能有收益；当参考
@@ -149,19 +149,19 @@ LESS 的全局竞争提供了另一个合理的归纳偏置：所有参考和源
 
 新增两个正式训练臂：
 
-- rags_global：保留原始 RAGS 的 CRB block 表示；对所有参考 block 的方向与每个源 block
+- rage_global：保留原始 RAGE 的 CRB block 表示；对所有参考 block 的方向与每个源 block
   计算余弦，按参考 block 的合法窗口数做加权平均，得到每个源 block 的一个全局分数，再用
   一次全局 value_mass（温度 0.25，无硬门）在全部源 block 间竞争。
-- rags_traj_global：保留 RAGS-Traj 的 CRB 全窗口线性重建轨迹表示；对所有参考轨迹方向
+- rage_traj_global：保留 RAGE-Traj 的 CRB 全窗口线性重建轨迹表示；对所有参考轨迹方向
   与每个源轨迹计算同样的全局加权平均分数（无硬门），再一次性在全部源轨迹窗口间竞争。
 
 Global 版本只改变质量聚合方式，表示、CRB 配置、源池、训练配方和温度保持对应原臂一致。
-它不再调用逐参考的 rags_marginal，也不为某个参考轨迹保留独立的最终采样预算。源单位
+它不再调用逐参考的 rage_marginal，也不为某个参考轨迹保留独立的最终采样预算。源单位
 仍按自身合法窗口数计入全局 softmax 的质量，最终概率总和为 1。
 
 这里的“全局”采用参考窗口数加权平均，而不是简单把 CRB block 数相加：CRB v2 保留所有
 合法窗口，block 数只是计算表示的分块方式；用窗口数能避免不同块大小改变参考总体的权重。
-轨迹级 Global 也因此保持与原 RAGS 的窗口质量语义一致。Global 与 LESS 的共同点是源单位
+轨迹级 Global 也因此保持与原 RAGE 的窗口质量语义一致。Global 与 LESS 的共同点是源单位
 只有一个全局排名/分数并直接竞争；LESS 的参考轨迹表示来自均匀采样窗口均值，本实验中的
 Global 表示仍来自 CRB，以便隔离“表示”和“聚合机制”两个因素。
 
@@ -182,11 +182,11 @@ main_v2.json 为八臂单 Seed 配置，旧 run 中已完成的三 Seed 结果�
 - tests/test_full_pool_resampling.py、tests/test_full_pool_control.py、
   tests/test_full_pool_run.py：18 passed。
 - resampling.py 与两个实验入口通过 py_compile。
-- 合成相反参考方向测试确认 Global 与逐参考 RAGS 产生不同分布，且各自概率总和为 1。
+- 合成相反参考方向测试确认 Global 与逐参考 RAGE 产生不同分布，且各自概率总和为 1。
 - main_v2.json 在实验环境中通过 validate_config，并确认八臂顺序与 seeds=[0]。
 
 ### 运行接入
 
-主实验入口已加入 rags_global 与 rags_traj_global，主控 supervisor 的文档摘要也更新为
+主实验入口已加入 rage_global 与 rage_traj_global，主控 supervisor 的文档摘要也更新为
 八臂单 Seed。新 run 应使用独立输出目录，避免覆盖已有三 Seed 的旧 v2 run；输入与已验证的
 共享数据可以复用，选择缓存需按新的臂名生成。

@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 import numpy as np
 from assets.gradient.cache import atomic_json
-from rags.experiments.formal_main_entry import preflight
+from rage.experiments.formal_main_entry import preflight
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
             argv = proc.read_bytes().split(b'\0')
         except OSError:
             continue
-        if (b'rags.experiments.full_pool_worker' in argv or b'rags.experiments.formal_main_entry' in argv) and str(run).encode() in argv:
+        if (b'rage.experiments.full_pool_worker' in argv or b'rage.experiments.formal_main_entry' in argv) and str(run).encode() in argv:
             raise RuntimeError('Stop active run before migration: ' + str(proc))
     old = json.loads((run/'protocol.json').read_text())
     new = json.loads(args.config.read_text())

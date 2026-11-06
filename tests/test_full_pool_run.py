@@ -3,16 +3,16 @@ import pytest
 import yaml
 import json
 
-from rags.experiments.full_pool_run import validate_config, worker_command
-from rags.experiments.run import parse_args, main
+from rage.experiments.full_pool_run import validate_config, worker_command
+from rage.experiments.run import parse_args, main
 
 
 def formal_config():
-    return json.loads(Path("configs/rags/main.json").read_text())
+    return json.loads(Path("configs/rage/main.json").read_text())
 
 
 def test_default_entry_is_new_protocol_without_legacy_subset_budget(capsys):
-    assert parse_args([]).config == "configs/rags/main.json"
+    assert parse_args([]).config == "configs/rage/main.json"
     assert main(["--dry-run"]) == 0
     output = capsys.readouterr().out
     assert "full_pool_worker" in output and "chronos-base" in output
@@ -29,13 +29,13 @@ def test_formal_config_requires_frozen_v5_matrix():
 def test_explicit_environment_uses_native_worker():
     config = dict(student_environments={"timemoe-200m": "/tmp/env/bin/python"})
     command = worker_command("timemoe-200m", config, "/tmp/run")
-    assert command[:3] == ["/tmp/env/bin/python", "-m", "rags.experiments.full_pool_worker"]
+    assert command[:3] == ["/tmp/env/bin/python", "-m", "rage.experiments.full_pool_worker"]
 
 
 def test_new_formal_cleanup_policy_is_frozen_and_resumable(tmp_path, monkeypatch):
     import json
     from types import SimpleNamespace
-    from rags.experiments import full_pool_run as module
+    from rage.experiments import full_pool_run as module
     config = dict(purpose="formal", students=["chronos-base"], experiment_version="v2", crb={"split_policy":"closest_zero_v2"})
     monkeypatch.setattr(module, "validate_config", lambda config: None)
     monkeypatch.setattr(module, "prepare_inputs", lambda *args: None)
@@ -51,7 +51,7 @@ def test_execution_override_parallel_workers_preserve_protocol(tmp_path, monkeyp
     import json
     import threading
     from types import SimpleNamespace
-    from rags.experiments import full_pool_run as module
+    from rage.experiments import full_pool_run as module
     students = ["chronos-base", "timesfm-2.5", "timemoe-200m"]
     config = dict(purpose="test", students=students)
     barrier = threading.Barrier(3, timeout=5)

@@ -4,16 +4,16 @@ from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig
-from rags.experiments.arms import WindowIndex, ArmOutput, SelectionCost
-from rags.experiments.v7_pools import training_pool
-from rags.experiments.v7_protocol import validate, make_config, exposure_audit, crb_for, NEW_ARMS
-from rags.experiments.v7_scores import uniform_anchors, reference_mean, score_trajectory, deploy
-from rags.experiments.v7_cache import V7Cache
-from rags.experiments.v7_assets import prepare
-from rags.experiments.v7_run import freeze, gate, cell_identity, marker
-from rags.experiments import v7_io
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig
+from rage.experiments.arms import WindowIndex, ArmOutput, SelectionCost
+from rage.experiments.v7_pools import training_pool
+from rage.experiments.v7_protocol import validate, make_config, exposure_audit, crb_for, NEW_ARMS
+from rage.experiments.v7_scores import uniform_anchors, reference_mean, score_trajectory, deploy
+from rage.experiments.v7_cache import V7Cache
+from rage.experiments.v7_assets import prepare
+from rage.experiments.v7_run import freeze, gate, cell_identity, marker
+from rage.experiments import v7_io
 from assets.gradient.cache import WindowRequest
 
 def pool_fixture():
@@ -39,8 +39,8 @@ def test_exact_whole_trajectory_seed_pools_stable_ids_and_overlap():
         training_pool(feasible[:1],dict(m,rows=[0],total_equivalents=1),0,target=2)
 
 def test_protocol_and_exposure():
-    c=make_config(json.loads(Path('configs/rags/main.json').read_text()),
-                  json.loads(Path('configs/rags/main_v6_timerxl.json').read_text()))
+    c=make_config(json.loads(Path('configs/rage/main.json').read_text()),
+                  json.loads(Path('configs/rage/main_v6_timerxl.json').read_text()))
     validate(c)
     assert len(c['arms'])==20
     for row in exposure_audit(c).values():
@@ -98,7 +98,7 @@ def test_window_rank_ties_compact_io_and_seed_identity(tmp_path):
     idx=WindowIndex(pool,context_length=480,prediction_length=96)
     scores=np.arange(len(idx),dtype=float)//3
     selected=deploy(idx,scores,arm='grad-dot',manifest=m,identity={'seed':0})
-    from rags.experiments.ranking import rank_mass
+    from rage.experiments.ranking import rank_mass
     np.testing.assert_array_equal(selected.probabilities,rank_mass(scores,np.ones(len(idx)))[1])
     assert np.isclose(selected.probabilities.sum(),1,atol=1e-12) and selected.probabilities.min()>0
     assert selected.probabilities[0]==selected.probabilities[1]
@@ -181,7 +181,7 @@ def test_assets_sparse_union_readonly_reconstruction(tmp_path,monkeypatch):
     assert p.count==count and after['new_bp']==0
 
 def test_barrier_and_checkpoint_selection(tmp_path):
-    from rags.experiments.v7_train import choose_checkpoint
+    from rage.experiments.v7_train import choose_checkpoint
     rows=[dict(epoch=0,mase=3),dict(epoch=.5,mase=1),dict(epoch=1,mase=1),dict(epoch=4,mase=2)]
     assert choose_checkpoint(rows)['epoch']==.5
     with pytest.raises(ValueError):choose_checkpoint([dict(epoch=0,mase=float('nan'))])
@@ -202,7 +202,7 @@ def test_analytic_scores_constant_ties_and_antipodal_cancellation():
     opposed=score_trajectory(301,[0,300],np.concatenate([g,-g]),g[0])
     assert opposed['grand-static'][150]==0 and opposed['grad-cos'][150]==0
     p=uniform_anchors(1001,17);g=rng.normal(size=(17,64));target=rng.normal(size=64)
-    from rags.experiments.v7_scores import interpolated_chunks
+    from rage.experiments.v7_scores import interpolated_chunks
     dense=np.concatenate([v for _,v in interpolated_chunks(1001,p,g)])
     scores=score_trajectory(1001,p,g,target)
     np.testing.assert_allclose(scores['grad-dot'],dense@target,atol=2e-13,rtol=2e-13)

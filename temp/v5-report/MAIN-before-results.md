@@ -1,18 +1,18 @@
 # 当前实验：V5
 
-唯一配置：`configs/rags/main.json`。继承停止前 V4 的两模型、九共享任务、13 方法、seeds 0/1/2 和训练配方；V5 改动限定为 [冻结方法](method.md)。没有选定唯一 RAGS 主方法；Block/Traj 四种聚合均保留。三个 seed 按整轮完成屏障串行，轮内两模型并行。
+唯一配置：`configs/rage/main.json`。继承停止前 V4 的两模型、九共享任务、13 方法、seeds 0/1/2 和训练配方；V5 改动限定为 [冻结方法](method.md)。没有选定唯一 RAGE 主方法；Block/Traj 四种聚合均保留。三个 seed 按整轮完成屏障串行，轮内两模型并行。
 
 V4 已按用户 2026-09-18 授权停止，停止记录位于既有结果目录 `STOPPED_FOR_DEVELOPMENT.json`；结果、检查点、原始梯度缓存保留。旧选集、CRB 重建资产、训练 cells 不能作为 V5 结果续跑。逐窗口梯度只有在模型、投影、精度、窗口及数据字段一致时才允许复用；新 CRB 和新概率必须重新构造。
 
 ## 唯一入口
 
-在 `/root/TS3`、`rags` 分支执行：
+在 `/root/TS3`、`rage` 分支执行：
 
 ```bash
-python -m rags.experiments.formal_main_entry --config configs/rags/main.json --run /root/autodl-tmp/TS3/outputs/main-rank-volume --dry-run
-python -m rags.experiments.prepare_suite --config configs/rags/main.json --run /root/autodl-tmp/TS3/outputs/main-rank-volume
-python -m rags.experiments.full_pool_assets --run /root/autodl-tmp/TS3/outputs/main-rank-volume --student chronos-base
-python -m rags.experiments.suite_report --run /root/autodl-tmp/TS3/outputs/main-rank-volume
+python -m rage.experiments.formal_main_entry --config configs/rage/main.json --run /root/autodl-tmp/TS3/outputs/main-rank-volume --dry-run
+python -m rage.experiments.prepare_suite --config configs/rage/main.json --run /root/autodl-tmp/TS3/outputs/main-rank-volume
+python -m rage.experiments.full_pool_assets --run /root/autodl-tmp/TS3/outputs/main-rank-volume --student chronos-base
+python -m rage.experiments.suite_report --run /root/autodl-tmp/TS3/outputs/main-rank-volume
 ```
 
 准备入口默认不启用正式选择、训练、评测。用户实际决定启动正式实验后，在 run 的 `execution_control.json` 显式启用三项控制，再运行 `formal_main_entry`（不带 `--dry-run`）。2026-09-18 用户已明确授权启动，正式 V5 现运行于 `/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918`，tmux 会话 `main-rank-volume`。科学代码版本 `6d3ead6`；执行优化参数独立记录在 run 的 `execution.json`，GPU 连续采样见 `gpu.csv`/`telemetry.json`。

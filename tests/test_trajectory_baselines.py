@@ -9,9 +9,9 @@ import torch
 from baselines.trajectory import budget_config, uniform_positions, trajectory_features
 from baselines.less.runner import less_select
 from baselines.less.algorithms import less_influence_scores
-from rags.core import TimeSeriesFragment
-from rags.experiments.arms import WindowIndex
-from rags.execution import SelectionExecution
+from rage.core import TimeSeriesFragment
+from rage.experiments.arms import WindowIndex
+from rage.execution import SelectionExecution
 
 
 def fragments(count=4, length=30):
@@ -59,7 +59,7 @@ def test_feature_mean_before_normalization_and_cache(tmp_path, monkeypatch):
         positions = index.bounds(fid)[0] + uniform_positions(index.fragment_lengths[fid], config)
         expected.append(engine.features(index.windows_at(positions)).mean(axis=0))
     # Both baseline adapters consume precisely the same sampled windows.
-    monkeypatch.setattr("rags.execution.encoder_embeddings", lambda e, w, **kw: e.features(w))
+    monkeypatch.setattr("rage.execution.encoder_embeddings", lambda e, w, **kw: e.features(w))
     for kind in ("tsds",):
         actual, info = trajectory_features(engine, index, config, kind=kind,
                                            cache_dir=tmp_path, pool_manifest=manifest)
@@ -119,7 +119,7 @@ def test_ivf_and_kde_match_literal_upstream():
 
 
 def test_old_run_and_changed_budget_cannot_reuse_student_cells(tmp_path):
-    from rags.experiments.main_table import parse_args, check_baseline_resume
+    from rage.experiments.main_table import parse_args, check_baseline_resume
     from baselines.trajectory import REVISION
     args = parse_args([])
     path = tmp_path / "protocol.json"
@@ -127,9 +127,9 @@ def test_old_run_and_changed_budget_cannot_reuse_student_cells(tmp_path):
     with pytest.raises(ValueError, match="new --out"):
         check_baseline_resume(tmp_path, args)
     args.language_baseline_revision = REVISION
-    from rags.experiments.regions import REVISION as DELIVERY_REVISION
+    from rage.experiments.regions import REVISION as DELIVERY_REVISION
     args.delivery_revision = DELIVERY_REVISION
-    from rags.experiments.arms import RANDOM_SAMPLING_REVISION
+    from rage.experiments.arms import RANDOM_SAMPLING_REVISION
     args.random_sampling_revision = RANDOM_SAMPLING_REVISION
     path.write_text(json.dumps({"protocol": vars(args)}))
     check_baseline_resume(tmp_path, args)
@@ -142,10 +142,10 @@ def test_old_run_and_changed_budget_cannot_reuse_student_cells(tmp_path):
 
 def test_tsds_multinomial_and_duplicate_artifact(tmp_path, monkeypatch):
     from baselines.tsds import runner
-    from rags.experiments.main_table import _save_selection, _load_selection
+    from rage.experiments.main_table import _save_selection, _load_selection
     index = WindowIndex(fragments(40, 12), context_length=4, prediction_length=2)
     engine = Probe()
-    monkeypatch.setattr("rags.execution.encoder_embeddings", lambda e, w, **kw: e.features(w))
+    monkeypatch.setattr("rage.execution.encoder_embeddings", lambda e, w, **kw: e.features(w))
     probs = np.zeros(40)
     probs[[5, 13]] = [.7, .3]
     monkeypatch.setattr(runner, "tsds_probability_assignment", lambda *a, **kw: probs)
@@ -179,7 +179,7 @@ def test_tsds_multinomial_and_duplicate_artifact(tmp_path, monkeypatch):
 
 def test_shared_thread_policy_also_caps_and_restores_faiss():
     import faiss
-    from rags.execution import selection_execution
+    from rage.execution import selection_execution
     previous = faiss.omp_get_max_threads()
     engine = Probe()
     engine.execution = SelectionExecution(cpu_threads=2)
@@ -193,8 +193,8 @@ def test_shared_thread_policy_also_caps_and_restores_faiss():
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 def test_real_chronos_512_64_language_baselines_cold_warm(tmp_path):
     from test_selection_execution import native_engine
-    from rags.engines import ChronosT5Engine, ChronosT5Config, _FullModelProjector
-    from rags.execution import selection_execution
+    from rage.engines import ChronosT5Engine, ChronosT5Config, _FullModelProjector
+    from rage.execution import selection_execution
     from baselines.runners import run_baseline
     engine = ChronosT5Engine.__new__(ChronosT5Engine)
     engine.__dict__.update(native_engine().__dict__)
@@ -233,7 +233,7 @@ def test_real_chronos_512_64_language_baselines_cold_warm(tmp_path):
                 np.testing.assert_array_equal(cold.selected.regions[:, 0], copies[:39])
             for key, value in engine.model.state_dict().items():
                 torch.testing.assert_close(value, base[key], rtol=0, atol=0)
-        from rags.experiments.train_eval import run_arm_training
+        from rage.experiments.train_eval import run_arm_training
         result = run_arm_training(engine, source_windows=cold.selected.prefix(2), source_epochs=4,
             batch_size=2, learning_rate=1e-5, seed=0, checkpoint_dir=tmp_path / "native-training",
             test_windows=index.windows_at(np.array([0, 1])), test_entities=["a", "b"],

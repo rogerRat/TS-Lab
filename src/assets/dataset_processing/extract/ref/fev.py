@@ -11,7 +11,7 @@ from typing import Any, Callable, Mapping
 
 import numpy as np
 
-from ts3.spec.ref_extraction import ReferenceExtractionSpecification
+from tsl.spec.ref_extraction import ReferenceExtractionSpecification
 
 
 log = logging.getLogger("extract.ref")

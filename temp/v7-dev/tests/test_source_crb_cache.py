@@ -7,9 +7,9 @@ import pytest
 
 from assets.gradient.blocks import compute_pool_blocks
 from assets.gradient.source_crb_cache import source_cache_directory
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig
-from rags.experiments.arms import WindowIndex
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig
+from rage.experiments.arms import WindowIndex
 
 
 def same(left, right):

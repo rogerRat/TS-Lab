@@ -21,7 +21,7 @@ def make_probe():
 
 
 def test_execution_policy_preserves_existing_positional_arguments():
-    from rags.execution import SelectionExecution
+    from rage.execution import SelectionExecution
     policy = SelectionExecution(16, 64, .7, 4, "eager")
     assert policy.inference_batch == 64
     assert policy.gradient_workers == 2
@@ -78,7 +78,7 @@ def test_family_batch_limit_and_safe_tail_shapes(monkeypatch):
 
 def test_bf16_chronos_uses_independent_workers_and_worker_calls_stay_serial(monkeypatch):
     from gradient.chronos import ChronosT5Engine, ChronosT5Config
-    from rags.execution import SelectionExecution
+    from rage.execution import SelectionExecution
     probe = ChronosT5Engine.__new__(ChronosT5Engine)
     probe.model = torch.nn.Linear(1, 1).bfloat16()
     probe.device = torch.device("cuda")

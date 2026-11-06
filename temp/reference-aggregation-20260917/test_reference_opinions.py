@@ -3,12 +3,12 @@ import json
 from pathlib import Path
 import numpy as np
 import pytest
-from rags.experiments.reference_opinions import (
+from rage.experiments.reference_opinions import (
     AGGREGATIONS, reference_marginal, selection_options,
 )
-from rags.experiments.resampling import value_mass
-from rags.experiments.full_pool import select_full_pool
-from rags.experiments.v3_protocol import opinion_method_protocols, validate_v3_config
+from rage.experiments.resampling import value_mass
+from rage.experiments.full_pool import select_full_pool
+from rage.experiments.v3_protocol import opinion_method_protocols, validate_v3_config
 from test_full_pool_resampling import Probe, inputs
 
 
@@ -70,21 +70,21 @@ def test_global_max_ignores_alpha_but_zero_clip_keeps_it():
 
 
 def test_new_defaults_and_frozen_v3_are_distinct():
-    config=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
-    for name,mode in [('less-main','maxSum'),('rags-main','zeroClipSum'),('rags-traj','zeroClipSum')]:
+    config=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
+    for name,mode in [('less-main','maxSum'),('rage-main','zeroClipSum'),('rage-traj','zeroClipSum')]:
         assert selection_options(name)['aggregation']==mode
         assert selection_options(name,config)['aggregation']=='linearSum'
-    assert selection_options('rags-main-expSum-local')==dict(aggregation='expSum',competition='local')
+    assert selection_options('rage-main-expSum-local')==dict(aggregation='expSum',competition='local')
     validate_v3_config(config)
     config['opinion_aggregation_protocol']='reference-opinion-v1'
     config['method_protocols']=opinion_method_protocols(config['arms'])
     validate_v3_config(config)
-    changed=deepcopy(config);changed['method_protocols']['rags-main']['reference_aggregation']='linearSum'
+    changed=deepcopy(config);changed['method_protocols']['rage-main']['reference_aggregation']='linearSum'
     with pytest.raises(ValueError,match='method_protocols'):validate_v3_config(changed)
 
 
-@pytest.mark.parametrize('name',['less-main','less-linearSum','rags-main','rags-traj',
-    'rags-main-maxSum','rags-traj-expSum','rags-main-linearSum-local','less-zeroClipSum-local'])
+@pytest.mark.parametrize('name',['less-main','less-linearSum','rage-main','rage-traj',
+    'rage-main-maxSum','rage-traj-expSum','rage-main-linearSum-local','less-zeroClipSum-local'])
 def test_production_dispatch_records_mode_without_changing_windows(name,tmp_path):
     out=select_full_pool(name,Probe(),run_dir=tmp_path,temperature=.05,**inputs())
     options=selection_options(name)
@@ -106,10 +106,10 @@ def test_exp_sum_is_exp_then_sum_then_outer_softmax_not_logsumexp():
 
 @pytest.mark.parametrize('filename',['main_reference_opinion_20260917.json','ablation_reference_opinion_20260917.json'])
 def test_generated_configs_are_valid_and_historical_default_stays_linear(filename):
-    config=json.loads((Path('configs/rags')/filename).read_text())
+    config=json.loads((Path('configs/rage')/filename).read_text())
     validate_v3_config(config)
     assert config['preparation_status']=='definition_only_not_launched'
-    old=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
+    old=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
     validate_v3_config(old)
     assert selection_options('less-main',old)['aggregation']=='linearSum'
 
@@ -126,11 +126,11 @@ def test_gpu_bounded_pairs_match_cpu(mode):
 
 
 def test_report_labels_do_not_rename_historical_artifact_slugs():
-    from rags.experiments.v3_report import display_method
-    old=json.loads(Path('configs/rags/main_v3_t005.json').read_text())
-    new=json.loads(Path('configs/rags/main_reference_opinion_20260917.json').read_text())
+    from rage.experiments.v3_report import display_method
+    old=json.loads(Path('configs/rage/main_v3_t005.json').read_text())
+    new=json.loads(Path('configs/rage/main_reference_opinion_20260917.json').read_text())
     assert display_method('less-main',old)=='less-linearSum'
-    assert display_method('rags-main',old)=='rags-main-linearSum'
-    assert display_method('rags-traj',old)=='rags-traj-linearSum'
+    assert display_method('rage-main',old)=='rage-main-linearSum'
+    assert display_method('rage-traj',old)=='rage-traj-linearSum'
     assert display_method('less-main',new)=='less-main'
-    assert old['arms']==['orig','rand','tsds','lp-mirror','less-main','rags-main','rags-traj']
+    assert old['arms']==['orig','rand','tsds','lp-mirror','less-main','rage-main','rage-traj']

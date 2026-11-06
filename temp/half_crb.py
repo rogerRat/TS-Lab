@@ -3,10 +3,10 @@ import json, sys, time
 from pathlib import Path
 from dataclasses import asdict
 import numpy as np
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine
-from rags.experiments.anchor_budget_simulate import ArrayGradientComputer
-from rags.experiments.anchor_budget_linear import window_cosines
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine
+from rage.experiments.anchor_budget_simulate import ArrayGradientComputer
+from rage.experiments.anchor_budget_linear import window_cosines
 from assets.gradient.dataset import GradientDataset
 
 repo=Path('/root/TS3')
@@ -53,7 +53,7 @@ for entry in samples:
             norm=np.linalg.norm(gt,axis=1); den=norm*np.linalg.norm(mean)
             block_sum+=np.divide(gt@mean,den,out=np.zeros(len(ix)),where=den>0).sum()
         for lo in range(0,len(truth),256):
-            from rags.window_reconstruction import interpolate_window_gradients
+            from rage.window_reconstruction import interpolate_window_gradients
             ix=np.arange(lo,min(lo+256,len(truth))); gt=truth[ix].astype(np.float64)
             norm=np.linalg.norm(gt,axis=1); est=interpolate_window_gradients(result,ix)
             good=norm>0

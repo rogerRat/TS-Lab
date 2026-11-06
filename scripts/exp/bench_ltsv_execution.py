@@ -18,11 +18,11 @@ from baselines.common import reference_windows
 from baselines.ltsv.fast import BlockScorer, block_rng, block_starts, reference_mse
 from baselines.ltsv.algorithms import ltsv_window_scores
 from baselines.ltsv.runner import _ltsv_training_loss
-from rags.execution import SelectionExecution, prepare_contexts, selection_execution
-from rags.experiments.development_inputs import load_fragments
-from rags.experiments.full_pool_models import build_model
-from rags.experiments.resampling import ranked_mass
-from rags.experiments.students import atomic_json
+from rage.execution import SelectionExecution, prepare_contexts, selection_execution
+from rage.experiments.development_inputs import load_fragments
+from rage.experiments.full_pool_models import build_model
+from rage.experiments.resampling import ranked_mass
+from rage.experiments.students import atomic_json
 
 
 def timed(fn):

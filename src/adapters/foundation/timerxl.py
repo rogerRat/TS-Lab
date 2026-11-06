@@ -3,7 +3,7 @@
 The pinned checkpoint ships TimerForPrediction with a native shifted-patch MSE
 training path (``labels`` + patch-level ``loss_masks``) and a deterministic
 greedy ``generate`` with RevIN-style context normalization enabled by default.
-TS3 keeps both semantics unchanged: training replays the native loss on
+RAGE keeps both semantics unchanged: training replays the native loss on
 pre-normalized selected windows; inference is the official generation path.
 """
 from __future__ import annotations

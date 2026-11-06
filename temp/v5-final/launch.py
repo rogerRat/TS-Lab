@@ -1,12 +1,12 @@
 from pathlib import Path
 import json,os,subprocess,sys
 from datetime import datetime,timezone,timedelta
-from rags.experiments.prepare_suite import prepare_suite
-from rags.experiments.protocol import validate_config
-from rags.experiments.students import atomic_json
+from rage.experiments.prepare_suite import prepare_suite
+from rage.experiments.protocol import validate_config
+from rage.experiments.students import atomic_json
 repo=Path('/root/TS3');os.chdir(repo)
 run=Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918')
-config=json.loads(Path('configs/rags/main.json').read_text());validate_config(config)
+config=json.loads(Path('configs/rage/main.json').read_text());validate_config(config)
 if run.exists() and any(run.iterdir()):raise RuntimeError('Choose a fresh V5 launch directory; existing contents preserved')
 prepare_suite(config,run)
 old=Path('/root/autodl-tmp/TS3/outputs/main-v4-three-seeds-20260918/rounds/seed0/grad_cache').resolve()
@@ -26,9 +26,9 @@ atomic_json(run/'launch.json',dict(git_commit=subprocess.check_output(['git','re
 script=repo/'temp/v5-launch/supervisor.py'
 script.write_text('''from pathlib import Path
 import json,os
-from rags.experiments.seed_rounds import run_rounds
-from rags.experiments.full_pool_run import run_suite
-from rags.experiments.students import atomic_json
+from rage.experiments.seed_rounds import run_rounds
+from rage.experiments.full_pool_run import run_suite
+from rage.experiments.students import atomic_json
 run=Path('/root/autodl-tmp/TS3/outputs/main-rank-volume-20260918')
 config=json.loads((run/'protocol.json').read_text())
 atomic_json(run/'supervisor.json',dict(pid=os.getpid(),status='running',supervision='current Codex thread'))

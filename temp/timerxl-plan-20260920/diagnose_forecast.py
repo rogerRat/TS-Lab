@@ -2,8 +2,8 @@
 import json
 import numpy as np
 
-from rags.experiments.full_pool_exploration import development_split
-from rags.experiments.full_pool_models import build_model
+from rage.experiments.full_pool_exploration import development_split
+from rage.experiments.full_pool_models import build_model
 
 INPUTS = "/root/autodl-tmp/TS3/outputs/timerxl-calibration-20260920/inputs-dev"
 

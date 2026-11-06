@@ -4,7 +4,7 @@ from itertools import product
 
 import pytest
 
-from rags.experiments.anchor_budget_simulate import (
+from rage.experiments.anchor_budget_simulate import (
     GRID, budget_combinations, choose_budget, run_self_test,
 )
 

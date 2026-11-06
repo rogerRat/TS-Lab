@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments.arms import ArmOutput, SelectionCost
-from rags.experiments.selection_metrics import SelectionMetrics
+from rage.experiments.arms import ArmOutput, SelectionCost
+from rage.experiments.selection_metrics import SelectionMetrics
 
 
 def output(notes=None):

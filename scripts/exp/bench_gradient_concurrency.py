@@ -12,8 +12,8 @@ import time
 import numpy as np
 import torch
 
-from rags.execution import SelectionExecution
-from rags.experiments.full_pool_models import build_model
+from rage.execution import SelectionExecution
+from rage.experiments.full_pool_models import build_model
 
 
 def atomic_json(path: Path, value) -> None:

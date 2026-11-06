@@ -401,7 +401,7 @@ def _parse_fev_bench_config(value: Mapping[str, Any], base: Path) -> tuple[Path,
 
 def _warn_reference_task_mismatch(checkpoint: Path, selected_task_indices: Sequence[int]) -> None:
     """Emit an unmistakable non-blocking warning for reference/evaluation mismatches."""
-    manifest_path = checkpoint / "ts3_checkpoint_manifest.json"
+    manifest_path = checkpoint / "rage_checkpoint_manifest.json"
     try:
         checkpoint_manifest = json.loads(manifest_path.read_text(encoding="ascii"))
     except (OSError, ValueError):

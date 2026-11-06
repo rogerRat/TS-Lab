@@ -1,4 +1,4 @@
-"""Offline contracts for the three-student main table (no real-data jobs)."""
+"""Offline contracts for the registered-student main table (no real-data jobs)."""
 import json
 from types import SimpleNamespace
 
@@ -8,10 +8,10 @@ import torch
 
 from adapters.foundation import build_adapter, get_model_spec
 from adapters.foundation.training import FineTuneConfig
-from rags.experiments.metrics import point_metrics
-from rags.experiments.students import (STUDENTS, adapter_engine, atomic_json,
+from rage.experiments.metrics import point_metrics
+from rage.experiments.students import (STUDENTS, adapter_engine, atomic_json,
                                       run_student_task, worker_command)
-from rags.experiments.student_report import summarize_students
+from rage.experiments.student_report import summarize_students
 
 
 class TinyAdapter:
@@ -87,7 +87,7 @@ def test_duplicate_selection_rows_reach_training_unchanged(tmp_path, monkeypatch
     np.savez(tmp_path / 'selection.npz', windows=windows, ids=ids)
     manifest['selections'] = {'tsds': manifest['selections']['random']}
     atomic_json(path, manifest)
-    from rags.experiments import train_eval
+    from rage.experiments import train_eval
     original_train = train_eval.run_arm_training
     received = []
 
@@ -113,7 +113,7 @@ def test_excluded_models_cannot_become_students_and_env_is_explicit(tmp_path):
         with pytest.raises(ValueError,match='excluded'):
             worker_command(key,tmp_path/'task.json',tmp_path/'out')
     command=worker_command('timemoe-200m',tmp_path/'task.json',tmp_path/'out')
-    assert command[:6]==['conda','run','--no-capture-output','-n','ts3-timemoe','python']
+    assert command[:6]==['conda','run','--no-capture-output','-n','rage-timemoe','python']
     assert worker_command('timemoe-200m',tmp_path/'t',tmp_path/'o',
                            environments={'timemoe-200m':'/env/bin/python'})[0]=='/env/bin/python'
     assert FineTuneConfig(512,64).weight_decay==.01
@@ -125,14 +125,14 @@ def test_student_summary_does_not_mix_models_or_repeat_selection_cost(tmp_path):
     (tmp_path/'tasks').mkdir()
     atomic_json(tmp_path/'tasks'/'ETT_1H.json',manifest)
     for student in STUDENTS:
-        for arm,value in [('original',3),('random',2),('rags',1)]:
+        for arm,value in [('original',3),('random',2),('rage',1)]:
             atomic_json(tmp_path/'students'/student/'cells'/f'{arm}.json',
                         {'student':student,'dataset':'ETT_1H','arm':arm,'seed':0,'mase':value})
     result=summarize_students(tmp_path,[SimpleNamespace(dataset='ETT_1H')],[0],
-                              ['original','random','rags'],STUDENTS)
+                              ['original','random','rage'],STUDENTS)
     assert len(result['selection_costs_shared_once'])==1
-    assert result['students']['timemoe-200m']['rags']['vs_random']['ETT_1H']==.5
-    assert result['students']['chronos-base']['rags']['average_rank_complete_tasks']==1
+    assert result['students']['timemoe-200m']['rage']['vs_random']['ETT_1H']==.5
+    assert result['students']['chronos-base']['rage']['average_rank_complete_tasks']==1
     assert 'sql' not in json.dumps(result)
     assert (tmp_path/'student_comparison.html').is_file()
 
@@ -149,7 +149,7 @@ def test_official_timemoe_batch_is_shifted_all_selected_points_not_exam():
 
 
 def test_fev_scale_only_uses_history_before_each_forecast(monkeypatch,tmp_path):
-    from rags.experiments import tasks
+    from rage.experiments import tasks
     values=np.arange(2000,dtype=np.float64)
     monkeypatch.setattr(tasks,'load_bundle_index',lambda path: None)
     monkeypatch.setattr(tasks,'_usable_full_series',lambda *a,**k: [('ETT_1H:a',values)])
@@ -162,8 +162,8 @@ def test_fev_scale_only_uses_history_before_each_forecast(monkeypatch,tmp_path):
 
 
 def test_main_table_selects_once_per_arm_then_deploys_all_students(monkeypatch,tmp_path):
-    from rags.experiments import main_table as main
-    from rags.experiments.arms import ArmOutput,SelectionCost
+    from rage.experiments import main_table as main
+    from rage.experiments.arms import ArmOutput,SelectionCost
     windows=np.arange(32,dtype=np.float32).reshape(8,4)/10
     task=SimpleNamespace(reference_fragments=[],test_windows=windows[:2],
                          test_entities=['ETT_1H:a']*2,test_scales=np.ones(2),constant_series=[])
@@ -182,7 +182,7 @@ def test_main_table_selects_once_per_arm_then_deploys_all_students(monkeypatch,t
         calls.append(name)
         return ArmOutput(name=name,selected=windows,window_ids=[(0,1+4*i) for i in range(8)],
                          cost=SelectionCost(),diagnostics={})
-    monkeypatch.setattr(main,'rags_crb_select',lambda *a,**k:selected('rags'))
+    monkeypatch.setattr(main,'rage_crb_select',lambda *a,**k:selected('rage'))
     monkeypatch.setattr(main,'streaming_random_select',lambda *a,**k:selected('random'))
     monkeypatch.setattr(main,'trajectory_level_select',lambda *a,**k:selected('trajectory_level'))
     monkeypatch.setattr(main,'run_baseline',lambda name,**k:selected(name))
@@ -200,7 +200,7 @@ def test_main_table_selects_once_per_arm_then_deploys_all_students(monkeypatch,t
     assert main.main(argv)==0
     assert len(calls)==7 and len(set(calls))==7
     assert deployed==list(STUDENTS)
-    assert len(list((tmp_path/'main'/'students').glob('*/cells/*.json')))==24
+    assert len(list((tmp_path/'main'/'students').glob('*/cells/*.json')))==8*len(STUDENTS)
     # Resume reuses the seven selections and completed cells, no new selection calls.
     assert main.main(argv)==0
     assert len(calls)==7

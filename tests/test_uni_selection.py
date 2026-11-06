@@ -1,4 +1,4 @@
-"""RAGS-uni: intra-trajectory uniformization and v5-uni experiment identity."""
+"""RAGE-uni: intra-trajectory uniformization and v5-uni experiment identity."""
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -6,16 +6,16 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from rags.experiments import full_pool
-from rags.experiments.full_pool import ARMS, validate_cached_selection
-from rags.experiments.protocol import (V5_FROZEN_ARMS, V5_UNI_ARMS, method_protocols,
+from rage.experiments import full_pool
+from rage.experiments.full_pool import ARMS, validate_cached_selection
+from rage.experiments.protocol import (V5_FROZEN_ARMS, V5_UNI_ARMS, method_protocols,
                                        validate_config)
-from rags.experiments.ranking import (DEFAULT_TEMPERATURE, rank_mass,
+from rage.experiments.ranking import (DEFAULT_TEMPERATURE, rank_mass,
                                       uniformize_intra_trajectory, UNIFORMIZATION_REVISION)
-from rags.experiments.reference_opinions import (UNI_ARMS, is_uni_arm,
+from rage.experiments.reference_opinions import (UNI_ARMS, LEGACY_UNI_ARMS, BLOCK_UNI_ARMS, WIN_UNI_ARMS, is_uni_arm,
                                                  selection_options, weight_placement_for)
-from rags.experiments.resampling import ResampledWindows
-from rags.crb import CRBConfig
+from rage.experiments.resampling import ResampledWindows
+from rage.crb import CRBConfig
 
 
 def _selection(probabilities, counts, trajectory_ids, scores=None,
@@ -110,23 +110,23 @@ def test_uniformization_rejects_invalid_trajectory_ids(ids):
 
 
 def test_uni_arms_registered_with_base_aggregation_and_placement():
-    assert UNI_ARMS == ('rags-block-expSum-uni', 'rags-block-linearSum-uni')
+    assert UNI_ARMS == LEGACY_UNI_ARMS + BLOCK_UNI_ARMS + WIN_UNI_ARMS
     for arm in UNI_ARMS:
         assert arm in ARMS
-        base_mode = arm[len('rags-block-'):-len('-uni')]
+        base_mode = arm[len('rage-block-'):].split('-', 1)[0]
         assert selection_options(arm) == dict(aggregation=base_mode, competition='global')
         assert weight_placement_for(arm) == ('after_transform' if base_mode == 'expSum'
                                              else 'before_transform')
         assert is_uni_arm(arm)
         protocols = method_protocols([arm])[arm]
-        assert protocols['intra_trajectory_uniformization'] == 'uniform_block_share'
+        assert protocols['intra_trajectory_uniformization'] == ('uniform_trajectory_window' if arm in WIN_UNI_ARMS else 'uniform_block_share')
         assert protocols['aggregation'] == base_mode
-    assert not is_uni_arm('rags-block-expSum')
+    assert not is_uni_arm('rage-block-expSum')
     # Base arms gain no uni identity.
-    assert 'intra_trajectory_uniformization' not in method_protocols(['rags-block-expSum'])['rags-block-expSum']
+    assert 'intra_trajectory_uniformization' not in method_protocols(['rage-block-expSum'])['rage-block-expSum']
 
 
-def test_rags_uni_dispatch_groups_blocks_by_trajectory():
+def test_rage_uni_dispatch_groups_blocks_by_trajectory():
     rng = np.random.default_rng(4)
     dim = 13
     reference_blocks = [SimpleNamespace(fragment_id=1, start_positions=[0, 1],
@@ -155,9 +155,9 @@ def test_rags_uni_dispatch_groups_blocks_by_trajectory():
 
     full_pool.ranked_selection = fake_ranked_selection
     try:
-        output = full_pool._rags('rags-block-linearSum-uni', index, dict(total_equivalents=4),
+        output = full_pool._rage('rage-block-linearSum-uni', index, dict(total_equivalents=4),
                                  assets, metadata, DEFAULT_TEMPERATURE, trajectory=False,
-                                 uniformize=True)
+                                 uniformize="block")
     finally:
         full_pool.ranked_selection = original
     selected = output.selected
@@ -167,8 +167,8 @@ def test_rags_uni_dispatch_groups_blocks_by_trajectory():
     assert selected.probabilities[1] == pytest.approx(.45)
     assert selected.probabilities[2] == pytest.approx(.1)
     with pytest.raises(ValueError, match='block representation only'):
-        full_pool._rags('rags-traj-linearSum', index, dict(total_equivalents=4), assets,
-                        metadata, DEFAULT_TEMPERATURE, trajectory=True, uniformize=True)
+        full_pool._rage('rage-traj-linearSum', index, dict(total_equivalents=4), assets,
+                        metadata, DEFAULT_TEMPERATURE, trajectory=True, uniformize="block")
 
 
 def test_validate_cached_selection_distinguishes_uni_identity():
@@ -183,39 +183,39 @@ def test_validate_cached_selection_distinguishes_uni_identity():
     base_metadata['scoring_revision'] = 'full-pool-rank-volume-v5'
     base_metadata['probability_mapping'] = 'object-rank-exponential-interval-v5'
     base_metadata['crb'] = asdict(crb)
-    from rags.experiments.ranking import frozen_rank_protocol
+    from rage.experiments.ranking import frozen_rank_protocol
     base_metadata['frozen_rank_protocol'] = frozen_rank_protocol()
-    validate_cached_selection(base_metadata, arm='rags-block-linearSum', identity=identity,
+    validate_cached_selection(base_metadata, arm='rage-block-linearSum', identity=identity,
         manifest=manifest, crb=crb, temperature=DEFAULT_TEMPERATURE)
     with pytest.raises(ValueError, match='uni method identity'):
-        validate_cached_selection(base_metadata, arm='rags-block-linearSum-uni', identity=identity,
+        validate_cached_selection(base_metadata, arm='rage-block-linearSum-uni', identity=identity,
             manifest=manifest, crb=crb, temperature=DEFAULT_TEMPERATURE)
     uni = uniformize_intra_trajectory(selected, np.array([7, 9]))
     uni_metadata = dict(uni.metadata, pool_manifest=manifest, model=identity,
         crb=asdict(crb), frozen_rank_protocol=frozen_rank_protocol())
-    validate_cached_selection(uni_metadata, arm='rags-block-linearSum-uni', identity=identity,
+    validate_cached_selection(uni_metadata, arm='rage-block-linearSum-uni', identity=identity,
         manifest=manifest, crb=crb, temperature=DEFAULT_TEMPERATURE)
     with pytest.raises(ValueError, match='uni method identity'):
-        validate_cached_selection(uni_metadata, arm='rags-block-linearSum', identity=identity,
+        validate_cached_selection(uni_metadata, arm='rage-block-linearSum', identity=identity,
             manifest=manifest, crb=crb, temperature=DEFAULT_TEMPERATURE)
 
 
 def test_v5_uni_config_validates_and_v5_frozen_matrix_unchanged():
-    from rags.experiments.ranking import DEFAULT_TEMPERATURE
-    config = json.loads(Path('configs/rags/main_v5_uni.json').read_text())
+    from rage.experiments.ranking import DEFAULT_TEMPERATURE
+    config = json.loads(Path('configs/rage/main_v5_uni.json').read_text())
     validate_config(config)
     assert config['experiment_version'] == 'v5-uni'
     assert tuple(config['arms']) == V5_UNI_ARMS
     # The approved V5 formal matrix is not extended by the uni experiment.
     assert V5_FROZEN_ARMS == tuple(a for a in ARMS if not a.endswith('-uni'))
-    v5 = json.loads(Path('configs/rags/main.json').read_text())
+    v5 = json.loads(Path('configs/rage/main.json').read_text())
     validate_config(v5)
 
     def with_uni_temperatures(source):
         result = json.loads(json.dumps(source))
         for settings in result['settings'].values():
             for arm in V5_UNI_ARMS:
-                if arm.startswith('rags-'):
+                if arm.startswith('rage-'):
                     settings['temperature'][arm] = DEFAULT_TEMPERATURE
         return result
 

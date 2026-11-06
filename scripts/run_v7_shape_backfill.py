@@ -9,17 +9,17 @@ import sys
 import time
 
 from assets.gradient.cache import atomic_json
-from rags.experiments.v7_amendment import report_view
-from rags.experiments.v7_protocol import MODELS, validate
-from rags.experiments.v7_run import artifact_identity, read
-from rags.experiments.v7_shape import ARMS
-from rags.experiments.v7_shape_backfill import EXTENSIONS, checked_model_lease, publish_receipt, run_model
+from rage.experiments.v7_amendment import report_view
+from rage.experiments.v7_protocol import MODELS, validate
+from rage.experiments.v7_run import artifact_identity, read
+from rage.experiments.v7_shape import ARMS
+from rage.experiments.v7_shape_backfill import EXTENSIONS, checked_model_lease, publish_receipt, run_model
 from scripts.supervise_v7_night import pidfd
 
-CONFIGS = ('configs/rags/main_v7_curve4.json',
-           'configs/rags/v7_extension_ne_china_wind.json',
-           'configs/rags/v7_extension_time_sg_pm25_h.json',
-           'configs/rags/v7_extension_time_coastal_ts_h.json')
+CONFIGS = ('configs/rage/main_v7_curve4.json',
+           'configs/rage/v7_extension_ne_china_wind.json',
+           'configs/rage/v7_extension_time_sg_pm25_h.json',
+           'configs/rage/v7_extension_time_coastal_ts_h.json')
 
 
 def sources(parent):
@@ -163,7 +163,7 @@ def main():
                          'scripts.run_v7_shape_backfill','--parent',str(parent),
                          '--student',model,'--arm',arm]
                 stream=log.open('a')
-                process=subprocess.Popen(command,cwd='/root/TS3',
+                process=subprocess.Popen(command,cwd='/root/TS-Lab',
                     env=dict(os.environ,PYTHONPATH='src:.',CUDA_VISIBLE_DEVICES=mapping[model]),
                     stdout=stream,stderr=subprocess.STDOUT)
                 stream.close()

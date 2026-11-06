@@ -1,8 +1,8 @@
 """Strict frozen-P10 recursive splitting; existing revisions stay unchanged."""
 import numpy as np
 import pytest
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine, CRBEngineMulti
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine, CRBEngineMulti
 
 
 def run(gradients, cover=3, split=5, many=False):

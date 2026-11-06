@@ -50,10 +50,10 @@ P_j=\frac{q_j\widetilde p_j}{\sum_kq_k\widetilde p_k}
 
 ### 5. 实现与验证状态
 
-新增远程src/rags/experiments/rank_v5.py。rank_mass_v5(scores, legal_counts, temperature=DEFAULT_TEMPERATURE)返回中间排名质量、最终对象概率和诊断；排名仅用对象数，源长度仅在最后进入。rank_resampled_windows_v5可从既有全局分数构造独立可训练选集，原选集不变、概率版本隔离、可序列化；缺分数直接报错，模块无模型/梯度访问器/BP调用路径。
+新增远程src/rage/experiments/rank_v5.py。rank_mass_v5(scores, legal_counts, temperature=DEFAULT_TEMPERATURE)返回中间排名质量、最终对象概率和诊断；排名仅用对象数，源长度仅在最后进入。rank_resampled_windows_v5可从既有全局分数构造独立可训练选集，原选集不变、概率版本隔离、可序列化；缺分数直接报错，模块无模型/梯度访问器/BP调用路径。
 
 tests/test_rank_v5.py的19项针对性测试通过（0.24s），覆盖不同对象数量的80%目标、分数单调变换不变、排名不受长度影响、并列/排列不变、同分数据量先验、乘积必须归一化、温度强度、单对象及选集序列化/缺分数禁止补BP。测试纯数组/选集操作，不加载模型、不计算梯度。
 
-缓存排名重放脚本temp/v4-explanation-20260918/replay_rank_v5.py读取此前equal_native_unit overlay中的排序键（它保留原始最终分数的顺序和并列），输出temp/rank-v5-tophalf80-20260918；复用两模型×九任务×LESS及四个RAGS-Block方法，共90份概率重放，不重算代表或梯度。中间前半对象质量范围[0.7994949831, 0.8000000000]，其中两份50%边界穿过并列组；无边界并列的情形达到80%。梯度计算数0、启动训练数0。NPZ/JSON同目录partial后原子发布、不用hash、不复制大型源数据。正式V5矩阵训练入口/配置与端到端MASE尚待推进，不将概率重放称为V5训练结果。
+缓存排名重放脚本temp/v4-explanation-20260918/replay_rank_v5.py读取此前equal_native_unit overlay中的排序键（它保留原始最终分数的顺序和并列），输出temp/rank-v5-tophalf80-20260918；复用两模型×九任务×LESS及四个RAGE-Block方法，共90份概率重放，不重算代表或梯度。中间前半对象质量范围[0.7994949831, 0.8000000000]，其中两份50%边界穿过并列组；无边界并列的情形达到80%。梯度计算数0、启动训练数0。NPZ/JSON同目录partial后原子发布、不用hash、不复制大型源数据。正式V5矩阵训练入口/配置与端到端MASE尚待推进，不将概率重放称为V5训练结果。
 
 ---

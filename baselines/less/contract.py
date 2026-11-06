@@ -16,7 +16,7 @@ CONTRACT = BaselineContract(
             "fixed feasible source pool and reference safe history",
             "ranked whole-trajectory point-budget delivery; uniform legal-start training sampling",
             "one trajectory per example; uniform-window raw gradient mean on both sides",
-            "sampling counts match the three configured RAGS budgets",
+            "sampling counts match the three configured RAGE budgets",
             "bilateral SGD gradients, single pretrained checkpoint (deliberate decisions 11-D2/D3)",
             "full-parameter shared hash projection instead of LoRA (decision 11-D5)",
         ),

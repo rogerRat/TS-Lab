@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pytest
 
-from rags.experiments import shared_formal_inputs as inputs
-from rags.experiments.development_inputs import load_fragments
+from rage.experiments import shared_formal_inputs as inputs
+from rage.experiments.development_inputs import load_fragments
 
 
 def test_full_reference_native_tail_and_full_causal_scales():

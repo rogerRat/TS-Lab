@@ -113,7 +113,7 @@ class GradientCache:
             probe=probe, value_kind="projected_per_window_gradient",
             storage_dtype="bfloat16", storage_encoding="uint16-bits",
             index_columns=["fragment_id", "physical_start_1based"])))
-        shared = os.environ.get("TS3_GRADIENT_CACHE_ROOT")
+        shared = os.environ.get("RAGE_GRADIENT_CACHE_ROOT")
         root = Path(shared) if shared else Path(run_dir) / "grad_cache"
         root.mkdir(parents=True, exist_ok=True)
         name = readable(model["model_id"]) + "--" + readable(model.get("ckpt_revision"))
@@ -247,7 +247,7 @@ class GradientCache:
             return
         if self.frozen or self._lock.closed:
             raise RuntimeError("selection requested an unprepared gradient; add it to assets requirements")
-        from rags.execution import execution_policy
+        from rage.execution import execution_policy
         batch = execution_policy(self.engine).batch_size(
             self.engine, "gradient", fallback=32, count=len(pending))
         # Dataset shards keep source and reference identities separate.

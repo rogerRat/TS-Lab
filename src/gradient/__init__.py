@@ -1,4 +1,4 @@
-"""Gradient computation and bounded random projection for TS3."""
+"""Gradient computation and bounded random projection for RAGE."""
 
 from .chronos import (
     ChronosTinyConfig,

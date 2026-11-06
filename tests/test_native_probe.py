@@ -2,8 +2,8 @@ import numpy as np
 import torch
 from types import SimpleNamespace
 
-from rags.experiments.native_probe import NativeProbe
-from rags.execution import encoder_embeddings
+from rage.experiments.native_probe import NativeProbe
+from rage.execution import encoder_embeddings
 
 
 def test_native_embedding_dispatch_excludes_future_and_preserves_rows():

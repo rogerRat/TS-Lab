@@ -2,9 +2,9 @@ import numpy as np
 import torch
 import pytest
 
-from rags.core import TimeSeriesFragment
-from rags.experiments.calibration import online_curve, validation_from_history
-from rags.experiments.train_eval import fine_tune
+from rage.core import TimeSeriesFragment
+from rage.experiments.calibration import online_curve, validation_from_history
+from rage.experiments.train_eval import fine_tune
 
 
 def test_online_evaluation_does_not_change_training_rng_or_optimizer():

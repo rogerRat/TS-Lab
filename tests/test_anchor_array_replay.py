@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from rags.core import TimeSeriesFragment
-from rags.crb import CRBConfig, CRBEngine
-from rags.experiments.anchor_budget_simulate import ArrayGradientComputer
+from rage.core import TimeSeriesFragment
+from rage.crb import CRBConfig, CRBEngine
+from rage.experiments.anchor_budget_simulate import ArrayGradientComputer
 
 
 def test_array_replay_preserves_exact_anchor_rows_and_crb():

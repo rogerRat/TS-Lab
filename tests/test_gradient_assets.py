@@ -6,11 +6,11 @@ import torch
 
 from assets.gradient import GradientCache, WindowRequest, FragmentGradients, GradientDataset
 from assets.gradient.prepare import prepare_gradients
-from rags.crb import CRBConfig, CRBEngineMulti
-from rags.core import TimeSeriesFragment
-from rags.execution import SelectionExecution
-from rags.experiments.arms import WindowIndex
-from rags.experiments.full_pool import select_full_pool
+from rage.crb import CRBConfig, CRBEngineMulti
+from rage.core import TimeSeriesFragment
+from rage.execution import SelectionExecution
+from rage.experiments.arms import WindowIndex
+from rage.experiments.full_pool import select_full_pool
 
 
 class Probe:
@@ -100,11 +100,11 @@ def test_all_gradient_methods_score_without_computation_and_reuse_new_temperatur
     probe = Probe()
     kwargs = dict(reference_fragments=refs, pool=pool, index=index, pool_manifest={"total_equivalents": 5},
                   model_identity={"model_id": "fixture", "ckpt": "base"}, crb_config=config, dataset_tag="task")
-    names = ["rags", "less", "rags_traj"]
+    names = ["rage", "less", "rage_traj"]
     assets = prepare_gradients(names, probe, run_dir=tmp_path, **kwargs)
     count = probe.count
-    from rags.experiments.ranking import DEFAULT_TEMPERATURE
-    for name in ("less-main","rags-block-maxSum","rags-traj-maxSum"):
+    from rage.experiments.ranking import DEFAULT_TEMPERATURE
+    for name in ("less-main","rage-block-maxSum","rage-traj-maxSum"):
         for temperature in (DEFAULT_TEMPERATURE,):
             output = select_full_pool(name, None, run_dir=tmp_path, gradient_assets=assets,
                                       temperature=temperature, **kwargs)
@@ -188,18 +188,18 @@ def test_v2_shared_cache_reuse_and_refuse_fresh_cache(tmp_path):
     kwargs = dict(reference_fragments=fragments,pool=fragments,index=index,
         pool_manifest={'seed':0},model_identity={'model_id':'fixture','ckpt':'step-1'},
         crb_config=CRBConfig(context_length=4,prediction_length=2),dataset_tag='tiny')
-    prepared = prepare_gradients(['rags'],probe,run_dir=old,**kwargs)
+    prepared = prepare_gradients(['rage'],probe,run_dir=old,**kwargs)
     path = prepared.cache.path.resolve()
     prepared.cache.close()
     before = probe.count
     (new/'grad_cache').symlink_to(old/'grad_cache',target_is_directory=True)
     atomic_json(new/'gradient_reuse.json',{'experiment_version':'v2'})
     atomic_json(new/'warm_cache_verification.json',{'reports':[{'cache':str(path)}]})
-    warm = prepare_gradients(['rags'],probe,run_dir=new,**kwargs)
+    warm = prepare_gradients(['rage'],probe,run_dir=new,**kwargs)
     assert probe.count == before and warm.cache.computed_windows == 0
     warm.cache.close()
     kwargs['model_identity'] = {'model_id':'fixture','ckpt':'different'}
     with pytest.warns(UserWarning,match='fields differ'):
         with pytest.raises(ValueError,match='refusing full recomputation'):
-            prepare_gradients(['rags'],probe,run_dir=new,**kwargs)
+            prepare_gradients(['rage'],probe,run_dir=new,**kwargs)
     assert probe.count == before

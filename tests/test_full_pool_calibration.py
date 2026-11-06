@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import torch
 
-from rags.experiments import full_pool_calibration as module
+from rage.experiments import full_pool_calibration as module
 
 
 def test_full_scan_p10_and_fragment_resume(tmp_path, monkeypatch):

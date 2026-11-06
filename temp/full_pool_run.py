@@ -24,7 +24,7 @@ def validate_config(config):
     from .tasks import MAIN_DATASETS
     if config["resampling_revision"] != REVISION:
         raise ValueError("Unsupported full-pool protocol")
-    if config.get("purpose") in ("formal", "rags_random_comparison"):
+    if config.get("purpose") in ("formal", "rage_random_comparison"):
         required = dict(pool_equivalents=16284, context_length=512, prediction_length=64,
                         students=list(STUDENTS), datasets=list(MAIN_DATASETS),
                         arms=list(ARMS), seeds=[0, 1, 2])
@@ -34,16 +34,16 @@ def validate_config(config):
             required['seeds'] = [0]
             # The linked temperature supplement run carries only the T=0.25 arms;
             # the main run keeps the frozen six training arms. The linked
-            # RAGS-Gateless ablation run carries only rags_gateless. The
-            # temperature-default form swaps rags/less for their T=0.25 arms.
+            # RAGE-Gateless ablation run carries only rage_gateless. The
+            # temperature-default form swaps rage/less for their T=0.25 arms.
             if config.get('arms') == list(TEMPERATURE_DEFAULT_FORM):
                 required['arms'] = list(TEMPERATURE_DEFAULT_FORM)
             elif config.get('arms') == list(TEMPERATURE_ARMS):
                 required['arms'] = list(TEMPERATURE_ARMS)
             elif config.get('arms') == list(GATELESS_ARMS):
                 required["arms"] = list(GATELESS_ARMS)
-        if config["purpose"] == "rags_random_comparison":
-            required.update(arms=["random", "rags"], online_evaluation=True)
+        if config["purpose"] == "rage_random_comparison":
+            required.update(arms=["random", "rage"], online_evaluation=True)
         for key, value in required.items():
             if config.get(key) != value:
                 raise ValueError(f"Formal matrix requires {key}={value!r}")
@@ -117,7 +117,7 @@ def worker_command(student, config, run_dir):
     environment = config.get("student_environments", {}).get(student, ENVIRONMENTS[student])
     prefix = ([environment] if "/" in environment else [sys.executable] if student == "chronos-base"
               and environment == "ts3" else ["conda", "run", "--no-capture-output", "-n", environment, "python"])
-    return prefix + ["-m", "rags.experiments.full_pool_worker", "--run", str(run_dir), "--student", student]
+    return prefix + ["-m", "rage.experiments.full_pool_worker", "--run", str(run_dir), "--student", student]
 
 
 def summarize(run_dir, config):

@@ -8,8 +8,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import numpy as np
-from rags.experiments.full_pool_run import summarize, validate_config
-from rags.experiments.students import atomic_json
+from rage.experiments.full_pool_run import summarize, validate_config
+from rage.experiments.students import atomic_json
 
 
 def refresh(config, run, document):
@@ -34,8 +34,8 @@ def refresh(config, run, document):
                 bucket.append(previous[i:j + len(end)].strip())
     lines = ['# MAIN-v2 — 主实验', '',
         f'- 更新时间：{datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds")}',
-        f'- 配置：`configs/rags/main_v2.json`；运行：`{run}`',
-        '- 继承最终 v1 的全部裁定：九任务、三模型；八训练臂（含 rags_global 与 rags_traj_global），只跑 seed 0，统一数值 softmax T=0.25；Quito/LTSV 延续移除。',
+        f'- 配置：`configs/rage/main_v2.json`；运行：`{run}`',
+        '- 继承最终 v1 的全部裁定：九任务、三模型；八训练臂（含 rage_global 与 rage_traj_global），只跑 seed 0，统一数值 softmax T=0.25；Quito/LTSV 延续移除。',
         '- C512/H64/D1，CRB 2%/1%/1%；覆盖与误差阶段沿用 v1；分裂阶段反复二分当前中点代表模长最小的一批可分裂区间，预算用尽，所有块保留。',
         '- 原始逐窗梯度共享已有字段校验缓存，只补缺失窗口；CRB 审计、选集、训练与评测全部新生，未复制 v1 cells/checkpoints。',
         '- v1 协议与旧结果保存在 [MAIN-v1](MAIN-v1.md)。', '',
@@ -84,7 +84,7 @@ def main():
     if args.refresh_only:
         return 0
     atomic_json(args.run/'readiness.json', dict(ready=True,config=config,experiment_version='v2'))
-    command = [sys.executable,'-u','-m','rags.experiments.formal_main_entry',
+    command = [sys.executable,'-u','-m','rage.experiments.formal_main_entry',
                '--config',str(args.config.resolve()),'--run',str(args.run.resolve())]
     for attempt in range(1,4):
         print(f'v2 launch attempt {attempt}: {command}', flush=True)
