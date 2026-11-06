@@ -38,7 +38,7 @@
 !/data/ref/.gitkeep
 /outputs/*
 /vis-out/*
-/archive/
+/archive
 /configs/catalog/*
 /configs/experiments/*
 
