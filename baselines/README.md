@@ -18,7 +18,7 @@ from baselines.ltsv.algorithms import ltsv_window_scores
 LESS and TSDS are language-side adaptations. LP-Mirror preserves the official
 linear-proxy Adam/SGD/loss-drop/top-k method. LTSV follows the paper's one-step
 valuation and block/point/window equations; its official HEAD is not a complete
-runnable checkout. Source anchors remain in `requ/baselines.lock`.
+runnable checkout. Source anchors remain in `requ/third_parties/bench/baselines.lock`.
 
 Candidate/ref provenance, C/H lengths and final evaluation are experimental
 settings. Model-specific training/readout changes are disclosed in contracts.

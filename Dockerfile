@@ -11,29 +11,30 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requ/requirements.txt /tmp/requirements.txt
+COPY requ/ /tmp/requ/
 
 RUN micromamba create --yes --prefix /opt/conda/envs/rage python=3.10 pip 'setuptools>=68' \
     && micromamba run --prefix /opt/conda/envs/rage python -m pip install --extra-index-url https://download.pytorch.org/whl/cu128 'torch==2.7.1+cu128' \
-    && micromamba run --prefix /opt/conda/envs/rage python -m pip install -r /tmp/requirements.txt \
+    && micromamba run --prefix /opt/conda/envs/rage python -m pip install -r /tmp/requ/requirements.txt \
     && micromamba clean --all --yes
 
-COPY requ/third_parties.lock /tmp/third_parties.lock
 
 RUN set -eux; \
     mkdir -p /tmp/third_parties; \
-    while read -r name url commit extra; do \
-        case "${name}" in ''|'#'*) continue ;; esac; \
-        test -n "${name}"; \
-        test -n "${url}"; \
-        test -n "${commit}"; \
-        test -z "${extra}"; \
-        git clone "${url}" "/tmp/third_parties/${name}"; \
-        git -C "/tmp/third_parties/${name}" checkout --detach "${commit}"; \
-        micromamba run --prefix /opt/conda/envs/rage python -m pip install --no-deps "/tmp/third_parties/${name}"; \
-    done < /tmp/third_parties.lock; \
+    for lock in /tmp/requ/third_parties/model/chronos.lock /tmp/requ/third_parties/bench/fev.lock; do \
+        while read -r name url commit extra; do \
+            case "${name}" in ''|'#'*) continue ;; esac; \
+            test -n "${name}"; \
+            test -n "${url}"; \
+            test -n "${commit}"; \
+            test -z "${extra}"; \
+            git clone "${url}" "/tmp/third_parties/${name}"; \
+            git -C "/tmp/third_parties/${name}" checkout --detach "${commit}"; \
+            micromamba run --prefix /opt/conda/envs/rage python -m pip install --no-deps "/tmp/third_parties/${name}"; \
+        done < "${lock}"; \
+    done; \
     micromamba run --prefix /opt/conda/envs/rage python -m pip check; \
-    rm -rf /tmp/third_parties /tmp/third_parties.lock
+    rm -rf /tmp/third_parties /tmp/requ
 
 FROM ${CUDA_IMAGE} AS runtime
 

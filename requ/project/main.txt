@@ -1,0 +1,30 @@
+# Direct dependencies owned by the RAGE repository main environment.
+# Third-party model and benchmark requirements are composed by ../requirements.txt.
+-r native-selection.txt
+
+# Core computation
+numpy==2.2.6
+scipy==1.15.3
+pot==0.9.7.post1
+statsmodels==0.14.6
+pandas==2.3.3
+
+# Project data access and formats
+datasets==4.8.5
+fsspec==2026.2.0
+modelscope-hub==0.1.8
+pyarrow==24.0.0
+
+# Project visualization and analysis
+plotly==6.8.0
+matplotlib==3.9.2
+kaleido==1.3.0
+scikit-learn==1.7.2
+umap-learn==0.5.12
+
+# Project CLI and configuration
+tqdm==4.68.2
+PyYAML==6.0.3
+
+# Project verification
+pytest==8.4.2

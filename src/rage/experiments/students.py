@@ -32,7 +32,7 @@ def provenance(*, include_lock=False):
               "python": sys.executable, "packages": packages}
     if include_lock:
         result["model_integrations_lock_sha256"] = hashlib.sha256(
-            (PROJECT_ROOT / "requ/model_integrations.lock").read_bytes()).hexdigest()
+            (PROJECT_ROOT / "requ/third_parties/model/integrations.lock").read_bytes()).hexdigest()
     return result
 
 

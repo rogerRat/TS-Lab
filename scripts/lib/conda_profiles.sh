@@ -7,6 +7,7 @@ usage() {
 }
 run_python() { conda run --no-capture-output -n "$ENV_NAME" python "$@"; }
 run_pip() { run_python -m pip "$@"; }
+source "$PROJECT_ROOT/scripts/lib/plotly_backend.sh"
 
 network_git() (
     # AutoDL's GitHub proxy must not slow down domestic pip/conda mirrors.
@@ -37,6 +38,18 @@ checkout_source() {
     [[ "$(git -C "$target" rev-parse HEAD)" == "$revision" ]]
 }
 
+requirements_have_plotly() {
+    local file="$1" directory flag include extra
+    grep -Eq "^[[:space:]]*plotly==" "$file" && return 0
+    directory="$(cd -- "$(dirname -- "$file")" && pwd)"
+    while read -r flag include extra; do
+        [[ "$flag" == "-r" && -n "$include" && -z "$extra" ]] || continue
+        [[ -f "$directory/$include" ]] || continue
+        requirements_have_plotly "$directory/$include" && return 0
+    done < "$file"
+    return 1
+}
+
 install_sources() {
     local lock="$1" name url revision extra
     while read -r name url revision extra; do
@@ -57,14 +70,23 @@ install_profile() {
     run_pip install 'setuptools>=68' wheel -r "$PROJECT_ROOT/requ/$REQUIREMENTS"
     run_pip install --no-deps --no-build-isolation -e "$PROJECT_ROOT"
     case "$PROFILE" in
-        main) install_sources third_parties.lock ;;
-        time) install_sources time.third_parties.lock ;;
+        main)
+            install_sources third_parties/model/chronos.lock
+            install_sources third_parties/bench/fev.lock
+            ;;
+        time)
+            install_sources third_parties/bench/time.lock
+            install_sources third_parties/model/chronos.lock
+            ;;
         timemoe)
             local name url revision
-            read -r name url revision < <(awk '$1 == "timemoe-source"' "$PROJECT_ROOT/requ/model_integrations.lock")
+            read -r name url revision < <(awk '$1 == "timemoe-source"' "$PROJECT_ROOT/requ/third_parties/model/integrations.lock")
             checkout_source Time-MoE-pinned "$url" "$revision"
             ;;
     esac
+    if requirements_have_plotly "$PROJECT_ROOT/requ/$REQUIREMENTS"; then
+        install_plotly_backend
+    fi
 }
 
 verify_profile() {
@@ -76,12 +98,12 @@ import torch
 profile = sys.argv[1]
 modules = {
     "main": ["chronos", "fev", "numpy", "pandas", "pyarrow", "scipy", "faiss",
-             "ot", "threadpoolctl", "umap", "tensorboard", "matplotlib", "rage", "tsl",
+             "ot", "threadpoolctl", "umap", "tensorboard", "matplotlib", "plotly", "kaleido", "rage", "tsl",
              "rage.static_selection", "scripts.select_static"],
-    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "rage"],
-    "timemoe": ["faiss", "scipy", "yaml", "plotly", "rage"],
-    "sundial": ["faiss", "scipy", "yaml", "plotly", "rage"],
-    "timerxl": ["faiss", "scipy", "yaml", "plotly", "rage"],
+    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
+    "timemoe": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
+    "sundial": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
+    "timerxl": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
     "time": ["timebench", "timebench.evaluation.data", "chronos"],
 }
 for module in modules[profile]:
@@ -110,6 +132,9 @@ import sys
 from chronos import BaseChronosPipeline
 BaseChronosPipeline.from_pretrained(sys.argv[1], device_map="cpu", torch_dtype="float32")
 PY
+    fi
+    if requirements_have_plotly "$PROJECT_ROOT/requ/$REQUIREMENTS"; then
+        verify_plotly_backend
     fi
 }
 

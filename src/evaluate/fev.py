@@ -29,7 +29,7 @@ LOGGER = logging.getLogger("evaluate")
 UTC8 = timezone(timedelta(hours=8))
 from configs.paths import PROJECT_ROOT
 DEFAULT_TASK_FILE = PROJECT_ROOT / "configs" / "eval" / "fev" / "default.yaml"
-DEFAULT_LOCK_FILE = PROJECT_ROOT / "requ" / "third_parties.lock"
+DEFAULT_LOCK_FILE = PROJECT_ROOT / "requ" / "third_parties" / "bench" / "fev.lock"
 RQ3_METRICS = ("SQL", "MASE", "WAPE", "WQL", "MAE", "MSE")
 RQ3_TASK_COUNT = 20
 

@@ -1,0 +1,4 @@
+# Shared model runtime used by Time-MoE, Sundial, and TimerXL profiles.
+torch==2.7.1+cu128
+transformers==4.40.1
+accelerate==1.11.0

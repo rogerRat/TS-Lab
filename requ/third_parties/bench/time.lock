@@ -1,0 +1,2 @@
+# TIME benchmark source. The shared Chronos model source is in ../model/chronos.lock.
+TIME https://github.com/zqiao11/TIME.git b6e7ba9862acb9233c8c55b314c1777052c420ff
