@@ -8,13 +8,13 @@ from pathlib import Path
 import subprocess
 import sys
 
-STUDENTS = ("chronos-base", "timesfm-2.5", "timemoe-200m", "timerxl-84m", "sundial-base-128m")
+STUDENTS = ("chronos-tiny", "chronos-base", "timesfm-2.5", "timemoe-200m", "timerxl-84m", "sundial-base-128m")
 # Kept in the historical registry for offline compatibility, but these models
 # have no supported student-training deployment contract.
 NON_DEPLOYABLE_STUDENTS = frozenset(("sundial-base-128m", "timesfm-3.0"))
 HISTORICAL_STUDENTS = ("chronos-small",)
-ENVIRONMENTS = dict(zip(STUDENTS, ("rage", "rage-timesfm", "rage-timemoe", "rage-timerxl", "rage-sundial")))
-PARAMETER_COUNTS = dict(zip(STUDENTS, (201_374_976, 231_289_280, 453_196_800, 84_142_080, 128_329_680)))
+ENVIRONMENTS = dict(zip(STUDENTS, ("rage", "rage", "rage-timesfm", "rage-timemoe", "rage-timerxl", "rage-sundial")))
+PARAMETER_COUNTS = dict(zip(STUDENTS, (8_394_496, 201_374_976, 231_289_280, 453_196_800, 84_142_080, 128_329_680)))
 ENVIRONMENTS["chronos-small"] = "rage"
 PARAMETER_COUNTS["chronos-small"] = 46_154_240
 
@@ -60,7 +60,7 @@ def worker_command(student, manifest, out_dir, *, environments=None):
     environment = (environments or {}).get(student, ENVIRONMENTS[student])
     if "/" in environment:
         command = [environment]
-    elif student in ("chronos-base", "chronos-small") and environment == "rage":
+    elif student in ("chronos-tiny", "chronos-base", "chronos-small") and environment == "rage":
         command = [sys.executable]
     else:
         command = ["conda", "run", "--no-capture-output", "-n", environment, "python"]
@@ -139,9 +139,9 @@ def run_student_task(student, manifest_path, out_dir, *, engine=None):
     c, h = manifest["context_length"], manifest["prediction_length"]
     if engine is None:
         model_path = manifest.get("model_paths", {}).get(student)
-        if student in ("chronos-base", "chronos-small"):
-            from rage.engines import ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_SMALL, DEFAULT_CHRONOS_T5_BASE
-            default = DEFAULT_CHRONOS_T5_BASE if student == "chronos-base" else DEFAULT_CHRONOS_T5_SMALL
+        if student in ("chronos-tiny", "chronos-base", "chronos-small"):
+            from rage.engines import ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_TINY, DEFAULT_CHRONOS_T5_SMALL, DEFAULT_CHRONOS_T5_BASE
+            default = {"chronos-tiny": DEFAULT_CHRONOS_T5_TINY, "chronos-small": DEFAULT_CHRONOS_T5_SMALL, "chronos-base": DEFAULT_CHRONOS_T5_BASE}[student]
             engine = ChronosT5Engine(ChronosT5Config(context_length=c, prediction_length=h,
                 model_path=model_path or default), device=manifest.get("device", "cuda"))
         else:

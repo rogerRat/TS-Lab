@@ -107,9 +107,9 @@ def online_curve(engine, windows, *, base_state, learning_rate, seed, checkpoint
 
 
 def build_student(student, model_path=None):
-    if student in ("chronos-base", "chronos-small"):
-        from rage.engines import ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_SMALL, DEFAULT_CHRONOS_T5_BASE
-        default = DEFAULT_CHRONOS_T5_BASE if student == "chronos-base" else DEFAULT_CHRONOS_T5_SMALL
+    if student in ("chronos-tiny", "chronos-base", "chronos-small"):
+        from rage.engines import ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_TINY, DEFAULT_CHRONOS_T5_SMALL, DEFAULT_CHRONOS_T5_BASE
+        default = {"chronos-tiny": DEFAULT_CHRONOS_T5_TINY, "chronos-small": DEFAULT_CHRONOS_T5_SMALL, "chronos-base": DEFAULT_CHRONOS_T5_BASE}[student]
         return ChronosT5Engine(ChronosT5Config(context_length=512, prediction_length=64,
             model_path=model_path or default), device="cuda")
     adapter = _foundation_adapter(student, model_path)

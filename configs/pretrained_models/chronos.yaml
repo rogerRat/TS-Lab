@@ -10,6 +10,13 @@ models:
     architecture: T5ForConditionalGeneration
     parameter_count_range: [45000000, 47000000]
     status: enabled
+  chronos-t5-tiny-8m:
+    repo_id: amazon/chronos-t5-tiny
+    revision: 29d808298f1a62493e7b9a5e08529d0d930fa189
+    destination: cache/pretrained_models/amazon/chronos-t5-tiny/29d808298f1a62493e7b9a5e08529d0d930fa189
+    architecture: T5ForConditionalGeneration
+    parameter_count_range: [8394496, 8394496]
+    status: enabled
   chronos-t5-base-200m:
     repo_id: amazon/chronos-t5-base
     revision: ad294eaacead15db499b740ea4122266dd2a81a2

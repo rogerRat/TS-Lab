@@ -18,6 +18,7 @@ from gradient.count_sketch import add_count_sketch
 from rage.execution import SelectionExecution
 
 
+DEFAULT_CHRONOS_T5_TINY = "cache/pretrained_models/amazon/chronos-t5-tiny/29d808298f1a62493e7b9a5e08529d0d930fa189"
 DEFAULT_CHRONOS_T5_SMALL = (
     "cache/pretrained_models/amazon/chronos-t5-small"
 )
