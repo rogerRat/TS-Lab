@@ -1,0 +1,15 @@
+{
+  "experiment": "v0-crb-var",
+  "last_modified": "2026-11-09",
+  "source_experiment": "v0-crb-reconst-test",
+  "gradient_cache": "outputs/train/v0-crb-reconst-test/gradients/trajectory-{ordinal:02d}.bf16",
+  "trajectory_count": 10,
+  "context_length": 512,
+  "prediction_length": 64,
+  "window_stride": 1,
+  "gradient_budget": "ceil(legal_start_count / 64) per trajectory",
+  "crb_stage_allocation": "two mandatory endpoints plus discretionary probes split as evenly as possible across coverage, error-risk, and recursive minimum-kappa stages",
+  "baseline": "same per-trajectory anchor count, evenly spaced including endpoints",
+  "metrics": ["within-block gradient variance", "relative gradient variance", "mean-direction angular dispersion"],
+  "output": "outputs/train/v0-crb-var"
+}

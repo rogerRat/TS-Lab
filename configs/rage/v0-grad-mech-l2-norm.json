@@ -1,0 +1,14 @@
+{
+  "experiment": "v0-grad-mech-l2-norm",
+  "source_experiment": "v0-grad-mech-test",
+  "source_manifest": "outputs/train/v0-grad-mech-test/input_manifest.json",
+  "source_ordinals": [973, 980, 981, 984, 985, 987, 988, 996, 998, 999],
+  "gradient_cache": "outputs/train/v0-crb-reconst-test/gradients",
+  "gram_source": "outputs/train/v0-gradient-proxy-test",
+  "output": "outputs/train/v0-grad-mech-l2-norm",
+  "gradient_coordinates": 8394496,
+  "window_span": 576,
+  "max_lag": 575,
+  "cpu_threads": 2,
+  "expected_windows": 12836
+}

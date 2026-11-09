@@ -1,0 +1,37 @@
+{
+  "experiment": "v0-grad-mech-test",
+  "source": "autogluon/chronos_datasets",
+  "subset": "m5",
+  "source_revision": "eeecad0b82a8c237e212ce6f8d1abecb513e2cec",
+  "expected_source_rows": 30490,
+  "raw_data": "data/src/raw/chronos/m5",
+  "bundle_data": "data/src/shard_dataset/v0-grad-mech-test/m5/load",
+  "selection": {
+    "order": "source-row-order",
+    "eligible_min_points": 576,
+    "count": 1000,
+    "random_sampling": false
+  },
+  "context_length": 512,
+  "prediction_length": 64,
+  "stride": 1,
+  "model": "chronos-t5-tiny-8m",
+  "warmup": {
+    "steps": 100,
+    "batch_size": 32,
+    "learning_rate": 1e-06,
+    "seed": 0
+  },
+  "retain_gradient_ordinals": [
+    973,
+    980,
+    981,
+    984,
+    985,
+    987,
+    988,
+    996,
+    998,
+    999
+  ]
+}

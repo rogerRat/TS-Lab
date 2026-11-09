@@ -1,0 +1,11 @@
+{
+  "experiment": "v0-vage",
+  "budget_denominator": 64,
+  "proxy_denominator": 64,
+  "block_length": 512,
+  "n_min": 2,
+  "proxy_shrink_threshold": 8,
+  "proxy_source": "outputs/train/v0-gradient-proxy-test",
+  "gradient_source": "outputs/train/v0-crb-reconst-test/gradients",
+  "output": "outputs/train/v0-vage"
+}

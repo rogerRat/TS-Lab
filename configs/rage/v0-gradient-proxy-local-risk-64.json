@@ -1,0 +1,12 @@
+{
+  "experiment": "v0-gradient-proxy-test",
+  "substudy": "Local-Risk 64-point sampling extension",
+  "source_output": "outputs/train/v0-gradient-proxy-test",
+  "output": "outputs/train/v0-gradient-proxy-test/local_risk_sparse_64",
+  "block_length": 64,
+  "sample_counts": [64, 48, 32, 16, 8, 4],
+  "replicates": 20,
+  "seed": 0,
+  "cpu_threads": 2,
+  "heartbeat_seconds": 30
+}

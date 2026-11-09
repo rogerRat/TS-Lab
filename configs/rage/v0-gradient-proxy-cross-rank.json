@@ -1,0 +1,17 @@
+{
+  "experiment": "v0-gradient-proxy-test",
+  "part_code": "Cross-Rank",
+  "source_config": "configs/rage/v0-gradient-proxy-test.json",
+  "output": "outputs/train/v0-gradient-proxy-test/cross_rank",
+  "reference_tracks": [0, 7],
+  "source_tracks": [1, 2, 3, 4, 5, 6, 8, 9],
+  "reference_policy": "all windows from each reference track",
+  "source_policy": "deterministic, evenly placed windows with disjoint 576-point spans within each source track",
+  "window_span": 576,
+  "reference_batch_size": 4,
+  "coordinate_tile": 32768,
+  "cpu_threads": 2,
+  "heartbeat_seconds": 30,
+  "top_k": 5,
+  "seed": 0
+}

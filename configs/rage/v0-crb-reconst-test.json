@@ -1,0 +1,52 @@
+{
+  "experiment": "v0-crb-reconst-test",
+  "gradient_dtype": "bfloat16",
+  "trajectory_count": 10,
+  "source_experiment": "v0-grad-mech-test",
+  "source_config": "configs/rage/v0-grad-mech-test.json",
+  "bundle_data": "data/src/shard_dataset/v0-grad-mech-test/m5/load",
+  "input_manifest": "outputs/train/v0-grad-mech-test/input_manifest.json",
+  "checkpoint": "outputs/train/v0-grad-mech-test/chronos-tiny-warmup-100",
+  "context_length": 512,
+  "prediction_length": 64,
+  "stride": 1,
+  "budget_denominators": [
+    1,
+    4,
+    16,
+    64,
+    128,
+    256,
+    512,
+    576
+  ],
+  "initial_samples_per_budget": 16,
+  "forced_crb_ratio": [
+    1.0,
+    0.0,
+    0.0
+  ],
+  "disk_reserve_gib": 1,
+  "stop_sentinel": "outputs/train/v0-crb-reconst-test/STOP",
+  "full_gradient_output": "outputs/train/v0-crb-reconst-test/gradients",
+  "search_output": "outputs/train/v0-crb-reconst-test/search",
+  "budget_definition": "ceil(legal_start_count / denominator), with a minimum of two mandatory endpoint gradients",
+  "uniform_anchor_rule": "evenly spaced unique anchors over all legal starts, always including both endpoints",
+  "max_budget_denominator": 576,
+  "trajectory_ordinals": [
+    973,
+    980,
+    981,
+    984,
+    985,
+    987,
+    988,
+    996,
+    998,
+    999
+  ],
+  "allow_cached_gradients_before_predecessor_complete": false,
+  "search_strategy": "uniform_simplex_lattice_d4_plus_centroid",
+  "max_rounds": 1,
+  "cpu_threads": 2
+}

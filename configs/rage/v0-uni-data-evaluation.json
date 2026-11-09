@@ -1,0 +1,11 @@
+{
+  "experiment": "v0-uni-data-evaluation",
+  "references_per_track": 10,
+  "seed": 0,
+  "max_lag": 575,
+  "query_batch_size": 8,
+  "cpu_threads": 2,
+  "source": "outputs/train/v0-gradient-proxy-test",
+  "gradient_source": "outputs/train/v0-crb-reconst-test/gradients",
+  "output": "outputs/train/v0-uni-data-evaluation"
+}

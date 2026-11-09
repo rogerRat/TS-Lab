@@ -1,0 +1,8 @@
+{
+  "experiment": "v0-var-proxy-estimate",
+  "block_length": 256,
+  "proxy_count": 8,
+  "full_anchor_count": 4,
+  "source": "outputs/train/v0-gradient-proxy-test",
+  "output": "outputs/train/v0-var-proxy-estimate"
+}

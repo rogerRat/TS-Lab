@@ -1,0 +1,13 @@
+{
+  "experiment": "v0-gradient-proxy-test",
+  "substudy": "Local-Risk sampling extension",
+  "source_output": "outputs/train/v0-gradient-proxy-test",
+  "output": "outputs/train/v0-gradient-proxy-test/local_risk_sparse",
+  "block_length": 32,
+  "sample_counts": [32, 24, 16, 8, 4],
+  "sampling": "20 repeated seeded nested uniform samples without replacement within each full block; 32 uses all points once",
+  "replicates": 20,
+  "seed": 0,
+  "cpu_threads": 2,
+  "heartbeat_seconds": 30
+}

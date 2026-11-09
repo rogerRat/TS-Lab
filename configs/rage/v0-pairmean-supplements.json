@@ -1,0 +1,13 @@
+{
+  "experiment": "v0-pairmean-supplements",
+  "gradient_source": "outputs/train/v0-crb-reconst-test/gradients",
+  "gram_source": "outputs/train/v0-gradient-proxy-test",
+  "vage_anchor_sources": {
+    "static_nmin2": "outputs/train/v0-vage/anchors.json",
+    "static_nmin1": "outputs/train/v0-vage-nmin1/anchors.json",
+    "methods_nmin1": "outputs/train/v0-vage-methods-nmin1/anchors.json"
+  },
+  "scale_denominators": [1, 2, 4, 8, 16, 32, 64, 128],
+  "vage_output": "outputs/train/v0-vage/pairmean",
+  "scale_output": "outputs/train/v0-uni-reconst-scale/pairmean"
+}
