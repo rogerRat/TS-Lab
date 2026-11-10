@@ -335,3 +335,5 @@ At 13:45 CST, TimerXL seed 0 random completed all 4,000 updates and eight FEV/TI
 At 13:52 CST, the Chronos input pools for seeds 1, 2, and 3 are all prepared. All six manifests parse, match their respective sampling seeds, and have the expected 19,903 random or 199,030 full series. TimerXL seed 0 full finished training and entered step 0 FEV evaluation; its phase .complete remains pending.
 
 At 13:58 CST, TimerXL seed 0 full completed all eight FEV/TIME evaluations and wrote .complete. The active queue automatically started TimesFM seed 0 random in the rage-timesfm environment. TimerXL seed 0 rand/full are both complete.
+
+At 14:01 CST, TimesFM FEV short-context tasks 18 and 19 passed direct base-checkpoint rehearsals after patch-multiple left padding was fixed. Temporary rehearsal artifacts were removed. The active formal seed 0 random training process continues and will use the corrected adapter at evaluation.

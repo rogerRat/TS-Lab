@@ -1032,3 +1032,9 @@ Ran the actual Chronos --prepare-only entry point sequentially for seeds 2 and 3
 Last modified: 2026-11-10
 
 Verified TimerXL seed 0 rand and full .complete markers after all eight FEV and TIME checkpoint evaluations. The active queue automatically started TimesFM seed 0 random and loaded its candidate pool. No manual restart was needed.
+
+### 2026-11-10 14:01 CST - TimesFM short-context rehearsal and fix
+
+Last modified: 2026-11-10
+
+A direct FEV task 18 rehearsal initially failed because a 59-point context was not divisible by the TimesFM patch length of 32. Updated src/adapters/foundation/eval/fev.py to left-pad TimesFM contexts to the next 32-point multiple after the existing 512-point cap. Re-ran the actual FEV evaluator with --resume: task 18 passed (MASE 8.8114). A separate task 19 run also passed (MASE 4.0807). These are base-model rehearsal metrics, not formal seed results. Deleted the temporary checkpoint wrapper, evaluation outputs, YAML config, and four rehearsal evaluator logs. The formal TimesFM seed 0 random training process remained active.
