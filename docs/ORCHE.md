@@ -321,3 +321,9 @@ Formal output roots: `outputs/train/v1-rage-chronosT5-trev-base-rand/` and `outp
 Both new model pairs use the exact Chronos inputs pools by reference, not copies. Effective batch is 32 with microbatch 8; all parameters, LoRA weights, and training are BF16. Each phase runs 4,000 updates at steps 0/100/200/500/1000/2000/3000/4000. The runner evaluates FEV then TIME at each step and removes that step's adapter only after both outputs are complete; adapter 4000 is retained. The environment installer is scripts/temp/prepare_trev_other_models.sh and now pins datasets==4.8.5 plus installs the local FEV package metadata in both model environments. Do not start the foundation runner manually while the queue is active.
 
 TimerXL rehearsal passed a one-step BF16 LoRA update, merged-checkpoint export, FEV task 9, and TIME CPHL/15T short. TimesFM rehearsal passed in tmux v1-rehearse-timesfm25. Its one-step BF16 LoRA loss was finite; FEV task 9 MASE=0.6565; TIME CPHL/15T short MSE=0.1730, MAE=0.2900, MASE=1.2217. The queue remains dependency-gated on Chronos full completion.
+
+## Seed 0-3 Trev queue (2026-11-10)
+
+Last modified: 2026-11-10
+
+Session: v1-trev-seeds-0-3. Command: bash scripts/temp/queue_v1_rage_trev_seeds.sh. Console: logs/v1-rage-foundation-trev/seed-queue-console.log. GPU phases execute serially. Seed 0 Chronos rand/full are complete; TimerXL rand resumes at evaluation step 0, then TimerXL full and TimesFM rand/full. For each seed 1, 2, 3, prepare Chronos rand/full input pools, start its checkpoint cleanup watcher, then run Chronos rand/full, TimerXL rand/full, TimesFM rand/full. Each phase is resumable from its checkpoint and evaluation outputs. The first checkpoint cleanup watcher is started by the queue after pool preparation. Do not launch a second queue concurrently.

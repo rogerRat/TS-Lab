@@ -1002,3 +1002,9 @@ At the user's direction, removed the four remaining raw BF16 full-gradient traje
 ### 2026-11-10 12:46 CST - queue and cleanup audit
 
 The foundation queue is live in tmux v1-foundation-trev-queue and is polling for Chronos full .complete. Chronos random has only adapter-step-4000 remaining after all step evaluations. Chronos full training reached step 2,000 and saved that adapter; it is still active. TimerXL and TimesFM rehearsal completion markers are present in their retained console logs, and temporary rehearsal artifacts are absent. Python compilation, shell syntax, four model JSON manifests, and git diff whitespace checks passed. Formal TimerXL/TimesFM training has not started yet by design; the queue starts them after Chronos rand/full completion.
+
+### 2026-11-10 13:40 CST - Trev seeds 0-3 queue resumed
+
+Last modified: 2026-11-10
+
+Found no active tmux or training process. Chronos seed 0 rand/full both have .complete. TimerXL seed 0 rand has optimizer step 4000 and an incomplete step 0 FEV evaluation. Verified the short-context padding fix and JSON newline fix compile. Repaired the existing base-step-0000 manifest with a literal escaped newline. Ran the formal TimerXL step 0 FEV command with --resume; tasks 18 and 19 completed and the four-task results CSV was written. Created seed 1-3 rand/full configs for all three models, with matching pool and training sampling seeds. Started tmux v1-trev-seeds-0-3; its TimerXL seed 0 resume loaded the pool and saved optimizer state and began TIME step 0. Queue and progress are in logs/v1-rage-foundation-trev/seed-queue-console.log. Earlier queue state above is historical.

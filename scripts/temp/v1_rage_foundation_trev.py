@@ -26,7 +26,7 @@ LOGGER = None
 def write_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".partial")
-    temp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\\n", encoding="ascii")
+    temp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="ascii")
     temp.replace(path)
 
 def on_signal(signum, _frame):
@@ -44,6 +44,8 @@ def load_pool(config):
     expected = 0.1 if config["phase"] == "rand" else 1.0
     if fraction != expected or manifest["contract"]["random_fraction"] != fraction:
         raise ValueError("shared candidate-pool fraction does not match this phase")
+    if int(manifest["contract"]["sampling_seed"]) != int(config.get("sampling_seed", 0)):
+        raise ValueError("shared candidate-pool sampling seed does not match this phase")
     windows = RegionWindows(np.load(root / "values.npy", mmap_mode="r"),
         np.load(root / "offsets.npy", mmap_mode="r"), np.load(root / "regions.npy", mmap_mode="r"),
         window_length=576, budget_windows=4000 * 32)
@@ -188,7 +190,7 @@ def train_phase(config, config_path):
     LOGGER.info("stage=train-start phase=%s steps=4000 effective_batch=32 micro_batch=8 precision=bfloat16",
         config["experiment_version"])
     result = fine_tune(engine, windows, steps=4000, batch_size=32,
-        learning_rate=config["learning_rate"], seed=0, on_step=on_step,
+        learning_rate=config["learning_rate"], seed=int(config.get("sampling_seed", 0)), on_step=on_step,
         resume_path=ckpt_root / "resume.pt", checkpoint_steps=checkpoint_steps[1:], recipe=recipe,
         schedule_total_steps=4000)
     if result.get("steps") != 4000: raise RuntimeError("training stopped before 4,000 optimizer updates")
@@ -202,7 +204,7 @@ def train_phase(config, config_path):
     del engine, _probe; torch.cuda.empty_cache()
     evaluate_phase(config, phase_dir)
     complete.write_text(json.dumps({"completed_steps": checkpoint_steps,
-        "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, indent=2) + "\\n", encoding="ascii")
+        "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, indent=2) + "\n", encoding="ascii")
     (ckpt_root / "resume.pt").unlink(missing_ok=True)
     shutil.rmtree(ckpt_root / "base-step-0000", ignore_errors=True)
     LOGGER.info("stage=phase-complete phase=%s output=%s", config["experiment_version"], phase_dir)

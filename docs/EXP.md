@@ -12,8 +12,8 @@ This table covers every maintained experiment and batch in this document. Comple
 | v0-proxy-dp-segmentation | longest4-unweighted | Exact BF16 proxy-variance DP vs same-count uniform | Completed | 4/4 tracks; relative variance 0.5031 vs 0.6762; direction dispersion 0.2995 vs 0.4298 |
 | v0-proxy-dp-segmentation | longest4-window-weighted | Exact length-weighted BF16 proxy-variance DP vs same-count uniform | Completed | 4/4 tracks; relative variance 0.5717 vs 0.6762; direction dispersion 0.3572 vs 0.4298 |
 | v1-rage-chronosT5-trev-base-rand | 1-random-10pct | Chronos-T5-Base BF16 LoRA; evaluate eight fixed optimizer-step checkpoints on 12 native-univariate FEV/TIME tasks | Completed | 4,000 updates and all eight step evaluations completed; .complete; only adapter 4000 retained |
-| v1-rage-chronosT5-trev-base-full | 1-full-pool | Chronos-T5-Base BF16 LoRA on the full fixed candidate pool | Running | Training in tmux v1-chronost5-trev; step 2,000 saved at 12:46 CST |
-| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for both Chronos batches; TimerXL rehearsal passed |
+| v1-rage-chronosT5-trev-base-full | 1-full-pool | Chronos-T5-Base BF16 LoRA on the full fixed candidate pool | Completed | 4,000 updates, evaluations, and .complete |
+| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Running | 4,000 updates saved; FEV step 0 complete; TIME step 0 active in seed queue |
 | v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimerXL random phase .complete |
 | v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | TimesFM 2.5 200M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for TimerXL pair; TimesFM rehearsal passed |
 | v1-rage-timesFM-trev-2.5-full | 1-full-pool | TimesFM 2.5 200M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimesFM random phase .complete |
@@ -414,6 +414,25 @@ Solve exact DP: DP[k,i]=min_j(DP[k-1,j]+V(j,i)) subject to interval length at le
 | 2 | Validate K, minimum interval length, complete coverage, finite outputs, and completion marker; summarize results | Completed; K=22, lengths>=16, contiguous coverage, finite metrics |
 
 
+| v1-rage-chronosT5-trev-base-rand-seed1 | 1-rand | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-chronosT5-trev-base-full-seed1 | 1-full | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-rand-seed1 | 1-rand | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-full-seed1 | 1-full | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-rand-seed1 | 1-rand | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-full-seed1 | 1-full | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 1; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-chronosT5-trev-base-rand-seed2 | 2-rand | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-chronosT5-trev-base-full-seed2 | 2-full | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-rand-seed2 | 2-rand | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-full-seed2 | 2-full | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-rand-seed2 | 2-rand | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-full-seed2 | 2-full | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 2; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-chronosT5-trev-base-rand-seed3 | 3-rand | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-chronosT5-trev-base-full-seed3 | 3-full | Chronos-T5-Base BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-rand-seed3 | 3-rand | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timerXL-trev-84m-full-seed3 | 3-full | TimerXL 84M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+| v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | TimesFM 2.5 200M BF16 LoRA, 4,000 updates and 12 tasks at each fixed checkpoint | Queued | Seed 3; follows all previous seed batches in scripts/temp/queue_v1_rage_trev_seeds.sh |
+
 ## v1-rage-chronosT5-trev-base and foundation-model Trev batches
 
 First proposed: 2026-11-10 02:03 CST. Last modified: 2026-11-10.
@@ -440,3 +459,9 @@ For each step, remove the intermediate adapter only after both its FEV and TIME 
 ### v0-proxy-dp-segmentation completion correction (2026-11-10)
 
 The earlier plan above describes the ten-track candidate study. The executed replay used only source ordinals 01, 05, 06, and 09 after the raw caches for the other tracks were removed. Both unweighted and length-weighted exact DP replays completed with 22 intervals per track. For unweighted DP vs uniform, equal-track relative variance was 0.5031/0.6762, equal-interval direction dispersion 0.2995/0.4298, window-weighted direction 0.5844/0.4297, and absolute variance 3.7787/9.4982. For length-weighted DP vs uniform, the same metrics were 0.5717/0.6762, 0.3572/0.4298, 0.4923/0.4297, and 12.5689/9.4982. The descriptive results apply only to the four selected longest tracks. Detailed results: docs/results/v0-proxy-dp-segmentation.md.
+
+## Seed 0-3 extension (2026-11-10)
+
+Last modified: 2026-11-10
+
+The seed 0 Chronos pair is complete. TimerXL seed 0 resumes from saved optimizer step 4000, then TimerXL full and TimesFM rand/full run. Seeds 1, 2, and 3 each run Chronos rand/full, TimerXL rand/full, and TimesFM rand/full in that order. The random subset and training sampling use the matching seed; full pool selection retains all eligible series and uses the matching training seed. All other parameters and evaluation tasks match seed 0. The queue is scripts/temp/queue_v1_rage_trev_seeds.sh.

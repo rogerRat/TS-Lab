@@ -2,6 +2,7 @@
 """Remove evaluated intermediate adapters after they are no longer needed."""
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 from pathlib import Path
@@ -29,11 +30,15 @@ def evaluated(batch: str, step: int) -> bool:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--seed", type=int, choices=(0, 1, 2, 3), default=0)
+    args = parser.parse_args()
+    batches = BATCHES if args.seed == 0 else tuple(batch + "-seed%d" % args.seed for batch in BATCHES)
     logger = configure_logger("v1_trev_cleanup", "v1-rage-chronosT5-trev-base",
                               "checkpoint_cleanup", "waiting_for_evaluations")
     while True:
         all_complete = True
-        for batch in BATCHES:
+        for batch in batches:
             train_root = ROOT / "outputs/train" / batch
             checkpoint_root = train_root / "checkpoints"
             if not (train_root / ".complete").exists():
