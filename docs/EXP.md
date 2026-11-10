@@ -13,8 +13,8 @@ This table covers every maintained experiment and batch in this document. Comple
 | v0-proxy-dp-segmentation | longest4-window-weighted | Exact length-weighted BF16 proxy-variance DP vs same-count uniform | Completed | 4/4 tracks; relative variance 0.5717 vs 0.6762; direction dispersion 0.3572 vs 0.4298 |
 | v1-rage-chronosT5-trev-base-rand | 1-random-10pct | Chronos-T5-Base BF16 LoRA; evaluate eight fixed optimizer-step checkpoints on 12 native-univariate FEV/TIME tasks | Completed | 4,000 updates and all eight step evaluations completed; .complete; only adapter 4000 retained |
 | v1-rage-chronosT5-trev-base-full | 1-full-pool | Chronos-T5-Base BF16 LoRA on the full fixed candidate pool | Completed | 4,000 updates, evaluations, and .complete |
-| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Running | 4,000 updates saved; FEV step 0 complete; TIME step 0 active in seed queue |
-| v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimerXL random phase .complete |
+| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Completed | 4,000 updates, all eight FEV/TIME evaluations, and .complete |
+| v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Running | Started after random phase; step 100 saved at 13:45 CST |
 | v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | TimesFM 2.5 200M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for TimerXL pair; TimesFM rehearsal passed |
 | v1-rage-timesFM-trev-2.5-full | 1-full-pool | TimesFM 2.5 200M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimesFM random phase .complete |
 | v0-active-value-rank | 1-expanded-cross-rank | Expanded cross-track proxy ranking | Completed | 100 references; 714-766 candidates each; mean rho 0.7104 |

@@ -1014,3 +1014,9 @@ Found no active tmux or training process. Chronos seed 0 rand/full both have .co
 Last modified: 2026-11-10
 
 Ran the actual Chronos --prepare-only entry point for seed 1. Random pool: 19,903 series, 49,194,984 points. Full pool: 199,030 series, 475,138,055 points. Both input manifests parse and match sampling_seed=1; values, offsets, and regions arrays are present. Preparation tmux session exited after success. The serial seed 0-3 queue remains active and was evaluating TimerXL seed 0 step 2000 at last check.
+
+### 2026-11-10 13:45 CST - TimerXL seed 0 random complete
+
+Last modified: 2026-11-10
+
+Verified outputs/train/v1-rage-timerXL-trev-84m-rand/.complete after all eight FEV/TIME checkpoint evaluations. The live queue then started TimerXL seed 0 full and saved step 100. No manual restart or data deletion was needed.
