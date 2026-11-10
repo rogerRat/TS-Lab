@@ -1044,3 +1044,9 @@ A direct FEV task 18 rehearsal initially failed because a 59-point context was n
 Last modified: 2026-11-10
 
 The user specified MASE as the only metric to inspect, compare, and report for all Chronos, TimerXL, and TimesFM Trev batches. Updated EXP, ORCHE, RESULTS, and the TimerXL seed 0 result document. This is a reporting decision; no training or evaluation parameters or running processes were changed.
+
+### 2026-11-10 - Trev training-scope clarification
+
+Last modified: 2026-11-10
+
+The user confirmed that existing LoRA runs should be retained without rerunning. Clarified in EXP, ORCHE, RESULTS, and the TimerXL seed 0 result document that `full` means the full eligible data pool, while both rand and full train LoRA adapters with frozen base weights. No training configuration, evaluation configuration, output, or live process was changed.

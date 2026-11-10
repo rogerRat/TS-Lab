@@ -2,7 +2,7 @@
 
 Last modified: 2026-11-10
 
-Both random-10% and full-pool phases completed 4,000 BF16 LoRA optimizer updates. Each phase has all eight fixed checkpoint evaluations, with four FEV tasks and eight TIME tasks at every checkpoint. The source artifacts are under `outputs/train/v1-rage-timerXL-trev-84m-{rand,full}/` and `outputs/eval/v1-rage-timerXL-trev-84m-{rand,full}/`.
+Both random-10% and full-pool phases completed 4,000 BF16 LoRA optimizer updates. `Full` refers only to the eligible data pool; the base model was frozen in both phases, and neither phase used full-parameter fine-tuning. Each phase has all eight fixed checkpoint evaluations, with four FEV tasks and eight TIME tasks at every checkpoint. The source artifacts are under `outputs/train/v1-rage-timerXL-trev-84m-{rand,full}/` and `outputs/eval/v1-rage-timerXL-trev-84m-{rand,full}/`.
 
 | Phase | Step | Hospital MASE | M_DENSE MASE | US consumption MASE | World CO2 MASE |
 |---|---:|---:|---:|---:|---:|

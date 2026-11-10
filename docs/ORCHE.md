@@ -324,6 +324,8 @@ TimerXL rehearsal passed a one-step BF16 LoRA update, merged-checkpoint export, 
 
 ## Seed 0-3 Trev queue (2026-11-10)
 
+All queued rand/full phases for Chronos, TimerXL, and TimesFM use BF16 LoRA (r=8, alpha=16) with frozen base weights. `full` selects the full eligible data pool, not full-parameter training. Keep the existing runs and queue; no rerun is required for this clarification.
+
 For all queued Chronos, TimerXL, and TimesFM Trev batches, use MASE alone for result inspection, comparisons, and summaries across FEV and TIME. Other evaluator metrics are raw outputs and do not enter decisions.
 
 Last modified: 2026-11-10
