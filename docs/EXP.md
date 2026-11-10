@@ -14,8 +14,8 @@ This table covers every maintained experiment and batch in this document. Comple
 | v1-rage-chronosT5-trev-base-rand | 1-random-10pct | Chronos-T5-Base BF16 LoRA; evaluate eight fixed optimizer-step checkpoints on 12 native-univariate FEV/TIME tasks | Completed | 4,000 updates and all eight step evaluations completed; .complete; only adapter 4000 retained |
 | v1-rage-chronosT5-trev-base-full | 1-full-pool | Chronos-T5-Base BF16 LoRA on the full fixed candidate pool | Completed | 4,000 updates, evaluations, and .complete |
 | v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Completed | 4,000 updates, all eight FEV/TIME evaluations, and .complete |
-| v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Running | Started after random phase; step 100 saved at 13:45 CST |
-| v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | TimesFM 2.5 200M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for TimerXL pair; TimesFM rehearsal passed |
+| v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Completed | 4,000 updates, all eight FEV/TIME evaluations, and .complete |
+| v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | TimesFM 2.5 200M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Running | Started after TimerXL pair at 13:58 CST |
 | v1-rage-timesFM-trev-2.5-full | 1-full-pool | TimesFM 2.5 200M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimesFM random phase .complete |
 | v0-active-value-rank | 1-expanded-cross-rank | Expanded cross-track proxy ranking | Completed | 100 references; 714-766 candidates each; mean rho 0.7104 |
 | v0-active-value-rank | 2-active-correction | Budgeted active value-ranking correction | Completed | At 10% and B=64, boundary regret 0.04192 vs 0.05148 highest-proxy |
