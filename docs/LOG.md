@@ -1008,3 +1008,9 @@ The foundation queue is live in tmux v1-foundation-trev-queue and is polling for
 Last modified: 2026-11-10
 
 Found no active tmux or training process. Chronos seed 0 rand/full both have .complete. TimerXL seed 0 rand has optimizer step 4000 and an incomplete step 0 FEV evaluation. Verified the short-context padding fix and JSON newline fix compile. Repaired the existing base-step-0000 manifest with a literal escaped newline. Ran the formal TimerXL step 0 FEV command with --resume; tasks 18 and 19 completed and the four-task results CSV was written. Created seed 1-3 rand/full configs for all three models, with matching pool and training sampling seeds. Started tmux v1-trev-seeds-0-3; its TimerXL seed 0 resume loaded the pool and saved optimizer state and began TIME step 0. Queue and progress are in logs/v1-rage-foundation-trev/seed-queue-console.log. Earlier queue state above is historical.
+
+### 2026-11-10 13:44 CST - Seed 1 candidate pools prepared
+
+Last modified: 2026-11-10
+
+Ran the actual Chronos --prepare-only entry point for seed 1. Random pool: 19,903 series, 49,194,984 points. Full pool: 199,030 series, 475,138,055 points. Both input manifests parse and match sampling_seed=1; values, offsets, and regions arrays are present. Preparation tmux session exited after success. The serial seed 0-3 queue remains active and was evaluating TimerXL seed 0 step 2000 at last check.
