@@ -1056,3 +1056,9 @@ The user confirmed that existing LoRA runs should be retained without rerunning.
 Last modified: 2026-11-10
 
 The seed queue exited at 15:03 after TimesFM seed 0 random completed 4,000 training updates and step 0 FEV. TIME step 0 failed on task 5 (ECDC_COVID/W): a 157-point context was not divisible by the model patch length 32. Updated src/adapters/foundation/eval/time.py to left-pad only TimesFM contexts to the next 32-point multiple. Python compilation passed. A single-task rehearsal was rejected by TIME manifest validation because the frozen manifest requires all eight tasks; its temporary YAML/output/log were removed. Ran the formal eight-task TIME evaluation with --resume. Tasks 1-4 were reused; tasks 5-8 completed and time_metadata.json records completion. No training data or checkpoint was deleted or rerun. The seed queue will resume from the saved optimizer and evaluation artifacts.
+
+### 2026-11-10 15:16 CST - Trev queue restarted from saved outputs
+
+Last modified: 2026-11-10
+
+Started tmux v1-trev-seeds-0-3 with scripts/temp/queue_v1_rage_trev_seeds.sh, appending to the existing console log. Both TimerXL seed 0 phases were skipped via .complete. TimesFM seed 0 random resumed from its saved 4,000-step optimizer state; step 0 FEV/TIME were skipped as complete, and step 100 FEV began. The queue retains TimesFM full and seeds 1-3 in sequence. No training checkpoint was deleted or recomputed.
