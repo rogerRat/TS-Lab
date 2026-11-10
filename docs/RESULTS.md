@@ -171,3 +171,9 @@ MASE is the sole metric used for inspection, comparison, and reporting across th
 Last modified: 2026-11-10
 
 TimesFM 2.5 seed 0 random and full phases completed 4,000 BF16 LoRA updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6547/1.3943/8.8224/3.9751 for random and 0.6646/1.4042/8.8852/3.9794 for full. This is one seed; details and source files: docs/results/v1-rage-trev-timesfm-seed0.md.
+
+## v1-rage-trev seed 0 final scope
+
+Last modified: 2026-11-10
+
+The study was closed at one seed by user request. All six Chronos, TimerXL, and TimesFM seed 0 rand/full LoRA phases completed 4,000 updates and eight FEV/TIME checkpoint evaluations. Only MASE is used in the final comparison. The incomplete Chronos seed 1 run was stopped and its partial outputs removed; no seed 1-3 results are reported. Final FEV and TIME MASE tables and source paths: docs/results/v1-rage-trev-seed0-final.md.

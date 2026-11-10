@@ -347,3 +347,9 @@ At 15:15 CST, the original seed queue had exited after TimesFM seed 0 random rea
 The seed 0-3 queue was restarted in tmux v1-trev-seeds-0-3 at 15:16 CST with tee -a preserving the previous console log. It skipped both completed TimerXL phases and TimesFM seed 0 step 0 evaluations; TimesFM seed 0 random is evaluating step 100 from saved step-4000 training state.
 
 At 16:38 CST, all six seed 0 Chronos, TimerXL, and TimesFM rand/full phases have .complete markers and all eight FEV/TIME checkpoint evaluations each. The live queue moved to Chronos seed 1 random training; step 500 was saved and step 722 observed. Tmux v1-trev-cleanup-seed1 is live. GPU utilization was 98% and the data disk had 211 GiB free.
+
+## Trev queue closed (2026-11-10)
+
+Last modified: 2026-11-10
+
+The user stopped the extension after seed 0. The multi-seed queue, seed 1 runner, and seed 1 checkpoint cleanup watcher have exited. All six seed 0 rand/full phases are complete; no Trev GPU task remains queued. Seed 1 random was interrupted at logged step 2445/4000 and its partial outputs were removed. All other seed 1-3 phases were cancelled before training and their configs/prepared pools were removed. Keep raw logs as historical operation records. Final MASE results: docs/results/v1-rage-trev-seed0-final.md.

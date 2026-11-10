@@ -90,24 +90,24 @@
 | rage-smoke-static-cycle | 2 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 详情见历史原文与结果文档 |
 | rage-smoke-static-cycle | 3 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 784、3；详情见历史原文与结果文档 |
 | rage-smoke-static-cycle | 4 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 详情见历史原文与结果文档 |
-| v1-rage-chronosT5-trev-base-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Running | Step 500 saved; training past step 700 at 16:38 CST |
-| v1-rage-chronosT5-trev-base-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-chronosT5-trev-base-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-chronosT5-trev-base-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-chronosT5-trev-base-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-chronosT5-trev-base-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timerXL-trev-84m-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | 排队中 | 尚无已核实的完整结果 |
-| v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | 排队中 | 尚无已核实的完整结果 |
+| v1-rage-chronosT5-trev-base-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Terminated | Stopped before step 4000; latest logged step 2445; partial outputs removed |
+| v1-rage-chronosT5-trev-base-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-chronosT5-trev-base-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-chronosT5-trev-base-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-chronosT5-trev-base-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-chronosT5-trev-base-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timerXL-trev-84m-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Cancelled | Not trained; prepared inputs and configs removed |
+| v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Cancelled | Not trained; prepared inputs and configs removed |
 
 ## 现行正在进行的实验
 
@@ -208,3 +208,9 @@
 ### v1 的已有更改记录
 
 2026-11-10：明确 full 为完整候选池 LoRA 训练，而非全参数训练；决定仅以 MASE 汇总；TimesFM 的 FEV 与 TIME 输入在必要时向左补齐至 32 点 patch 的倍数；失败的 seed 0 随机池评估从已有优化器和评估产物恢复，不重跑已完成部分。当前仍使用原队列；详细故障过程见 docs/LOG.md，排队规则见 docs/ORCHE.md。
+
+## Trev seed scope closed (2026-11-10)
+
+Last modified: 2026-11-10
+
+The user stopped the multi-seed extension and retained seed 0 only. All six seed 0 Chronos, TimerXL, and TimesFM rand/full LoRA phases are complete; MASE-only results are in docs/results/v1-rage-trev-seed0-final.md. Chronos seed 1 random training was interrupted before step 4000 (latest logged progress step 2445) and has no formal result. The other seed 1-3 phases were not trained. Seed 1-3 configs, prepared pools, partial checkpoints, and the extension queue were removed. Historical batch rows remain in the overview for traceability.

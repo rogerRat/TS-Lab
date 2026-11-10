@@ -1086,3 +1086,9 @@ Archived the previous 84,206-byte EXP text at docs/EXP.english-archive-20261110.
 Last modified: 2026-11-10
 
 Verified .complete for both Chronos, TimerXL, and TimesFM seed 0 phases. For each TimesFM phase, all eight fixed checkpoints have four FEV task rows and completed TIME metadata with eight tasks. The resumed queue automatically started Chronos seed 1 random training; step 500 was saved, step 722 observed, and tmux v1-trev-cleanup-seed1 is active. GPU utilization was 98%; data disk had 211 GiB available. MASE-only TimesFM seed 0 results are recorded in docs/results/v1-rage-trev-timesfm-seed0.md and indexed in docs/RESULTS.md. No user data or checkpoints were removed.
+
+### 2026-11-10 16:49 CST - Trev extension stopped at user request
+
+Last modified: 2026-11-10
+
+The user narrowed the Trev study to seed 0 only and requested cleanup and final results. Sent SIGINT to the active Chronos seed 1 random runner and stopped the seed 1 checkpoint watcher; the queue and both tmux sessions exited. Latest logged training progress was step 2445/4000, with no .complete or formal evaluation result. Removed six seed 1-3 Chronos input/output directories, including partial seed 1 optimizer and adapters, all 18 seed 1-3 configs, and the multi-seed queue script. Restored the checkpoint cleanup watcher to its seed 0 implementation. Seed 0 model checkpoints, evaluations, raw logs, and experiment history were retained. Data-disk free space increased from 211 GiB to 218 GiB. Final MASE-only results are in docs/results/v1-rage-trev-seed0-final.md.
