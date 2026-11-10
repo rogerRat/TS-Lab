@@ -52,8 +52,14 @@ class FoundationTIMEEvaluationAdapter:
                 model["model_key"], self.checkpoint, model["device"]
             )
         inference = self.config["inference"]
-        contexts = [clean_context(np.asarray(entry["target"], dtype=np.float32))[-int(inference["context_length"]):]
-                    for entry in inputs]
+        contexts = []
+        for entry in inputs:
+            context = clean_context(np.asarray(entry["target"], dtype=np.float32))[-int(inference["context_length"]):]
+            if self.config["model"]["model_key"] == "timesfm-2.5":
+                required_length = max(32, ((len(context) + 31) // 32) * 32)
+                if len(context) < required_length:
+                    context = np.pad(context, (required_length - len(context), 0), mode="edge")
+            contexts.append(context.astype(np.float32, copy=False))
         if not contexts:
             raise ValueError("TIME task produced no prediction inputs")
         levels = [float(value) for value in inference["quantile_levels"]]

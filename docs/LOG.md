@@ -1050,3 +1050,9 @@ The user specified MASE as the only metric to inspect, compare, and report for a
 Last modified: 2026-11-10
 
 The user confirmed that existing LoRA runs should be retained without rerunning. Clarified in EXP, ORCHE, RESULTS, and the TimerXL seed 0 result document that `full` means the full eligible data pool, while both rand and full train LoRA adapters with frozen base weights. No training configuration, evaluation configuration, output, or live process was changed.
+
+### 2026-11-10 15:15 CST - TimesFM TIME patch alignment recovered
+
+Last modified: 2026-11-10
+
+The seed queue exited at 15:03 after TimesFM seed 0 random completed 4,000 training updates and step 0 FEV. TIME step 0 failed on task 5 (ECDC_COVID/W): a 157-point context was not divisible by the model patch length 32. Updated src/adapters/foundation/eval/time.py to left-pad only TimesFM contexts to the next 32-point multiple. Python compilation passed. A single-task rehearsal was rejected by TIME manifest validation because the frozen manifest requires all eight tasks; its temporary YAML/output/log were removed. Ran the formal eight-task TIME evaluation with --resume. Tasks 1-4 were reused; tasks 5-8 completed and time_metadata.json records completion. No training data or checkpoint was deleted or rerun. The seed queue will resume from the saved optimizer and evaluation artifacts.

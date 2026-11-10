@@ -341,3 +341,5 @@ At 13:52 CST, the Chronos input pools for seeds 1, 2, and 3 are all prepared. Al
 At 13:58 CST, TimerXL seed 0 full completed all eight FEV/TIME evaluations and wrote .complete. The active queue automatically started TimesFM seed 0 random in the rage-timesfm environment. TimerXL seed 0 rand/full are both complete.
 
 At 14:01 CST, TimesFM FEV short-context tasks 18 and 19 passed direct base-checkpoint rehearsals after patch-multiple left padding was fixed. Temporary rehearsal artifacts were removed. The active formal seed 0 random training process continues and will use the corrected adapter at evaluation.
+
+At 15:15 CST, the original seed queue had exited after TimesFM seed 0 random reached 4,000 updates and its step 0 TIME evaluation failed on ECDC_COVID/W due to a 157-point context not divisible by the 32-point TimesFM patch. The TIME adapter now left-pads TimesFM contexts to the next 32-point multiple. A formal --resume evaluation reused the four complete TIME tasks and completed tasks 5-8; step 0 FEV was already complete. Resume the existing seed queue from saved training/evaluation outputs; do not rerun completed phases.
