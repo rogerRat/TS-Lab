@@ -1080,3 +1080,9 @@ Started tmux v1-trev-seeds-0-3 with scripts/temp/queue_v1_rage_trev_seeds.sh, ap
 Last modified: 2026-11-10
 
 Archived the previous 84,206-byte EXP text at docs/EXP.english-archive-20261110.md. Rebuilt docs/EXP.md in Chinese with the experiment and batch overview, all 24 v1 seed/model/pool batches, explicit training hyperparameters, evaluation decisions, current queue status, and links to preserved historical detail. Verified five seed-0 .complete markers; TimesFM seed-0 full was training at step 3791/4000 in the live queue log. No training process or configuration was changed.
+
+### 2026-11-10 16:38 CST - Seed 0 complete and seed 1 started
+
+Last modified: 2026-11-10
+
+Verified .complete for both Chronos, TimerXL, and TimesFM seed 0 phases. For each TimesFM phase, all eight fixed checkpoints have four FEV task rows and completed TIME metadata with eight tasks. The resumed queue automatically started Chronos seed 1 random training; step 500 was saved, step 722 observed, and tmux v1-trev-cleanup-seed1 is active. GPU utilization was 98%; data disk had 211 GiB available. MASE-only TimesFM seed 0 results are recorded in docs/results/v1-rage-trev-timesfm-seed0.md and indexed in docs/RESULTS.md. No user data or checkpoints were removed.

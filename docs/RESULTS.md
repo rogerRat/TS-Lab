@@ -165,3 +165,9 @@ Completed 2026-11-10 using cached BF16 gradients from the four longest tracks (o
 Last modified: 2026-11-10
 
 MASE is the sole metric used for inspection, comparison, and reporting across the Chronos, TimerXL, and TimesFM Trev batches. All Chronos, TimerXL, and TimesFM Trev rand/full phases use LoRA with frozen base weights; `full` refers to the full eligible data pool, not full-parameter training. TimerXL 84M seed 0 random and full phases completed 4,000 updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6672/2.0354/13.4942/5.7754 for random and 0.6675/2.0330/12.5499/5.2563 for full. Source CSVs, task coverage, and limits: docs/results/v1-rage-trev-timerxl-seed0.md.
+
+## v1-rage-trev TimesFM seed 0
+
+Last modified: 2026-11-10
+
+TimesFM 2.5 seed 0 random and full phases completed 4,000 BF16 LoRA updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6547/1.3943/8.8224/3.9751 for random and 0.6646/1.4042/8.8852/3.9794 for full. This is one seed; details and source files: docs/results/v1-rage-trev-timesfm-seed0.md.
