@@ -331,3 +331,5 @@ Session: v1-trev-seeds-0-3. Command: bash scripts/temp/queue_v1_rage_trev_seeds.
 Seed 1 Chronos random and full pools were prepared in tmux v1-trev-seed1-pool at 13:43 CST. Both input manifests validate with sampling_seed=1, and the temporary preparation session exited successfully. The main queue remains active on TimerXL seed 0.
 
 At 13:45 CST, TimerXL seed 0 random completed all 4,000 updates and eight FEV/TIME checkpoint evaluations; .complete exists. The same queue automatically started TimerXL seed 0 full and saved step 100. Seed 1 Chronos pools are ready.
+
+At 13:52 CST, the Chronos input pools for seeds 1, 2, and 3 are all prepared. All six manifests parse, match their respective sampling seeds, and have the expected 19,903 random or 199,030 full series. TimerXL seed 0 full finished training and entered step 0 FEV evaluation; its phase .complete remains pending.

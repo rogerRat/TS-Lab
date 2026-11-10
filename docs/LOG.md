@@ -1020,3 +1020,9 @@ Ran the actual Chronos --prepare-only entry point for seed 1. Random pool: 19,90
 Last modified: 2026-11-10
 
 Verified outputs/train/v1-rage-timerXL-trev-84m-rand/.complete after all eight FEV/TIME checkpoint evaluations. The live queue then started TimerXL seed 0 full and saved step 100. No manual restart or data deletion was needed.
+
+### 2026-11-10 13:52 CST - Seed 2-3 pools ready; TimerXL full training complete
+
+Last modified: 2026-11-10
+
+Ran the actual Chronos --prepare-only entry point sequentially for seeds 2 and 3. Seed 2 random has 19,903 series and 49,032,491 points; seed 3 random has 19,903 series and 45,892,809 points. Each full pool has 199,030 series and 475,138,055 points. All six seed 1-3 input manifests parse and match their seed; values, offsets, and regions arrays exist. The preparation session exited. TimerXL seed 0 full wrote its training manifest after 4,000 steps and entered FEV step 0 evaluation; evaluation completion is not yet claimed.
