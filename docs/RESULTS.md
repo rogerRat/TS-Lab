@@ -154,3 +154,9 @@ At B=64, mean Recall@k is 0.5064 for pure boundary, 0.4776 for proxy high, 0.429
 ## v0-crb-var
 
 Completed 2026-11-09. Across ten trajectories at matched budgets of ceil(window_count/64), CRB had lower mean relative within-block variance (0.6410 vs 0.6802) and mean direction dispersion (0.4051 vs 0.4402) than Uniform on every track. CRB block size showed a positive association with local dispersion on all ten tracks; larger CRB blocks retained greater dispersion, so its shorter intervals did not preferentially fall in the highest-dispersion regions. Absolute variance did not consistently improve. Details and limitations: docs/results/v0-crb-var.md.
+
+## v1-rage-trev TimerXL seed 0
+
+Last modified: 2026-11-10
+
+TimerXL 84M seed 0 random and full phases completed 4,000 updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6672/2.0354/13.4942/5.7754 for random and 0.6675/2.0330/12.5499/5.2563 for full. Source CSVs, task coverage, and limits: docs/results/v1-rage-trev-timerxl-seed0.md.
