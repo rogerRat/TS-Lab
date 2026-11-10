@@ -1051,6 +1051,18 @@ Last modified: 2026-11-10
 
 The user confirmed that existing LoRA runs should be retained without rerunning. Clarified in EXP, ORCHE, RESULTS, and the TimerXL seed 0 result document that `full` means the full eligible data pool, while both rand and full train LoRA adapters with frozen base weights. No training configuration, evaluation configuration, output, or live process was changed.
 
+### 2026-11-10 14:50 CST - v1 projected-gradient storage assessment
+
+Last modified: 2026-11-10
+
+Read the frozen v1 pool and evaluation declarations and measured the seed-0 full-pool offsets. The full pool has 199,030 series, 475,138,055 points, and 360,695,805 legal 576-point windows. Sampling legal starts at 0, 16, 32, ... independently within each series yields 22,669,472 projected gradients. At 4,096 dimensions, the training cache alone needs 172.954 GiB in BF16 or 345.909 GiB in FP32, before metadata and temporary files. The data disk had 226,501,459,968 bytes (210.946 GiB) free at 14:48 CST. The retained Chronos-T5-Base step-4000 adapter has 884,736 LoRA parameters, so a dense 884,736 by 4,096 projection matrix takes 13.5 GiB in FP32 or 6.75 GiB in BF16 if persisted. The 12 local evaluation Arrow files total fewer than 410,000 target points; their exact eligible history-gradient count depends on the frozen cutoff and window definition and has not been established. No gradient cache job was started and no existing data was removed. A full-pool BF16 cache is high storage risk, while FP32 and simultaneous BF16 LoRA plus head caches do not fit the current free space. Use one fixed projection operator per compatible parameter space across all training and evaluation windows; record its seed, algorithm, parameter order, and checkpoint identity. Stage output in bounded chunks without a second full-cache copy, and recheck free space before launch.
+
+### 2026-11-10 - projected-cache scope clarification
+
+Last modified: 2026-11-10
+
+The user clarified that all three active models need projected-gradient preparation, the global precision is BF16, and only 4,096-dimensional projected vectors will be persisted. The full training pool contains 475,138,055 points (0.475138055 billion). The 12 local benchmark Arrow files contain 409,993 target points in total. Therefore the raw combined point-count upper bound is 475,548,048 (0.475548048 billion); the exact leakage-safe evaluation history count is lower and depends on task cutoffs. The training pool alone has 22,669,472 stride-16 legal-window anchors per model. At 8,192 bytes per BF16 projected vector, its projected cache requires 172.954 GiB per model or 518.863 GiB for three models, excluding evaluation vectors and metadata. This exceeds the data disk free space measured earlier (210.946 GiB). No raw LoRA-gradient persistence is planned or authorized by this clarification.
+
 ### 2026-11-10 15:15 CST - TimesFM TIME patch alignment recovered
 
 Last modified: 2026-11-10
@@ -1062,3 +1074,9 @@ The seed queue exited at 15:03 after TimesFM seed 0 random completed 4,000 train
 Last modified: 2026-11-10
 
 Started tmux v1-trev-seeds-0-3 with scripts/temp/queue_v1_rage_trev_seeds.sh, appending to the existing console log. Both TimerXL seed 0 phases were skipped via .complete. TimesFM seed 0 random resumed from its saved 4,000-step optimizer state; step 0 FEV/TIME were skipped as complete, and step 100 FEV began. The queue retains TimesFM full and seeds 1-3 in sequence. No training checkpoint was deleted or recomputed.
+
+### 2026-11-10 - EXP Chinese revision and v1 registry audit
+
+Last modified: 2026-11-10
+
+Archived the previous 84,206-byte EXP text at docs/EXP.english-archive-20261110.md. Rebuilt docs/EXP.md in Chinese with the experiment and batch overview, all 24 v1 seed/model/pool batches, explicit training hyperparameters, evaluation decisions, current queue status, and links to preserved historical detail. Verified five seed-0 .complete markers; TimesFM seed-0 full was training at step 3791/4000 in the live queue log. No training process or configuration was changed.

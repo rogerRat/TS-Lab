@@ -1,6 +1,6 @@
 # Experiment results
 
-Last modified: 2026-11-09
+Last modified: 2026-11-10
 
 ## v0-active-value-rank
 
@@ -154,6 +154,11 @@ At B=64, mean Recall@k is 0.5064 for pure boundary, 0.4776 for proxy high, 0.429
 ## v0-crb-var
 
 Completed 2026-11-09. Across ten trajectories at matched budgets of ceil(window_count/64), CRB had lower mean relative within-block variance (0.6410 vs 0.6802) and mean direction dispersion (0.4051 vs 0.4402) than Uniform on every track. CRB block size showed a positive association with local dispersion on all ten tracks; larger CRB blocks retained greater dispersion, so its shorter intervals did not preferentially fall in the highest-dispersion regions. Absolute variance did not consistently improve. Details and limitations: docs/results/v0-crb-var.md.
+
+
+## v0-proxy-dp-segmentation
+
+Completed 2026-11-10 using cached BF16 gradients from the four longest tracks (ordinals 01, 05, 06, 09), with exactly 22 intervals per track for DP and uniform. Unweighted proxy-variance DP reduced equal-track true relative variance (0.5031 vs 0.6762), equal-interval direction dispersion (0.2995 vs 0.4298), and absolute variance (3.7787 vs 9.4982), but raised window-weighted direction dispersion (0.5844 vs 0.4297). The length-weighted proxy objective reduced relative variance (0.5717 vs 0.6762) and equal-interval direction dispersion (0.3572 vs 0.4298), but raised window-weighted direction dispersion (0.4923 vs 0.4297) and absolute variance (12.5689 vs 9.4982). These are descriptive equal-track means over four selected long tracks; neither objective dominates all metrics. Full definitions and per-track results: docs/results/v0-proxy-dp-segmentation.md. Both output trees have .complete markers. The raw BF16 full-gradient source caches were deleted after validation at the user's direction on 2026-11-10; derived outputs and proxy caches remain.
 
 ## v1-rage-trev TimerXL seed 0
 
