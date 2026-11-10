@@ -1,6 +1,6 @@
 # Task Orchestration
 
-Last modified: 2026-11-09
+Last modified: 2026-11-10
 
 ## v0-active-value-rank
 
@@ -91,7 +91,7 @@ The gradient probe completed all 1,000 trajectories and its .complete marker is 
 3. The full test suite passed (784 passed, 3 skipped); completion marker: `logs/tests/full-suite-20261107.complete`.
 4. v0-grad-mech-test and all ten BF16 retained caches are complete. The CRB queue reuses those caches and runs at most two trajectory batches concurrently, with two CPU threads per batch.
 
-Last modified: 2026-11-07
+Last modified: 2026-11-10
 
 ## 2026-11-07 gradient cache amendment
 
@@ -286,10 +286,38 @@ The aggregate coverage plot and random-seed table were generated after the two b
 
 The CPU replay completed for all ten trajectories using the rage environment and retained BF16 gradient caches. No GPU work or new gradient computation was used. Outputs and .complete are present in outputs/train/v0-crb-var/. The per-block CSV and per-trajectory JSON were summarized in docs/results/v0-crb-var.md. No follow-on task is queued.
 
-## v0-proxy-dp-segmentation scheduled
+## v0-proxy-dp-segmentation completed
 
-| Task | Resources | Dependency | Command | State |
+| Task | Resources | Dependency | Output | State |
 |---|---|---|---|---|
-| Ten-trajectory proxy-DP partition replay | rage Conda environment; RTX 4080 for proxy Gram matrix; two CPU threads for DP and true-gradient metrics; 22 GiB data-disk free at launch | Existing head-gradient proxy and BF16 full-gradient caches | OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src:. /root/autodl-tmp/rage/envs/rage/bin/python -u scripts/temp/v0_proxy_dp_segmentation.py | Prepared for tmux resume; trajectory 00 checkpoint is pending recomputation |
+| Longest-four unweighted exact DP replay | rage Conda; RTX 4080 for BF16 proxy reconstruction and blocked Gram products; two CPU threads; four-start positional true-gradient reads | Selected cached proxy and BF16 full-gradient files | outputs/train/v0-proxy-dp-segmentation-longest4-unweighted/ | Complete; 176 interval rows, eight summaries, .complete |
+| Longest-four window-weighted exact DP replay | Same | Unweighted pass and same selected caches | outputs/train/v0-proxy-dp-segmentation-longest4-window/ | Complete; 176 interval rows, eight summaries, .complete |
+| Validate and report | CPU | Both batches complete | docs/results/v0-proxy-dp-segmentation.md; docs/RESULTS.md | Complete; K, minimum length, coverage, and finite-value checks passed |
 
-Persist only CSV/JSON summaries, small relative to existing caches. Proxy and full-gradient caches are read-only and must remain unchanged. For every trajectory verify K=ceil(N/64), interval count K, minimum length 16, and exact contiguous coverage before reporting.
+Only source ordinals 01, 05, 06, and 09 were replayed. After both result sets were validated, all raw BF16 full-gradient vectors and their cache completion markers were deleted at the user's direction on 2026-11-10. Proxy-gradient caches and derived Gram matrices remain; no raw full-gradient cache remains. The initial whole-file mapping caused cgroup use near 39 GiB; the corrected chunked positional-read method stayed near 12.8 GiB under the 62 GiB cgroup limit. No follow-on task is queued, no automatic inspection is enabled, and the server remains on.
+
+## v1-rage-chronosT5-trev-base-rand / v1-rage-chronosT5-trev-base-full
+
+State at 2026-11-10 02:43 CST: random batch running in tmux `v1-chronost5-trev`; both source pools are materialized. RTX 4080 utilization was 99%, 18.9 GiB / 32 GiB GPU memory; host memory available 456 GiB; data disk 220 GiB free at launch. Experiment Python is `/root/autodl-tmp/rage/envs/rage/bin/python`; PEFT 0.18.1 and python-dotenv 1.2.4 are installed there. The Chronos-T5-Base checkpoint directory exists.
+
+1. Freeze the source profile to Chronos `wiki_daily_100k`, Chronos `m5`, LOTSA `PEMS07`, Monash `solar_10_minutes`, and UTSD `UTSD-1G`. Check actual point counts and storage before fetching; all large data/output/cache artifacts stay under the data-disk-backed project paths.
+2. Freeze the 12-task evaluation declaration: four native-univariate FEV tasks (`hospital_admissions_1D`, `M_DENSE_1D`, `us_consumption_1Y`, `world_co2_emissions`) and eight native-univariate TIME tasks (`CPHL/15T`, `CPHL/30T`, `CPHL/H`, `ECDC_COVID/D`, `ECDC_COVID/W`, `epf_electricity_price/H`, `Commodity_Import/M`, `Commodity_Production/M`). Pin upstream revisions, task horizons, metrics, and local data paths before starting training.
+3. Fixed-update support is implemented at 0,100,200,500,1000,2000,3000,4000. Each update samples 32 valid 576-point windows with replacement, using 512 context + 64 target. Use BF16 only; verify base, adapter, loss, and AdamW moment dtypes at launch.
+4. Rehearse fetch/load, seeded sampling, BF16 LoRA update, and one FEV plus one TIME task. The 1-step BF16 LoRA update and both evaluation paths completed. TIME context NaNs are linearly interpolated from finite observations, with all-invalid contexts zero-filled; the original missing ground truth remains available to metric masking. Remove only rehearsal artifacts after recording results.
+5. Started `v1-rage-chronosT5-trev-base-rand` at 2026-11-10 02:42 CST with `PYTHONPATH=src:third_parties/TIME/src:. /root/autodl-tmp/rage/envs/rage/bin/python -u scripts/temp/v1_rage_chronost5_trev.py` in tmux session `v1-chronost5-trev` with unbuffered console output and resumable optimizer state. Verified BF16 model and LoRA, optimizer checkpoints through step 1,000, and live GPU utilization. The script starts `v1-rage-chronosT5-trev-base-full` automatically after the random phase `.complete` and validation.
+6. Log each stage and failure in `docs/LOG.md`; update batch states in `docs/EXP.md`; summarize only verified results in `docs/RESULTS.md`. Never shut down the server.
+
+Formal output roots: `outputs/train/v1-rage-chronosT5-trev-base-rand/` and `outputs/train/v1-rage-chronosT5-trev-base-full/`; logs: `logs/v1-rage-chronosT5-trev-base/`; manifests/configs: `configs/rage/v1-rage-chronosT5-trev-base-rand.json`, `configs/rage/v1-rage-chronosT5-trev-base-full.json`, `scripts/temp/v1_rage_chronost5_trev.py`, `configs/eval/fev/v1-rage-trev-run.yaml`, and `configs/eval/time/v1-rage-trev.yaml`.
+
+
+## v1-rage-foundation-trev queue (2026-11-10)
+
+| Order | Work | Environment and resources | Dependency | Command/session | State |
+|---|---|---|---|---|---|
+| 1 | Chronos-T5-Base rand then full; each has eight step checkpoints and FEV+TIME evaluations | rage Conda; RTX 4080 | Fixed source pool | tmux v1-chronost5-trev | Rand .complete; full training active, latest observed step 2,000 |
+| 2 | TimerXL 84M rand then full | /root/autodl-tmp/rage/envs/rage-timerxl; RTX 4080; datasets 4.8.5; FEV editable metadata installed | Both Chronos .complete markers | tmux v1-foundation-trev-queue; scripts/temp/queue_v1_rage_foundation_trev.sh | Waiting; heartbeat confirms live |
+| 3 | TimesFM 2.5 200M rand then full | /root/autodl-tmp/rage/envs/rage-timesfm; RTX 4080; datasets 4.8.5; FEV editable metadata installed | Both TimerXL .complete markers | Same queue session, after TimerXL | Waiting |
+
+Both new model pairs use the exact Chronos inputs pools by reference, not copies. Effective batch is 32 with microbatch 8; all parameters, LoRA weights, and training are BF16. Each phase runs 4,000 updates at steps 0/100/200/500/1000/2000/3000/4000. The runner evaluates FEV then TIME at each step and removes that step's adapter only after both outputs are complete; adapter 4000 is retained. The environment installer is scripts/temp/prepare_trev_other_models.sh and now pins datasets==4.8.5 plus installs the local FEV package metadata in both model environments. Do not start the foundation runner manually while the queue is active.
+
+TimerXL rehearsal passed a one-step BF16 LoRA update, merged-checkpoint export, FEV task 9, and TIME CPHL/15T short. TimesFM rehearsal passed in tmux v1-rehearse-timesfm25. Its one-step BF16 LoRA loss was finite; FEV task 9 MASE=0.6565; TIME CPHL/15T short MSE=0.1730, MAE=0.2900, MASE=1.2217. The queue remains dependency-gated on Chronos full completion.

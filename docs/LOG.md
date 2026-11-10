@@ -1,6 +1,6 @@
 # Operation Log
 
-Last modified: 2026-11-07
+Last modified: 2026-11-10
 
 ## 2026-11-07 v0-grad-mech-test second progress check
 
@@ -814,7 +814,7 @@ Last modified: 2026-11-08
 
 ### 2026-11-09 - v0-active-value-rank planned
 
-Last modified: 2026-11-09
+Last modified: 2026-11-10
 
 - User requested the first two batches of active value-ranking experiments.
 - Checked existing experiment documents, proxy and cost reports, cache formats, GPU, RAM, disk, and tmux. Existing worktree changes were retained. GPU idle; data disk about 250 GiB free.
@@ -881,3 +881,124 @@ Registered a new independent cached-gradient experiment. It samples existing out
 - Updated the source-specific adapter to validate metadata against ordered BIN shards, memory-map each shard, and read each trajectory by its global offset, including trajectories crossing shard boundaries.
 - Re-ran Load successfully: 2,466,924 trajectories were written to `data/src/shard_dataset/selection24-time300b-fixed`. The output index contains 15,199,263,843 time points.
 - The complete converted source set contains 3,008,537 trajectories and 19,725,286,219 time points across Chronos, LOTSA, Monash, UTSD, and Time-300B.
+
+
+### 2026-11-09 - Output-head gradient cache support
+
+Last modified: 2026-11-09
+
+- Inspected the existing cache, Chronos Tiny engine, model registry, Timer-XL and TimesFM adapters, experiment documents, worktree, GPU, memory, data disk, tmux sessions, and active processes. The v0-proxy-dp-seg task was active on GPU; no validation job was started.
+- Confirmed the v0-grad-mech-test warmup checkpoint has tie_word_embeddings=true and that input embedding and lm_head weights are the same Parameter and storage. ChronosTinyGradientEngine defaults to lm_head.weight and uses _fast_batch under torch.no_grad with captured head inputs and an analytic CE derivative. It excludes embedding-path terms. ChronosT5Engine.gradient_sketch instead calls torch.autograd.grad over every trainable parameter, so it computes the combined gradient for the tied shared weight and the rest of the model.
+- Added an output_head cache mode. Chronos-T5 Tiny/Small/Base and TimerXL use analytic output-head derivatives. TimesFM 2.5 freezes backbone parameters and differentiates only its two nonlinear output projection blocks. Added output-head identity fields to the cache manifest so these resources cannot collide with full-model caches. Cache roots are restricted to the project outputs directory.
+- Extended the cache runner to Chronos-T5 Tiny/Small/Base, TimesFM 2.5, and TimerXL 84M. TimesFM 3.0 remains excluded because its project capability is inference-only.
+- Added docs/gradient-output-head.md with the model scope, loss semantics, tie handling, command shape, and required numerical validation. Read-only CPU loading confirmed the warmed ChronosTiny checkpoint ties the input and output weights. AST parsing and git diff --check passed. No model gradient cache was generated, and no tests or numeric gradient comparisons were run.
+
+### 2026-11-10 00:06 CST - proxy-DP memory-limit interruption and rewrite
+
+The first launch entered trajectory 01 proxy interpolation but produced no checkpoint before the user reported a container memory overflow and restarted it. The previous true-gradient evaluator converted an entire interval to float32; with up to 8,394,496 parameters per time point, a single long block could allocate multiple GiB, in addition to proxy reconstruction buffers. The 62 GiB cgroup limit is lower than host free-memory figures suggested. After restart, confirmed no replay process, tmux session, or trajectory checkpoint remained. Reworked proxy interpolation to BF16 with bounded 32-anchor host transfers; proxy Gram construction now converts 65,536 coordinates at a time and accumulates FP32 products; true-gradient metrics now use four-start CPU chunks with FP32 reductions. Added partition coverage checks and cgroup-memory logging. The selected cache files remain intact and data-disk space is unchanged.
+
+### 2026-11-10 00:07 CST - proxy-DP memory-bounded batch restart
+
+Restarted the unweighted then window-weighted longest-four batches in tmux `v0-proxy-dp-longest4` after Python bytecode compilation. The run reports cgroup memory at each trajectory start; inspect memory and completion checkpoints before allowing the next trajectory to continue if usage rises unexpectedly.
+
+### 2026-11-10 - Optional LoRA support for the output-head model batches
+
+Last modified: 2026-11-10
+
+- Added opt-in PEFT LoRA support to the shared student worker for Chronos-T5 Tiny/Small/Base, TimerXL 84M, and TimesFM 2.5 200M. Default targets are Chronos T5 attention q/v and TimerXL/TimesFM attention q_proj/v_proj; embeddings and forecasting heads remain frozen.
+- Kept existing manifests unchanged by enabling LoRA only when training.lora is present. Updated adapter-backed loss closures to reference the wrapped PEFT model, and added the normalized adapter configuration to run metrics and the optimizer-resume contract.
+- Updated optimizer parameter selection and gradient clipping to operate only on trainable parameters when training options are used.
+- Pinned PEFT 0.18.1 in the Chronos, TimerXL, and TimesFM model profiles and added import checks for those environments.
+- Added docs/lora-support.md with model coverage, defaults, manifest syntax, tied-embedding handling, and validation limits. No model run or training experiment was started; implementation validation is limited to static checks.
+
+### 2026-11-10 00:14 CST - proxy-DP full-cache paging issue corrected
+
+After restarting with BF16 proxy reconstruction and chunked true-gradient arithmetic, cgroup memory rose to about 39 GiB while reading the 22 GiB full-gradient cache. Inspection showed 22.7 GiB resident file mapping from torch.from_file, not anonymous float32 tensors. Stopped the active run before another track started. Unweighted source ordinal 01 had completed and its per-track checkpoint was atomically written; its cache-derived metrics are retained for resume. Replaced whole-file mapping with four-start os.pread reads and POSIX_FADV_DONTNEED after each chunk, so only bounded chunk tensors are materialized and consumed file pages are advised for eviction. Used POSIX_FADV_DONTNEED on the already-read ordinal 01 files; no cache files were deleted. Current cgroup memory is around 13 GiB and no replay process is active.
+
+The earlier 00:07 restart entry records the attempted session; it did not complete either objective batch. Current actual state is one unweighted source-track checkpoint (ordinal 01), with all other tracks and the window-weighted batch pending.
+
+
+### 2026-11-10 00:46 CST - v0-proxy-dp-segmentation completed
+
+Completed the unweighted and length-weighted exact DP replays on source ordinals 01, 05, 06, and 09. Each objective has 176 interval rows, eight trajectory-method summaries, four per-track checkpoints, and a .complete marker. Validation confirmed K=22 for all tracks and methods, lengths at least 16, exact contiguous coverage, and finite metrics. Equal-track means: unweighted DP versus uniform relative variance 0.5031/0.6762, direction dispersion 0.2995/0.4298, window-weighted direction 0.5844/0.4297, absolute variance 3.7787/9.4982. Window-weighted DP: 0.5717/0.6762, 0.3572/0.4298, 0.4923/0.4297, and 12.5689/9.4982. Results and limitations are recorded in docs/results/v0-proxy-dp-segmentation.md, EXP, RESULTS, and ORCHE. Peak observed cgroup use remained about 12.8 GiB after replacing whole-file mappings with four-start reads and POSIX_FADV_DONTNEED. No gradients were recomputed and no server shutdown or automatic inspection was issued.
+
+### 2026-11-10 00:52 CST - final experiment configuration audit
+
+A final artifact audit found configs/rage/v0-proxy-dp-segmentation.json still described the initial ten-track, unweighted-only plan. Updated it to the actual selected source ordinals, deleted ordinals, BF16 proxy reconstruction, both objectives, and output directories. Revalidated JSON syntax, source cache shapes for ordinals 01, 05, 06, and 09, absence of deleted full-gradient caches and markers for the shortest six, both completion markers, and 176 interval rows/eight summaries per objective. The exact DP transition applies length/N to V(j,i) for the window objective; both methods use K=22 and the reported minimum-length and contiguous-coverage checks pass. No replay process remains.
+
+### 2026-11-10 - selection24 Time-300B directory cleanup
+
+- Confirmed `selection24-time300b` was an empty output from the earlier failed single-BIN load; its `load/shards` tree contained no files. The valid 2,466,924-trajectory dataset and index were in `selection24-time300b-fixed`.
+- Removed only the empty stale directory and renamed the valid dataset to `data/src/shard_dataset/selection24-time300b`. No dataset files were deleted. The `selection24-time300b-buildings` empty directory was not changed.
+- Last modified: 2026-11-10.
+
+### 2026-11-10 01:37 CST - all raw full-gradient caches deleted
+
+At the user's direction, removed the four remaining raw BF16 full-gradient trajectory vectors (ordinals 01, 05, 06, 09; 93,481,107,456 bytes total, about 87.0 GiB) and their four cache-specific .complete markers from outputs/train/v0-crb-reconst-test/gradients/. The directory is now absent. Earlier, the six shortest trajectory caches had already been deleted. Searched the project and data disk: no BF16 full-gradient files or named raw full-gradient cache files remain. The ten head_gradients.npy files are output-head proxies, not full gradients, and were retained. Derived Gram matrices, summary artifacts, model weights, and experiment outputs were also retained. No replay process was active. Data-disk free space increased from 135 GiB to 222 GiB (60% used).
+
+
+### 2026-11-10 02:03 CST - v1-rage-trev-base experiment preparation
+
+- Read the experiment index, orchestration plan, operation log, source survey, LoRA support, Chronos-Base historical config, and training implementation. The RTX 4080 was idle, data disk had 222 GiB available, and the Chronos-T5-Base checkpoint directory exists.
+- Confirmed the trainer samples each effective batch with replacement and supports low-level fixed-step updates, while production run_arm_training currently derives checkpoint boundaries from epochs. The requested fixed-step curve therefore needs explicit checkpoint-boundary support.
+- Registered v1-rage-trev-base-rand followed by v1-rage-trev-base-full and recorded the five fixed candidate sources, BF16 LoRA settings, 576-point window protocol, requested update checkpoints, and 12-task evaluation suite in docs/EXP.md and docs/ORCHE.md.
+- No training, dataset download, or deletion has started. Next: inspect exact source/evaluation pipeline requirements, implement fixed-step checkpoint orchestration, then perform the requested disposable end-to-end rehearsal before formal launch.
+
+### 2026-11-10 - Rename Chronos-T5-Base Trev batches
+
+- Renamed the active experiment batches to v1-rage-chronosT5-trev-base-rand and v1-rage-chronosT5-trev-base-full so the model family is explicit. Updated the current experiment index, detailed protocol, orchestration section, and random-batch config filename and identifier. Earlier log entry retains the original names as an accurate record of the initial registration.
+- Training progress is defined by optimizer updates, not epochs: each step consumes one effective batch of 32 sampled 576-point windows. Checkpoints are fixed at 0, 100, 200, 500, 1,000, 2,000, 3,000, and 4,000 updates; the cosine schedule spans 4,000 updates.
+
+### 2026-11-10 - Chronos-T5-Base Trev rehearsal and rename
+
+- Canonical batch IDs are v1-rage-chronosT5-trev-base-rand and v1-rage-chronosT5-trev-base-full. Renamed the random config file and synchronized current docs and orchestration. Optimizer updates define training duration: batch 32 sampled windows per update, checkpoints at 0/100/200/500/1000/2000/3000/4000, and a 4000-update cosine schedule.
+- The existing eligible source shards contain 475,152,633 points: wiki_daily_100k 274,100,000; m5 47,140,014; PEMS07 24,921,792; solar_10_minutes 7,200,720; UTSD-1G 121,790,107. Eligible series counts are 100,000 / 29,351 / 883 / 137 / 68,679 respectively. The measured total is 1.3% above the nominal 469M plan; preserve all five fixed configurations and record the exact count rather than truncating.
+- BF16 Chronos-T5-Base LoRA forward/backward/update was exercised for one step; all model and adapter parameters were BF16. FEV rehearsal completed hospital_admissions_1D (SQL 0.5315187, MASE 0.6705529). TIME CPHL/15T short completed after adding python-dotenv 1.2.4 and handling non-finite historical context values by interpolation from finite observations (zero-fill only if a whole context is invalid); TIME metric computation preserves the original ground truth. TIME rehearsal metrics: MSE 0.2065, MAE 0.3161, RMSE 0.3579, MASE 1.3400, CRPS 0.2557.
+- Rehearsal outputs and temporary one-task configs/data manifests were removed after recording the successful results. The official 12-task configs, shared source caches, model checkpoint, and evaluation data were retained. Formal training is not yet running.
+
+### 2026-11-10 - Freeze measured Chronos Trev pool
+
+- Scanned each configured bundle with the formal eligibility rule (at least 576 points, finite, non-constant). Exact pool: 199,030 series and 475,138,055 points. Per-source series/points: wiki_daily_100k 100,000 / 274,100,000; m5 29,351 / 47,140,014; PEMS07 883 / 24,921,792; solar_10_minutes 137 / 7,200,720; UTSD-1G 68,659 / 121,775,529. Corrected the preliminary UTSD count from the earlier metadata scan.
+- Prepared deterministic 10% series subset: 19,903 series, 49,350,594 points, 37,906,369 legal windows. Materialized random and full pools under each batch output inputs directory. The full pool has 199,030 series, 475,138,055 points, and 360,695,805 legal windows. No training has started yet.
+
+### 2026-11-10 02:43 CST - Start Chronos-T5-Base Trev sequence
+
+- Started `scripts/temp/v1_rage_chronost5_trev.py` in tmux `v1-chronost5-trev`. The source manifests use the freshly scanned eligibility counts; random selection is 19,903/199,030 eligible series (seed 0), totaling 49,350,594 points. Full phase is queued in the same sequential runner.
+- Verified the base model has 201,374,976 parameters, LoRA has 884,736 trainable parameters, and all parameters are BF16. The AdamW moment dtype guard passed through the first update boundary. Step 100 adapter checkpoint was written. At 02:43 CST GPU utilization was 99%, GPU memory 18.9/32 GiB, host memory available 456 GiB, and data disk had 220 GiB free. Console log: `logs/v1-rage-chronosT5-trev-base/experiment-console.log`.
+- The logged ETA at step 100 was about 27 minutes for random-phase training only; evaluation follows all eight checkpoints, then full-pool training and its evaluations. No evaluation result is claimed yet.
+
+### 2026-11-10 02:44 CST - Training heartbeat
+
+- Random 10% phase remains active in tmux `v1-chronost5-trev`; steps 100 and 200 adapter checkpoints are present. At step 274 the ETA to step 4,000 was 25.6 minutes. GPU utilization was 91%, allocated memory 18.9 GiB / 32 GiB. No errors or dtype violations observed.
+
+### 2026-11-10 02:45 CST - Random phase checkpoint
+
+- The same tmux process 23453 remains active; step 500 LoRA adapter and optimizer resume state were persisted. At 02:45:59 CST the trainer was at step 500 with 98% GPU utilization and 18.9 GiB GPU memory. ETA to step 4,000 was about 24 minutes.
+
+### 2026-11-10 02:49 CST - Random phase step 1,000
+
+- Random 10% training reached optimizer step 1,000 and saved its adapter and resume state. The trainer process remains active in tmux `v1-chronost5-trev`; the latest ETA to step 4,000 was 20.5 minutes. GPU utilization was 89%, allocated memory 18.9 GiB. The BF16 AdamW moment guard continues to pass.
+
+
+### 2026-11-10 12:37 CST - TimerXL and TimesFM Trev queue preparation
+
+- Chronos random phase completed all eight fixed-step FEV/TIME evaluations and wrote .complete. Chronos full phase is training in tmux v1-chronost5-trev; step 500 was saved at 12:35 CST. The intermediate-checkpoint watcher removed evaluated random adapters, leaving only step 4000.
+- Added TimerXL 84M and TimesFM 2.5 200M rand/full manifests with BF16 LoRA r=8/alpha=16, 4,000 optimizer updates, 32 effective batch / 8 microbatch, 576-point windows, and the same twelve FEV/TIME tasks. Both pairs reference the exact frozen Chronos input pools.
+- Fixed foundation FEV quantile axis mapping after rehearsal showed a shape mismatch. Fixed FEV result metadata to tolerate deterministic adapters without Chronos sampling fields. TimerXL one-step BF16 LoRA training, merged export, FEV task 9 and TIME CPHL/15T short now pass. TimerXL rehearsal MASE=0.6650 (FEV); TIME MSE=0.1290, MAE=0.2469, MASE=1.0540.
+- TimerXL environment initially imported local FEV code but lacked distribution metadata required by the result writer. Installed the project FEV checkout editable with --no-deps in both model environments and added this installation to scripts/temp/prepare_trev_other_models.sh. Both environments use datasets 4.8.5; verified TimerXL transformers 4.40.1/PEFT 0.10.0 and TimesFM transformers 5.3.0/PEFT 0.18.1.
+- Started TimesFM 2.5 BF16 LoRA/FEV/TIME rehearsal in tmux v1-rehearse-timesfm25. Started automatic foundation queue in tmux v1-foundation-trev-queue; it observed Chronos rand .complete and is waiting for Chronos full .complete, then runs TimerXL rand/full followed by TimesFM rand/full.
+- Runner/exporter, both model config pairs, queue shell syntax and Python syntax were checked. Formal TimerXL/TimesFM training has not started yet; no result is claimed for those batches.
+
+
+### 2026-11-10 12:44 CST - Foundation rehearsals passed and EXP record recovered
+
+- TimesFM 2.5 rehearsal passed: one BF16 LoRA update (finite loss), merged checkpoint export, FEV task 9 MASE=0.6565, and TIME CPHL/15T short MSE=0.1730, MAE=0.2900, MASE=1.2217. TimerXL passed the same path earlier: FEV task 9 MASE=0.6650; TIME MSE=0.1290, MAE=0.2469, MASE=1.0540.
+- Fixed TimesFM FEV contexts to use the latest 512 observations, matching the fixed training/evaluation context and the model's 32-point patch divisibility requirement. Both FEV/TIME rehearsals now pass.
+- Disposable rehearsal model checkpoints, temporary evaluation outputs/configs, and the one-task TIME data manifest/link were removed after metric capture. Source models and formal candidate/evaluation data remain.
+- docs/EXP.md was accidentally truncated during a failed UTF-8 write. Restored its tracked historical contents from HEAD, then re-added the current Chronos and foundation batch records and corrected the v0-proxy completion status from docs/LOG.md and docs/RESULTS.md. Experiment data and result files were not affected.
+- Automatic queue remains live in tmux v1-foundation-trev-queue. At 12:44 CST it had passed the Chronos rand dependency and was waiting for Chronos full. Chronos full remained active at step 1,689; no TimerXL or TimesFM formal training had started.
+
+
+### 2026-11-10 12:46 CST - queue and cleanup audit
+
+The foundation queue is live in tmux v1-foundation-trev-queue and is polling for Chronos full .complete. Chronos random has only adapter-step-4000 remaining after all step evaluations. Chronos full training reached step 2,000 and saved that adapter; it is still active. TimerXL and TimesFM rehearsal completion markers are present in their retained console logs, and temporary rehearsal artifacts are absent. Python compilation, shell syntax, four model JSON manifests, and git diff whitespace checks passed. Formal TimerXL/TimesFM training has not started yet by design; the queue starts them after Chronos rand/full completion.

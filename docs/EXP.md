@@ -1,6 +1,6 @@
 # 实验
 
-最后修改日期：2026-11-09
+最后修改日期：2026-11-10
 
 ## Experiment and batch overview
 
@@ -9,6 +9,14 @@ This table covers every maintained experiment and batch in this document. Comple
 | Experiment | Batch | Work | Status | Actual result |
 |---|---|---|---|---|
 | v0-crb-var | 1-ten-trajectory-replay | Compare CRB adaptive intervals with matched uniform intervals at one gradient per about 64 starts | Completed | 10/10 budget-verified; relative variance 0.6410 vs 0.6802; direction dispersion 0.4051 vs 0.4402 |
+| v0-proxy-dp-segmentation | longest4-unweighted | Exact BF16 proxy-variance DP vs same-count uniform | Completed | 4/4 tracks; relative variance 0.5031 vs 0.6762; direction dispersion 0.2995 vs 0.4298 |
+| v0-proxy-dp-segmentation | longest4-window-weighted | Exact length-weighted BF16 proxy-variance DP vs same-count uniform | Completed | 4/4 tracks; relative variance 0.5717 vs 0.6762; direction dispersion 0.3572 vs 0.4298 |
+| v1-rage-chronosT5-trev-base-rand | 1-random-10pct | Chronos-T5-Base BF16 LoRA; evaluate eight fixed optimizer-step checkpoints on 12 native-univariate FEV/TIME tasks | Completed | 4,000 updates and all eight step evaluations completed; .complete; only adapter 4000 retained |
+| v1-rage-chronosT5-trev-base-full | 1-full-pool | Chronos-T5-Base BF16 LoRA on the full fixed candidate pool | Running | Training in tmux v1-chronost5-trev; step 2,000 saved at 12:46 CST |
+| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | TimerXL 84M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for both Chronos batches; TimerXL rehearsal passed |
+| v1-rage-timerXL-trev-84m-full | 1-full-pool | TimerXL 84M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimerXL random phase .complete |
+| v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | TimesFM 2.5 200M BF16 LoRA on the shared seed-0 subset; same evaluation protocol | Queued | Automatic queue waits for TimerXL pair; TimesFM rehearsal passed |
+| v1-rage-timesFM-trev-2.5-full | 1-full-pool | TimesFM 2.5 200M BF16 LoRA on the full fixed candidate pool | Queued | Starts after TimesFM random phase .complete |
 | v0-active-value-rank | 1-expanded-cross-rank | Expanded cross-track proxy ranking | Completed | 100 references; 714-766 candidates each; mean rho 0.7104 |
 | v0-active-value-rank | 2-active-correction | Budgeted active value-ranking correction | Completed | At 10% and B=64, boundary regret 0.04192 vs 0.05148 highest-proxy |
 | v0-active-value-rank | 3-proxy-coverage | Diagnose true top-k proxy positions across 100 references | Completed | Mean recall at k/2k/3k: 0.4023/0.6480/0.7950; 65 references have true top-k beyond 5k |
@@ -394,7 +402,7 @@ First proposed: 2026-11-09. Last modified: 2026-11-09. Status: completed. Goal: 
 
 ## v0-proxy-dp-segmentation
 
-First proposed: 2026-11-09 22:19 CST. Last modified: 2026-11-09 22:19 CST. Status: running. Goal: test whether an exact DP partition minimizing the unweighted sum of interval trace variances in reconstructed output-head proxy gradients improves true-gradient interval metrics over an equal-count uniform partition.
+First proposed: 2026-11-09 22:19 CST. Last modified: 2026-11-10 00:52 CST. Status: completed. Goal: test whether an exact DP partition minimizing the unweighted sum of interval trace variances in reconstructed output-head proxy gradients improves true-gradient interval metrics over an equal-count uniform partition.
 
 Use ten fixed trajectories and existing proxy-gradient arrays at , with true full-gradient BF16 caches at . No gradients are recomputed. For each trajectory with N starts, set K=ceil(N/64). Sample proxy gradients every four starts and include the terminal start when needed to permit interpolation through the full trajectory. Linearly reconstruct the proxy vector at every start. Define a vector interval variance as trace of the population covariance, equal to mean squared Euclidean deviation from the interval vector mean. Optimize the unweighted sum of interval variances, not weighted by interval length.
 
@@ -402,5 +410,33 @@ Solve exact DP: DP[k,i]=min_j(DP[k-1,j]+V(j,i)) subject to interval length at le
 
 | Batch | Work | Status |
 |---|---|---|
-| 1 | Run ten cached proxy reconstructions, exact DP, and matched uniform partitions; evaluate true-gradient metrics | Running; first trajectory completed; resume checkpoints enabled |
-| 2 | Validate K, minimum interval length, complete coverage, finite outputs, and completion marker; summarize results | Pending |
+| 1 | Run cached proxy reconstructions for source ordinals 01, 05, 06, and 09, exact DP, and matched uniform partitions; evaluate true-gradient metrics | Completed; 176 interval rows per objective; .complete |
+| 2 | Validate K, minimum interval length, complete coverage, finite outputs, and completion marker; summarize results | Completed; K=22, lengths>=16, contiguous coverage, finite metrics |
+
+
+## v1-rage-chronosT5-trev-base and foundation-model Trev batches
+
+First proposed: 2026-11-10 02:03 CST. Last modified: 2026-11-10.
+
+### Fixed source pool and evaluation protocol
+
+The candidate source union is fixed to Chronos wiki_daily_100k and m5, LOTSA PEMS07, Monash solar_10_minutes, and UTSD UTSD-1G. Eligibility is length at least 576, all values finite, and non-constant. The measured pool is 199,030 series and 475,138,055 points: wiki_daily_100k 100,000/274,100,000; m5 29,351/47,140,014; PEMS07 883/24,921,792; solar_10_minutes 137/7,200,720; UTSD-1G 68,659/121,775,529. The nominal plan was 469M points; keep all eligible series and record the exact measured total.
+
+The random phase is a reproducible 10% series-level sample with seed 0: 19,903 series, 49,350,594 points, and 37,906,369 legal 576-point windows. The full phase has 199,030 series, 475,138,055 points, and 360,695,805 legal windows. Both pool manifests and mmap inputs are under their Chronos batch output directories and are shared by the other models without copying.
+
+Each optimizer update samples an effective batch of 32 legal 576-point windows with replacement, split into 512 context and 64 target. BF16 is used throughout. Checkpoints are 0,100,200,500,1000,2000,3000,4000 updates. Chronos-T5-Base LoRA uses r=8, alpha=16, dropout=0, attention q/v targets. AdamW: lr=1e-4, weight decay=0, betas=(0.9,0.999), eps=1e-8, gradient clip=1, cosine schedule, 3% warmup. Rand is followed by full automatically.
+
+The frozen 12-task evaluation is four native-univariate FEV tasks (hospital_admissions_1D, M_DENSE_1D, us_consumption_1Y, world_co2_emissions) and eight native-univariate TIME tasks (CPHL/15T, CPHL/30T, CPHL/H, ECDC_COVID/D, ECDC_COVID/W, epf_electricity_price/H, Commodity_Import/M, Commodity_Production/M). Every checkpoint is evaluated on all 12 tasks. Chronos runner/configs: scripts/temp/v1_rage_chronost5_trev.py and configs/rage/v1-rage-chronosT5-trev-base-{rand,full}.json. FEV/TIME configs are configs/eval/fev/v1-rage-trev-run.yaml and configs/eval/time/v1-rage-trev.yaml.
+
+### TimerXL and TimesFM batches
+
+TimerXL 84M uses thuml/timer-base-84m, revision 70077a71acce1b4c00d98332fcaabc694255d8e5. TimesFM 2.5 200M uses google/timesfm-2.5-200m-transformers, revision 5a9806b9b291fad9233b5249d88263f1846304d3. Each model has rand then full phases: v1-rage-timerXL-trev-84m-{rand,full} and v1-rage-timesFM-trev-2.5-{rand,full}. Both share the exact pool manifests and same 4,000-update BF16 training schedule. LoRA targets are q_proj/v_proj with r=8, alpha=16, dropout=0. Use effective batch 32 and microbatch 8 (accumulation 4); AdamW and window settings match the Chronos protocol.
+
+Configs are configs/rage/v1-rage-timerXL-trev-84m-{rand,full}.json and configs/rage/v1-rage-timesFM-trev-2.5-{rand,full}.json. Model-specific FEV/TIME configs are in configs/eval/fev/ and configs/eval/time/. Runner: scripts/temp/v1_rage_foundation_trev.py. Queue: scripts/temp/queue_v1_rage_foundation_trev.sh. The queue waits for both Chronos .complete markers, then runs TimerXL rand/full, then TimesFM rand/full. TimerXL and TimesFM produce deterministic point forecasts; their adapters repeat the point forecast at every FEV/TIME quantile level.
+
+For each step, remove the intermediate adapter only after both its FEV and TIME evaluations complete. Preserve adapter step 4000. After phase completion, remove optimizer resume state and the step-0 wrapper. Outputs and checkpoint data remain under project outputs/ paths backed by the data disk. Formal statuses are in the overview table and docs/ORCHE.md; actual run logs are in docs/LOG.md.
+
+
+### v0-proxy-dp-segmentation completion correction (2026-11-10)
+
+The earlier plan above describes the ten-track candidate study. The executed replay used only source ordinals 01, 05, 06, and 09 after the raw caches for the other tracks were removed. Both unweighted and length-weighted exact DP replays completed with 22 intervals per track. For unweighted DP vs uniform, equal-track relative variance was 0.5031/0.6762, equal-interval direction dispersion 0.2995/0.4298, window-weighted direction 0.5844/0.4297, and absolute variance 3.7787/9.4982. For length-weighted DP vs uniform, the same metrics were 0.5717/0.6762, 0.3572/0.4298, 0.4923/0.4297, and 12.5689/9.4982. The descriptive results apply only to the four selected longest tracks. Detailed results: docs/results/v0-proxy-dp-segmentation.md.
