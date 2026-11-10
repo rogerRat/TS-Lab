@@ -77,8 +77,12 @@ class FoundationFEVEvaluationAdapter(fev.ForecastingModel):
             contexts = []
             for item in past_data:
                 context = clean_context(np.asarray(item["target"], dtype=np.float32))[-512:]
-                if len(context) < minimum_context:
-                    context = np.pad(context, (minimum_context - len(context), 0), mode="edge")
+                if self.config["model"]["model_key"] == "timesfm-2.5":
+                    required_length = max(32, ((len(context) + 31) // 32) * 32)
+                else:
+                    required_length = max(minimum_context, len(context))
+                if len(context) < required_length:
+                    context = np.pad(context, (required_length - len(context), 0), mode="edge")
                 contexts.append(context.astype(np.float32, copy=False))
             forecasts = np.empty((len(contexts), int(task.horizon)), dtype=np.float32)
             by_length: dict[int, list[int]] = {}
