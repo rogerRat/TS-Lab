@@ -176,8 +176,16 @@ class ChronosTIMEEvaluationAdapter:
             if target.ndim != 1:
                 raise ValueError("TIME adapter expects univariate windows; backend must use to_univariate")
             target = target[-int(inference["context_length"]):]
-            if target.size == 0 or not np.isfinite(target).all():
-                raise ValueError("TIME input context must be non-empty and finite")
+            if target.size == 0:
+                raise ValueError("TIME input context must be non-empty")
+            finite = np.isfinite(target)
+            if not finite.all():
+                if finite.any():
+                    target = np.interp(
+                        np.arange(target.size), np.flatnonzero(finite), target[finite]
+                    ).astype(np.float32)
+                else:
+                    target = np.zeros_like(target, dtype=np.float32)
             contexts.append(torch.tensor(target, dtype=torch.float32))
         if not contexts:
             raise ValueError("TIME task produced no prediction inputs")

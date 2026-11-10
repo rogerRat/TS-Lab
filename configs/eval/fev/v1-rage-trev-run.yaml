@@ -1,0 +1,26 @@
+schema_version: 1
+benchmark: fev
+model:
+  id: v1_rage_trev_base
+adapter:
+  class: adapters.chronos.eval.fev:ChronosFEVEvaluationAdapter
+  config:
+    model:
+      device: cuda
+      torch_dtype: bfloat16
+    inference:
+      batch_size: 32
+      num_samples: 20
+      temperature: 1.0
+      top_k: 50
+      top_p: 1.0
+      seed: 20260722
+      evaluation_mode: single_window
+bench_config:
+  task_file: default.yaml
+  expected_tasks: 4
+  task_indices:
+  - 9
+  - 11
+  - 18
+  - 19

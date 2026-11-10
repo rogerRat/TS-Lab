@@ -345,7 +345,7 @@ def evaluate_with_fev(
         "fev_commit": _locked_commit(lock_file, "fev"),
         "fev_package_version": importlib_metadata.version("fev"),
         "metrics": list(RQ3_METRICS),
-        "sampling": {key: adapter_config["inference"][key] for key in ("num_samples", "temperature", "top_k", "top_p")},
+        "sampling": {key: adapter_config["inference"][key] for key in ("num_samples", "temperature", "top_k", "top_p") if key in adapter_config["inference"]},
         "base_seed": base_seed,
         "task_seed_formula": "base_seed + task_index",
         "task_indices": list(selected_task_indices),
