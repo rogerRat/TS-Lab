@@ -30,4 +30,5 @@ for seed in 1 2 3; do
   run_foundation /root/autodl-tmp/rage/envs/rage-timerxl/bin/python "$timer" "$suffix"
   run_foundation /root/autodl-tmp/rage/envs/rage-timesfm/bin/python "$times" "$suffix"
 done
+touch outputs/train/v1-rage-trev-seeds-0-3.complete
 log "all seeds 0 through 3 complete"
