@@ -324,6 +324,8 @@ TimerXL rehearsal passed a one-step BF16 LoRA update, merged-checkpoint export, 
 
 ## Seed 0-3 Trev queue (2026-11-10)
 
+For all queued Chronos, TimerXL, and TimesFM Trev batches, use MASE alone for result inspection, comparisons, and summaries across FEV and TIME. Other evaluator metrics are raw outputs and do not enter decisions.
+
 Last modified: 2026-11-10
 
 Session: v1-trev-seeds-0-3. Command: bash scripts/temp/queue_v1_rage_trev_seeds.sh. Console: logs/v1-rage-foundation-trev/seed-queue-console.log. GPU phases execute serially. Seed 0 Chronos rand/full are complete; TimerXL rand resumes at evaluation step 0, then TimerXL full and TimesFM rand/full. For each seed 1, 2, 3, prepare Chronos rand/full input pools, start its checkpoint cleanup watcher, then run Chronos rand/full, TimerXL rand/full, TimesFM rand/full. Each phase is resumable from its checkpoint and evaluation outputs. The first checkpoint cleanup watcher is started by the queue after pool preparation. Do not launch a second queue concurrently.

@@ -1038,3 +1038,9 @@ Verified TimerXL seed 0 rand and full .complete markers after all eight FEV and 
 Last modified: 2026-11-10
 
 A direct FEV task 18 rehearsal initially failed because a 59-point context was not divisible by the TimesFM patch length of 32. Updated src/adapters/foundation/eval/fev.py to left-pad TimesFM contexts to the next 32-point multiple after the existing 512-point cap. Re-ran the actual FEV evaluator with --resume: task 18 passed (MASE 8.8114). A separate task 19 run also passed (MASE 4.0807). These are base-model rehearsal metrics, not formal seed results. Deleted the temporary checkpoint wrapper, evaluation outputs, YAML config, and four rehearsal evaluator logs. The formal TimesFM seed 0 random training process remained active.
+
+### 2026-11-10 - Trev metric clarification
+
+Last modified: 2026-11-10
+
+The user specified MASE as the only metric to inspect, compare, and report for all Chronos, TimerXL, and TimesFM Trev batches. Updated EXP, ORCHE, RESULTS, and the TimerXL seed 0 result document. This is a reporting decision; no training or evaluation parameters or running processes were changed.
