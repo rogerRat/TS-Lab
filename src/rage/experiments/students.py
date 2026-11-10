@@ -23,7 +23,7 @@ def provenance(*, include_lock=False):
     from configs.paths import PROJECT_ROOT
     from importlib.metadata import version, PackageNotFoundError
     packages = {}
-    for name in ("torch", "transformers", "numpy"):
+    for name in ("torch", "transformers", "numpy", "peft"):
         try:
             packages[name] = version(name)
         except PackageNotFoundError:
@@ -123,6 +123,7 @@ def adapter_engine(adapter, context_length, prediction_length):
                            "timemoe-200m": "native_autoregressive",
                            "timerxl-84m": "native_autoregressive_revin",
                            "sundial-base-128m": "native_sampling_median"}[adapter.spec.key],
+        adapter=adapter,
     )
 
 
@@ -151,6 +152,9 @@ def run_student_task(student, manifest_path, out_dir, *, engine=None):
             if model_path:
                 adapter.spec = replace(adapter.spec, model_id=model_path)
             engine = adapter_engine(adapter, c, h)
+    from .lora import apply_student_lora
+    lora_config = config.get("lora")
+    lora_summary = apply_student_lora(engine, student, lora_config)
     runtime = provenance()
     dataset = manifest["dataset"]
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -196,6 +200,7 @@ def run_student_task(student, manifest_path, out_dir, *, engine=None):
                 learning_rate=config["learning_rate"], seed=seed, base_state=base,
                 checkpoint_dir=out_dir / "checkpoints" / dataset / arm / f"seed{seed}", **exam_kwargs)
             metrics.update(student=student, dataset=dataset, arm=arm, runtime=runtime,
+                           training_adapter=lora_summary,
                            selection_artifact=artifact["path"],
                            selection_cost_scope="shared_once_in_task_manifest",
                            selection_coverage=coverage)

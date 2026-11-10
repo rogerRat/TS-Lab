@@ -99,11 +99,11 @@ profile = sys.argv[1]
 modules = {
     "main": ["chronos", "fev", "numpy", "pandas", "pyarrow", "scipy", "faiss",
              "ot", "threadpoolctl", "umap", "tensorboard", "matplotlib", "plotly", "kaleido", "rage", "tsl",
-             "rage.static_selection", "scripts.select_static"],
-    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
+             "rage.static_selection", "scripts.select_static", "peft"],
+    "timesfm": ["timesfm3", "faiss", "scipy", "yaml", "plotly", "kaleido", "rage", "peft"],
     "timemoe": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
     "sundial": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
-    "timerxl": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage"],
+    "timerxl": ["faiss", "scipy", "yaml", "plotly", "kaleido", "rage", "peft"],
     "time": ["timebench", "timebench.evaluation.data", "chronos"],
 }
 for module in modules[profile]:

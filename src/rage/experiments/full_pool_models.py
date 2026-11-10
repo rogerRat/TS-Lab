@@ -2,7 +2,7 @@
 from dataclasses import replace
 import json
 
-from .students import STUDENTS, PARAMETER_COUNTS, adapter_engine
+from .students import STUDENTS, HISTORICAL_STUDENTS, PARAMETER_COUNTS, adapter_engine
 from gradient.timesfm import TimesFMGradientEngine
 from gradient.timemoe import TimeMoEGradientEngine
 
@@ -25,14 +25,29 @@ def _gradient_probe(student, engine, *, model_key, checkpoint):
 
 
 def build_model(student, *, model_path=None, device="cuda", context_length=512, prediction_length=64):
-    if student not in STUDENTS:
+    if student not in STUDENTS + HISTORICAL_STUDENTS:
         raise ValueError("Full-pool production requires a registered student: " + student)
-    if student == "chronos-base":
-        from gradient.chronos import ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_BASE
-        engine = ChronosT5Engine(ChronosT5Config(model_path=model_path or DEFAULT_CHRONOS_T5_BASE,
-            context_length=context_length, prediction_length=prediction_length), device=device)
+    if student in ("chronos-tiny", "chronos-small", "chronos-base"):
+        from gradient.chronos import (
+            ChronosT5Config, ChronosT5Engine, DEFAULT_CHRONOS_T5_TINY,
+            DEFAULT_CHRONOS_T5_SMALL, DEFAULT_CHRONOS_T5_BASE,
+        )
+        chronos = {
+            "chronos-tiny": ("amazon/chronos-t5-tiny",
+                             "29d808298f1a62493e7b9a5e08529d0d930fa189",
+                             DEFAULT_CHRONOS_T5_TINY),
+            "chronos-small": ("amazon/chronos-t5-small",
+                              "a971ba21945c4f1796b17a91fe69214b5f4ad472",
+                              DEFAULT_CHRONOS_T5_SMALL),
+            "chronos-base": ("amazon/chronos-t5-base",
+                             CHRONOS_BASE_REVISION, DEFAULT_CHRONOS_T5_BASE),
+        }
+        model_id, revision, default_path = chronos[student]
+        engine = ChronosT5Engine(ChronosT5Config(
+            model_path=model_path or default_path, context_length=context_length,
+            prediction_length=prediction_length,
+        ), device=device)
         probe = engine
-        model_id, revision = "amazon/chronos-t5-base", CHRONOS_BASE_REVISION
     else:
         from adapters.foundation import build_adapter
         adapter = build_adapter(student, device=device)

@@ -1,3 +1,4 @@
 # TimerXL environment composition.
 -r project/model-profile.txt
 -r third_parties/model/legacy-transformers-requirements.txt
+peft==0.18.1

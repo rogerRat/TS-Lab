@@ -230,9 +230,13 @@ def fine_tune(
         if options["exclude_bias_norm"]:
             decay, no_decay = [], []
             for name, parameter in model.named_parameters():
+                if not parameter.requires_grad:
+                    continue
                 (no_decay if name.endswith("bias") or "norm" in name.lower() else decay).append(parameter)
             parameters = [{"params": decay, "weight_decay": weight_decay},
                           {"params": no_decay, "weight_decay": 0.}]
+        if not isinstance(parameters, list):
+            parameters = [p for p in model.parameters() if p.requires_grad]
         optimizer = make_adamw(parameters, lr=learning_rate, weight_decay=weight_decay,
                               betas=tuple(options["betas"]), eps=options["eps"])
     elif recipe is not None:
@@ -263,10 +267,14 @@ def fine_tune(
     contract = dict(steps=steps, batch_size=batch_size, learning_rate=learning_rate,
                     weight_decay=weight_decay, seed=seed,
                     sampling=windows.metadata if resampled else None)
+    contract.update(getattr(windows, "training_contract", {}))
     if recipe is not None:
         contract.update(recipe=recipe.as_dict(), schedule_total_steps=schedule_total)
     if options is not None:
         contract["training_options"] = options
+    adapter_config = getattr(engine, "training_adapter_config", None)
+    if adapter_config is not None:
+        contract["training_adapter"] = adapter_config
     contract["parameter_dtypes"] = sorted({str(p.dtype) for p in model.parameters()})
     resume_path = Path(resume_path) if resume_path is not None else None
     save_at = set(checkpoint_steps or [steps])
@@ -338,12 +346,20 @@ def fine_tune(
                 (loss * (len(micro_indices) / len(indices) if options is not None else micro_scale)).backward()
             micro_losses.append(loss.detach())
         if options is not None and options["max_grad_norm"] is not None:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), options["max_grad_norm"], error_if_nonfinite=True)
+            torch.nn.utils.clip_grad_norm_(
+                [p for p in model.parameters() if p.requires_grad],
+                options["max_grad_norm"], error_if_nonfinite=True)
         if recipe is not None and recipe.max_grad_norm:
             torch.nn.utils.clip_grad_norm_(
                 [p for p in model.parameters() if p.requires_grad],
                 recipe.max_grad_norm)
         optimizer.step()
+        if next(model.parameters()).dtype == torch.bfloat16:
+            for parameter, state_values in optimizer.state.items():
+                for state_name in ("exp_avg", "exp_avg_sq", "max_exp_avg_sq"):
+                    state_tensor = state_values.get(state_name)
+                    if state_tensor is not None and state_tensor.dtype != parameter.dtype:
+                        raise TypeError("BF16 AdamW moment dtype mismatch: %s" % state_name)
         detached_loss = (micro_losses[0] if len(micro_losses) == 1
                          else torch.stack(micro_losses).mean())
         if options is not None:
@@ -378,6 +394,7 @@ def fine_tune(
         "final_loss": float(tail_losses[-1].cpu()),
         "tail_mean": float(torch.stack(tuple(tail_losses)).mean().cpu()),
         "steps": completed,
+        "sample_exposures": completed * batch_size,
         "resumed_from_step": resumed_from,
         "cumulative_training_seconds": prior_elapsed + time.monotonic() - started,
     }
@@ -494,6 +511,7 @@ def run_arm_training(
     *,
     source_windows: np.ndarray,
     source_steps: int | None = None,
+    source_step_checkpoints: list[int] | None = None,
     source_epochs: int | None = None,
     budget_windows: int | None = None,
     checkpoint_dir: Path | None = None,
@@ -514,6 +532,8 @@ def run_arm_training(
 
     The final epoch is the main-table result, never the best test checkpoint.
     Explicit source_steps is retained only for low-level diagnostic callers.
+    source_step_checkpoints specifies exact optimizer-update evaluation
+    boundaries for fixed-budget experiments; labels are the step counts.
     ``recipe`` selects the frozen production schedule: steps are derived as
     ceil(epochs * N / effective_batch), evaluation runs on the half-epoch grid
     plus the (possibly fractional) stop epoch, and the learning rate follows a
@@ -543,7 +563,9 @@ def run_arm_training(
         budget_windows = getattr(source_windows, "budget_windows", len(source_windows))
     from .resampling import ResampledWindows
     from .schedule import exposure_checkpoints
-    if isinstance(source_windows, ResampledWindows):
+    if source_step_checkpoints is not None:
+        boundaries = [(int(step), int(step)) for step in source_step_checkpoints if step > 0]
+    elif isinstance(source_windows, ResampledWindows):
         if budget_windows != source_windows.pool_n:
             raise ValueError("Training N must equal the shared full-pool manifest N")
         if recipe is not None:
@@ -562,7 +584,8 @@ def run_arm_training(
         boundaries = (epoch_checkpoints(budget_windows, batch_size, source_epochs)
                       if source_epochs is not None and len(source_windows) else [])
     steps = boundaries[-1][1] if boundaries else int(source_steps or 0)
-    schedule_total = (recipe.steps_for(budget_windows, recipe.schedule_epochs)
+    schedule_total = ((steps if source_step_checkpoints is not None else
+                       recipe.steps_for(budget_windows, recipe.schedule_epochs))
                       if recipe is not None else None)
     if online_evaluation:
         def assess():

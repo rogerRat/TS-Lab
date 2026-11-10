@@ -7,3 +7,4 @@ gluonts==0.16.3
 hatchling==1.32.0
 typer-config==1.5.1
 tensorboard==2.20.0
+peft==0.18.1
