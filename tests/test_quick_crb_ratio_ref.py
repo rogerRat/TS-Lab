@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from scripts.quick_crb_ratio_ref import TruthComputer, phase_allocation
+from scripts.legacy.v7.quick_crb_ratio_ref import TruthComputer, phase_allocation
 from rage.core import TimeSeriesFragment
 from rage.experiments.arms import WindowIndex
 

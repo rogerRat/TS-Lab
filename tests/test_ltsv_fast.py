@@ -187,7 +187,7 @@ def test_runner_dispatch_uses_explicit_execution_config_without_legacy_hash(tmp_
 
 
 def test_report_labels_budget_accuracy_and_original_counterfactual(tmp_path):
-    from scripts.exp.report_selection_runtime import report
+    from scripts.legacy.rage.report_selection_runtime import report
     (tmp_path/'protocol.json').write_text(json.dumps(dict(students=['model'],datasets=['task'],arms=['ltsv'])))
     folder=tmp_path/'students/model/selections'
     folder.mkdir(parents=True)

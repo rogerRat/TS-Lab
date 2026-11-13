@@ -1,6 +1,6 @@
 import subprocess
 import sys
-from scripts.supervise_v7_night import wait_all
+from scripts.legacy.v7.supervise_v7_night import wait_all
 
 
 def test_second_exits_first_without_lost_pid():

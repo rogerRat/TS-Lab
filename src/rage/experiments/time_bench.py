@@ -3,7 +3,7 @@
 Builds the same ``TaskSpec``/``TaskData`` objects the FEV main table uses,
 but from the pinned TIME benchmark checkout (``third_parties/TIME`` commit
 b6e7ba9, datasets.yaml) and its Hugging Face snapshot (``Real-TSF/TIME``
-revision 83e3d0b3, fetched by ``scripts/fetch_time_dataset.sh`` under
+revision 83e3d0b3, fetched by ``scripts/ops/fetch_time_dataset.sh`` under
 ``data/bench/time/<rev>/dataset``).
 
 Protocol mapping (mirrors the FEV path in ``tasks.py``, domain A):
@@ -98,7 +98,7 @@ def build_time_task(spec: TaskSpec, *, term: str = "short",
     dataset_path = TIME_DATA_ROOT / spec.dataset
     if not dataset_path.exists():
         raise FileNotFoundError(
-            "TIME data missing: %s (run scripts/fetch_time_dataset.sh)"
+            "TIME data missing: %s (run scripts/ops/fetch_time_dataset.sh)"
             % dataset_path)
     hf = hf_datasets.load_from_disk(str(dataset_path))
 

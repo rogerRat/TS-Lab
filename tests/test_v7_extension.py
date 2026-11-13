@@ -87,7 +87,7 @@ def test_source_links_preserve_inodes_exclude_reference_and_freeze_fields(tmp_pa
 
 def test_completed_task_reentry_skips_inputs_assets_and_selection(tmp_path,monkeypatch):
     import sys
-    import scripts.run_v7_extension_queue as queue
+    import scripts.legacy.v7.run_v7_extension_queue as queue
     observed=[]
     monkeypatch.setattr(queue,'CANDIDATES',[CANDIDATES[0]])
     monkeypatch.setattr(queue,'read',lambda path:{})

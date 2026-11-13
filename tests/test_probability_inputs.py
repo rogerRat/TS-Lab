@@ -5,7 +5,7 @@ import numpy as np
 from rage.core import TimeSeriesFragment
 from rage.experiments.development_inputs import load_fragments, save_fragments
 from rage.experiments.students import atomic_json
-from scripts.exp.probability_inputs import prepare
+from scripts.legacy.rage.probability_inputs import prepare
 
 
 def test_fixed_development_series_keep_source_pool_and_exclude_exam(tmp_path):

@@ -1,6 +1,6 @@
 import pytest
 
-from scripts.quick_crb_budget_sweep import (
+from scripts.legacy.v7.quick_crb_budget_sweep import (
     constrained_phase_allocation, feasible_allocations, reduced_ratio,
 )
 

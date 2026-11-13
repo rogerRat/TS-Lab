@@ -11,7 +11,7 @@ import pytest
 from runtime.task_queue import Queue
 
 
-CLI = Path(__file__).resolve().parents[1] / 'scripts/queue.py'
+CLI = Path(__file__).resolve().parents[1] / 'scripts/ops/queue.py'
 
 
 def test_standalone_cli_snapshots_script_and_runs_without_pythonpath(tmp_path):

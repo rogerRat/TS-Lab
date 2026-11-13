@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from scripts.quick_crb_uniform_ref import ReadOnlyCachedComputer, accuracy, report
+from scripts.legacy.v7.quick_crb_uniform_ref import ReadOnlyCachedComputer, accuracy, report
 
 
 def test_accuracy_identical_and_zero_vectors():

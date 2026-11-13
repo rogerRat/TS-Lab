@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from baselines.ltsv.runtime import accounting, comparison_seconds, load_restore_timing
-from scripts.exp.report_selection_runtime import report
+from scripts.legacy.rage.report_selection_runtime import report
 
 
 def test_adjust_only_restore_component_and_remove_setup():

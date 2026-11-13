@@ -47,6 +47,7 @@
 /third_parties/
 /cache/
 tokens.txt
+# Scratch scripts stay on disk only; never tracked.
 /scripts/temp/
 /configs/experiments/*
 

@@ -64,7 +64,7 @@ def worker_command(student, manifest, out_dir, *, environments=None):
         command = [sys.executable]
     else:
         command = ["conda", "run", "--no-capture-output", "-n", environment, "python"]
-    return command + ["-m", "scripts.exp.model_train", "--model", student,
+    return command + ["-m", "scripts.legacy.rage.model_train", "--model", student,
                        "--task-manifest", str(manifest), "--output", str(out_dir)]
 
 

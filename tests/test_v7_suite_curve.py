@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
-from scripts import run_v7_suite as suite
+from scripts.legacy.v7 import run_v7_suite as suite
 from rage.experiments.v7_run import gate, marker, cell_identity
 from assets.gradient.cache import atomic_json
 

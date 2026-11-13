@@ -68,7 +68,7 @@ def exercise(adapter, tmp_path):
               'exam':{'path':str(tmp_path/'exam.npz')},
               'selections':{'random':{'path':str(tmp_path/'selection.npz'),'cost':{'wall_seconds':0}}}}
     (tmp_path/'task.json').write_text(json.dumps(manifest))
-    run=subprocess.run([sys.executable,'-m','scripts.exp.model_train','--model',adapter.spec.key,
+    run=subprocess.run([sys.executable,'-m','scripts.legacy.rage.model_train','--model',adapter.spec.key,
                         '--task-manifest',str(tmp_path/'task.json'),'--output',str(tmp_path/'worker')],
                        capture_output=True,text=True)
     assert run.returncode==0,run.stdout+run.stderr

@@ -1,6 +1,6 @@
 import pytest
 
-from scripts.report_v7_final import rank_shape, reported_mase, SHAPE_ARMS
+from scripts.legacy.v7.report_v7_final import rank_shape, reported_mase, SHAPE_ARMS
 
 
 def test_endpoint_is_frozen_and_orig_is_untrained():

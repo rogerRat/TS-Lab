@@ -36,7 +36,7 @@ def test_moved_modules_keep_repository_data_roots():
 
 
 def test_cli_router_dispatches_without_implementing_selection(monkeypatch):
-    from scripts.exp import rage
+    from scripts.legacy.rage import rage
     calls = []
     class Workflow:
         @staticmethod
@@ -69,7 +69,7 @@ def test_legacy_selection_stacks_are_removed_but_external_baselines_remain():
 
 
 def test_assets_cli_includes_data_models_and_gradients(monkeypatch):
-    from scripts import assets
+    from scripts.tools import assets
     assert set(assets.WORKFLOWS) == {
         'fetch-source', 'fetch-reference', 'load-source', 'load-reference',
         'dedup-source', 'dedup-reference',

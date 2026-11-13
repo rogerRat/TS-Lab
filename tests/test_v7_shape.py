@@ -56,7 +56,7 @@ def test_first_receipts_create_missing_sidecar_parents(tmp_path):
 
 def test_global_arm_barrier_requires_every_model_seed_task(tmp_path,monkeypatch):
     import json
-    from scripts import run_v7_shape_backfill as queue
+    from scripts.legacy.v7 import run_v7_shape_backfill as queue
     from rage.experiments.v7_protocol import MODELS
     from rage.experiments.v7_run import artifact_identity
     monkeypatch.setattr(queue,'report_view',lambda raw,expected,config,model: raw
@@ -170,7 +170,7 @@ def test_shape_sidecar_identity_is_new_and_parent_untouched(monkeypatch,tmp_path
 
 def test_shape_queue_requires_all_original_and_extension_cells(tmp_path):
     import json
-    from scripts.run_v7_shape_backfill import complete
+    from scripts.legacy.v7.run_v7_shape_backfill import complete
     from rage.experiments.v7_protocol import MODELS
     runs=[tmp_path]+[tmp_path/'extensions'/name for name in ('wind','sg','coastal')]
     configs=[{'datasets':['task'],'arms':['orig','rand']}]
