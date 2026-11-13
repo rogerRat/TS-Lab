@@ -11,6 +11,13 @@ CHRONOS_BASE_REVISION = "ad294eaacead15db499b740ea4122266dd2a81a2"
 
 def _gradient_probe(student, engine, *, model_key, checkpoint):
     """Frozen per-student selection probe; new students use native batched VJP."""
+    if student in ("chronos-2-small", "chronos-2", "chronos-bolt-tiny",
+                   "chronos-bolt-mini", "chronos-bolt-small"):
+        from gradient.new_foundation import ChronosFamilyGradientEngine
+        return ChronosFamilyGradientEngine(engine, model_key=model_key)
+    if student == "moirai-2.0-small":
+        from gradient.new_foundation import Moirai2GradientEngine
+        return Moirai2GradientEngine(engine, model_key=model_key)
     if student == "timesfm-2.5":
         return TimesFMGradientEngine(engine, model_key=model_key)
     if student == "timemoe-200m":
@@ -58,16 +65,24 @@ def build_model(student, *, model_path=None, device="cuda", context_length=512, 
         probe = _gradient_probe(student, engine, model_key=f"{model_id}@{revision}",
                                 checkpoint=model_path or model_id)
     import torch
-    if student != "sundial-base-128m":
-        # Sundial keeps its native float32 checkpoint precision (bf16 breaks
-        # its patch-embedding mask concat); other students follow BF16 policy.
+    if student not in ("sundial-base-128m", "moirai-2.0-small"):
+        # Moirai 2.0 and Sundial retain the released FP32 runtime path.
         engine.model.to(dtype=torch.bfloat16)
     parameters = sum(p.numel() for p in engine.model.parameters())
     if parameters != PARAMETER_COUNTS[student]:
         raise ValueError(f"{student} weight identity mismatch: loaded {parameters} parameters")
     # Hugging Face configs include integer-keyed id2label maps and tuples.
     # Canonicalize once so the live identity equals its persisted JSON form.
-    config = json.loads(json.dumps(engine.model.config.to_dict()))
+    model_config = getattr(engine.model, "config", None)
+    if model_config is not None and hasattr(model_config, "to_dict"):
+        config = json.loads(json.dumps(model_config.to_dict()))
+    else:
+        module = engine.model
+        config = {"module": type(module).__name__,
+                  "patch_size": getattr(module, "patch_size", None),
+                  "max_seq_len": getattr(module, "max_seq_len", None),
+                  "num_predict_token": getattr(module, "num_predict_token", None),
+                  "quantile_levels": list(getattr(module, "quantile_levels", ())) }
     identity = dict(student=student, model_id=model_id, revision=revision,
                     ckpt=model_path or model_id, ckpt_revision=revision,
                     loaded_path=model_path or getattr(probe.config, "model_path", model_id),

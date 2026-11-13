@@ -8,13 +8,26 @@ from pathlib import Path
 import subprocess
 import sys
 
-STUDENTS = ("chronos-tiny", "chronos-base", "timesfm-2.5", "timemoe-200m", "timerxl-84m", "sundial-base-128m")
+STUDENTS = (
+    "chronos-tiny", "chronos-base", "timesfm-2.5", "timemoe-200m",
+    "timerxl-84m", "sundial-base-128m", "chronos-2-small", "chronos-2",
+    "chronos-bolt-tiny", "chronos-bolt-mini", "chronos-bolt-small",
+    "moirai-2.0-small",
+)
 # Kept in the historical registry for offline compatibility, but these models
 # have no supported student-training deployment contract.
 NON_DEPLOYABLE_STUDENTS = frozenset(("sundial-base-128m", "timesfm-3.0"))
 HISTORICAL_STUDENTS = ("chronos-small",)
-ENVIRONMENTS = dict(zip(STUDENTS, ("rage", "rage", "rage-timesfm", "rage-timemoe", "rage-timerxl", "rage-sundial")))
-PARAMETER_COUNTS = dict(zip(STUDENTS, (8_394_496, 201_374_976, 231_289_280, 453_196_800, 84_142_080, 128_329_680)))
+ENVIRONMENTS = dict(zip(STUDENTS, (
+    "rage", "rage", "rage-timesfm", "rage-timemoe", "rage-timerxl",
+    "rage-sundial", "rage-chronos2", "rage-chronos2", "rage-chronos2",
+    "rage-chronos2", "rage-chronos2", "rage-moirai2",
+)))
+PARAMETER_COUNTS = dict(zip(STUDENTS, (
+    8_394_496, 201_374_976, 231_289_280, 453_196_800, 84_142_080,
+    128_329_680, 27_934_624, 119_477_664, 8_652_672, 21_236_096,
+    47_718_016, 11_387_208,
+)))
 ENVIRONMENTS["chronos-small"] = "rage"
 PARAMETER_COUNTS["chronos-small"] = 46_154_240
 
@@ -119,7 +132,13 @@ def adapter_engine(adapter, context_length, prediction_length):
                                                            prediction_length=prediction_length),
         forecast=lambda contexts: adapter.forecast(contexts, prediction_length=prediction_length),
         context_embeddings=getattr(adapter, "context_embeddings", None),
-        forecast_protocol={"timesfm-2.5": "native_mean",
+        forecast_protocol={"chronos-2-small": "native_quantile_median",
+                           "chronos-2": "native_quantile_median",
+                           "chronos-bolt-tiny": "native_quantile_median",
+                           "chronos-bolt-mini": "native_quantile_median",
+                           "chronos-bolt-small": "native_quantile_median",
+                           "moirai-2.0-small": "native_quantile_median",
+                           "timesfm-2.5": "native_mean",
                            "timemoe-200m": "native_autoregressive",
                            "timerxl-84m": "native_autoregressive_revin",
                            "sundial-base-128m": "native_sampling_median"}[adapter.spec.key],

@@ -6,6 +6,12 @@ _STUDENT_TARGETS = {
     "chronos-tiny": ("q", "v"),
     "chronos-small": ("q", "v"),
     "chronos-base": ("q", "v"),
+    "chronos-2-small": ("self_attention.q", "self_attention.v"),
+    "chronos-2": ("self_attention.q", "self_attention.v"),
+    "chronos-bolt-tiny": ("q", "v"),
+    "chronos-bolt-mini": ("q", "v"),
+    "chronos-bolt-small": ("q", "v"),
+    "moirai-2.0-small": ("q_proj", "v_proj"),
     "timesfm-2.5": ("q_proj", "v_proj"),
     "timerxl-84m": ("q_proj", "v_proj"),
 }

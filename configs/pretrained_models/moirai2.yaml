@@ -1,0 +1,10 @@
+# Pinned Moirai 2.0 R checkpoint. Weights are noncommercial research only.
+models:
+  moirai-2.0-small:
+    repo_id: Salesforce/moirai-2.0-R-small
+    revision: 30f43ff08c8494f4943ae1521e9d4e94a0fbb389
+    parameter_count: 11387208
+    max_context: 8064
+    dependency_profile: moirai2
+    weights_license: CC-BY-NC-4.0
+    status: enabled

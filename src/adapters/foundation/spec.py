@@ -58,6 +58,48 @@ class ModelSpec:
 
 
 _SPECS: Mapping[str, ModelSpec] = MappingProxyType({
+    'chronos-2-small': ModelSpec(
+        key='chronos-2-small', family='chronos2', version='small-28m',
+        model_id='autogluon/chronos-2-small', revision='ddec01313e50b6bc58ebaa92ede81bc24a3d9f9a',
+        max_context=8192, capabilities=frozenset(ModelCapability),
+        dependency_profile='chronos2', official_training_recipe=True,
+        weights_license='Apache-2.0', notes='Native quantile loss; independent fixed-window groups.',
+    ),
+    'chronos-2': ModelSpec(
+        key='chronos-2', family='chronos2', version='120m',
+        model_id='amazon/chronos-2', revision='29ec3766d36d6f73f0696f85560a422f50e8498c',
+        max_context=8192, capabilities=frozenset(ModelCapability),
+        dependency_profile='chronos2', official_training_recipe=True,
+        weights_license='Apache-2.0', notes='Native quantile loss; independent fixed-window groups.',
+    ),
+    'chronos-bolt-tiny': ModelSpec(
+        key='chronos-bolt-tiny', family='chronos_bolt', version='tiny-9m',
+        model_id='amazon/chronos-bolt-tiny', revision='a0e552de83495b5c28c14c71c374f3e33280b340',
+        max_context=2048, capabilities=frozenset(ModelCapability),
+        dependency_profile='chronos2', official_training_recipe=False,
+        weights_license='Apache-2.0', notes='Native quantile loss; fixed 64-step head.',
+    ),
+    'chronos-bolt-mini': ModelSpec(
+        key='chronos-bolt-mini', family='chronos_bolt', version='mini-21m',
+        model_id='amazon/chronos-bolt-mini', revision='251268337516a88e253628c43e1d26ec577b376b',
+        max_context=2048, capabilities=frozenset(ModelCapability),
+        dependency_profile='chronos2', official_training_recipe=False,
+        weights_license='Apache-2.0', notes='Native quantile loss; fixed 64-step head.',
+    ),
+    'chronos-bolt-small': ModelSpec(
+        key='chronos-bolt-small', family='chronos_bolt', version='small-48m',
+        model_id='amazon/chronos-bolt-small', revision='772f3d25d38aec6d914c8949dab4462e2d46f5d8',
+        max_context=2048, capabilities=frozenset(ModelCapability),
+        dependency_profile='chronos2', official_training_recipe=False,
+        weights_license='Apache-2.0', notes='Native quantile loss; fixed 64-step head.',
+    ),
+    'moirai-2.0-small': ModelSpec(
+        key='moirai-2.0-small', family='moirai2', version='2.0-R-small-11m',
+        model_id='Salesforce/moirai-2.0-R-small', revision='30f43ff08c8494f4943ae1521e9d4e94a0fbb389',
+        max_context=8064, capabilities=frozenset(ModelCapability),
+        dependency_profile='moirai2', official_training_recipe=False,
+        weights_license='CC-BY-NC-4.0', notes='Research-only weights; direct 64-step quantile loss.',
+    ),
     "timemoe-200m": ModelSpec(
         key="timemoe-200m", family="timemoe", version="200M",
         model_id="Maple728/TimeMoE-200M",

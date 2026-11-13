@@ -1,0 +1,42 @@
+# Pinned Chronos 2 and Bolt checkpoints loaded through chronos-forecasting 2.3.2.
+models:
+  chronos-2-small:
+    repo_id: autogluon/chronos-2-small
+    revision: ddec01313e50b6bc58ebaa92ede81bc24a3d9f9a
+    parameter_count: 27934624
+    max_context: 8192
+    dependency_profile: chronos2
+    weights_license: Apache-2.0
+    status: enabled
+  chronos-2:
+    repo_id: amazon/chronos-2
+    revision: 29ec3766d36d6f73f0696f85560a422f50e8498c
+    parameter_count: 119477664
+    max_context: 8192
+    dependency_profile: chronos2
+    weights_license: Apache-2.0
+    status: enabled
+  chronos-bolt-tiny:
+    repo_id: amazon/chronos-bolt-tiny
+    revision: a0e552de83495b5c28c14c71c374f3e33280b340
+    parameter_count: 8652672
+    max_context: 2048
+    dependency_profile: chronos2
+    weights_license: Apache-2.0
+    status: enabled
+  chronos-bolt-mini:
+    repo_id: amazon/chronos-bolt-mini
+    revision: 251268337516a88e253628c43e1d26ec577b376b
+    parameter_count: 21236096
+    max_context: 2048
+    dependency_profile: chronos2
+    weights_license: Apache-2.0
+    status: enabled
+  chronos-bolt-small:
+    repo_id: amazon/chronos-bolt-small
+    revision: 772f3d25d38aec6d914c8949dab4462e2d46f5d8
+    parameter_count: 47718016
+    max_context: 2048
+    dependency_profile: chronos2
+    weights_license: Apache-2.0
+    status: enabled

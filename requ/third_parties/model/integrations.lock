@@ -14,3 +14,11 @@ sundial-base-128m https://huggingface.co/thuml/sundial-base-128m 3212e42564493f5
 transformers-sundial-runtime pypi:transformers 4.40.1
 timerxl-84m https://huggingface.co/thuml/timer-base-84m 70077a71acce1b4c00d98332fcaabc694255d8e5
 transformers-timerxl-runtime pypi:transformers 4.40.1
+chronos-forecasting-runtime pypi:chronos-forecasting 2.3.2
+chronos-2-small https://huggingface.co/autogluon/chronos-2-small ddec01313e50b6bc58ebaa92ede81bc24a3d9f9a
+chronos-2 https://huggingface.co/amazon/chronos-2 29ec3766d36d6f73f0696f85560a422f50e8498c
+chronos-bolt-tiny https://huggingface.co/amazon/chronos-bolt-tiny a0e552de83495b5c28c14c71c374f3e33280b340
+chronos-bolt-mini https://huggingface.co/amazon/chronos-bolt-mini 251268337516a88e253628c43e1d26ec577b376b
+chronos-bolt-small https://huggingface.co/amazon/chronos-bolt-small 772f3d25d38aec6d914c8949dab4462e2d46f5d8
+moirai2-runtime pypi:uni2ts 2.0.0
+moirai-2.0-small https://huggingface.co/Salesforce/moirai-2.0-R-small 30f43ff08c8494f4943ae1521e9d4e94a0fbb389

@@ -8,6 +8,12 @@ from .spec import get_model_spec
 
 def build_adapter(key: str, *, device: str = "auto") -> FoundationModelAdapter:
     spec = get_model_spec(key)
+    if spec.family in ("chronos2", "chronos_bolt"):
+        from .chronos_family import ChronosFamilyAdapter
+        return ChronosFamilyAdapter(spec, device=device)
+    if spec.family == "moirai2":
+        from .moirai2 import Moirai2Adapter
+        return Moirai2Adapter(spec, device=device)
     if key == "timemoe-200m":
         from .timemoe import TimeMoEAdapter
         return TimeMoEAdapter(spec, device=device)
