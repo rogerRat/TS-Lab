@@ -1,6 +1,6 @@
 # 实验总表
 
-最后修改日期：2026-11-13
+最后修改日期：2026-11-14
 
 本文件逐行记录全部实验与批次的工作、状态和实际结果，未开始、部分完成、终止的批次同样列出。
 每个实验的完整参数、方法、数据构建方式和评估口径见 `docs/exp/<实验代号>.md`；
@@ -68,6 +68,7 @@
 | `v1-rage-timesFM-trev-2.5-rand-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
 | `v1-rage-timesFM-trev-2.5-rand-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
 | `v1-rage-timesFM-trev-2.5-rand-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v2-ads` | [v2-ads/exp.md](exp/v2-ads/exp.md) | 2 |
 | `v2-foundation-expansion` | [v2-foundation-expansion.md](exp/v2-foundation-expansion/exp.md) | 1 |
 
 ## 批次总表
@@ -76,6 +77,8 @@
 
 | 实验代号 | 批次 | 工作 | 状态 | 实际结果 |
 |---|---|---|---|---|
+| v2-ads | implementation-validation | ADS 算法、函数/脚本接口、YAML 与 CLI 参数流及测试 | 完成：53 项相关测试通过 | 仅代码验证；正式训练评估未启动、无模型指标；[实验记录](exp/v2-ads/exp.md) / [结果](exp/v2-ads/results.md) |
+| v2-ads | ads-main-formal | 用 ADS 替换 CRB 的正式选择、训练和评估 | 未开始：正式数据和参数尚未冻结 | 无输出、无结果；[实验记录](exp/v2-ads/exp.md) / [结果](exp/v2-ads/results.md) |
 | v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
 | v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |
 | v1-crb-redo | 12tasks-ref-grad-prepare | 对 4 FEV 与 8 TIME 目标任务的安全历史准备 TimerXL CRB 1:0:1 与等预算 Uniform 参考梯度；后续匹配选择批次的前置依赖 | 完成：8 项安全历史及两方法梯度均核验；4 项因无法支持筛选而放弃，后续不再使用 | 8 项 CRB/Uniform 各合计 9079 个名义锚点，逐项见实验文档 |

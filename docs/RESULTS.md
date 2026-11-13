@@ -1,6 +1,6 @@
 # 实验结果总览
 
-最后修改日期：2026-11-13
+最后修改日期：2026-11-14
 
 本文件逐行记录全部实验与批次的工作、状态和实际结果，绝不编造或替换指标；
 数值以实际生成的产物、完成标记和日志为依据。逐实验完整报告见 `docs/results/<实验代号>.md`。
@@ -49,12 +49,15 @@
 | `v1-rage-trev-seed0-final` | [results/v1-rage-trev-seed0-final.md](exp/archive/v1-rage-trev/v1-rage-trev-seed0-final.md) |
 | `v1-rage-trev-timerxl-seed0` | [results/v1-rage-trev-timerxl-seed0.md](exp/archive/v1-rage-trev/v1-rage-trev-timerxl-seed0.md) |
 | `v1-rage-trev-timesfm-seed0` | [results/v1-rage-trev-timesfm-seed0.md](exp/archive/v1-rage-trev/v1-rage-trev-timesfm-seed0.md) |
+| `v2-ads` | [v2-ads/results.md](exp/v2-ads/results.md) |
 | `v2-foundation-expansion` | [results/v2-foundation-expansion.md](exp/v2-foundation-expansion/results.md) |
 
 ## 批次结果总表
 
 | 实验代号 | 批次 | 工作 | 状态 | 实际结果 |
 |---|---|---|---|---|
+| v2-ads | implementation-validation | ADS 核心与入口接入测试 | 完成 | 53 项相关测试通过；无模型评估指标；详见 [v2-ads 结果](exp/v2-ads/results.md) |
+| v2-ads | ads-main-formal | ADS 正式实验 | 未开始 | 正式参数未冻结，无产物和指标；详见 [v2-ads 结果](exp/v2-ads/results.md) |
 | v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
 | v1-crb-redo | 12tasks-ref-grad-prepare | 12 项安全历史资格检查，8 项准备 CRB/Uniform 梯度 | 完成；4 项放弃 | 8 项每方法各 9079 个名义锚点，4 项因无法支持筛选不再使用 |
 | v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |

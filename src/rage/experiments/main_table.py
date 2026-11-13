@@ -1,11 +1,11 @@
 """Main-table experiment: does selected data improve forecast accuracy?
 
-Eight arms per dataset and three students (experiment decision 9):
+Main-table arms per dataset and three students (experiment decision 9):
 
   original          pretrained Chronos-T5-small, no training;
   random            online uniform replacement draws from the feasible pool;
-  trajectory_level  one gradient per disjoint 576-point segment (F2);
-  rage           CRB reconstruction + cancellation detection + block recall;
+  rage              CRB reconstruction + cancellation detection + block recall;
+  ads               adaptive density sampling over real source/reference gradients;
   less / tsds / lp_mirror / ltsv   paper baselines (adapted, disclosed).
 
 Single-stage schedule (D1/D2): four epochs of fine-tuning on the selected
@@ -39,6 +39,7 @@ from .arms import (
     streaming_random_select,
     RANDOM_SAMPLING_REVISION,
     rage_crb_select,
+    ads_select,
 )
 from baselines.runners import run_baseline
 from baselines.trajectory import REVISION as LANGUAGE_BASELINE_REVISION
@@ -46,13 +47,14 @@ from .tasks import build_ratio_pool, build_task_data, build_task_specs
 from .time_bench import build_time_task, build_time_task_specs, verify_time_checkout
 from .quito_bench import build_quito_task, build_quito_task_specs
 from .train_eval import crb_gradient_computer
+from rage.ads import ADSConfig
 from .students import STUDENTS, deploy_students, key_values, atomic_json
 from .selection_metrics import SelectionMetrics
 from rage.execution import selection_execution, clear_execution_cache
 
 BASELINE_ARMS = ("less", "tsds", "lp_mirror", "ltsv")
-GRANULARITY_ARMS = ("trajectory_level",)
-CORE_ARMS = ("original", "random", "rage")
+GRANULARITY_ARMS = ()
+CORE_ARMS = ("original", "random")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -84,6 +86,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--selection-memory-fraction", type=float, default=0.7)
     parser.add_argument("--selection-cpu-threads", type=int, default=4)
     parser.add_argument("--selection-generation", choices=["eager", "cuda_graph"], default="cuda_graph")
+    parser.add_argument("--selector", choices=["rage", "ads"], default="rage",
+                        help="focal gradient selection method")
+    parser.add_argument("--ads-q-coarse", type=float, default=32.0)
+    parser.add_argument("--ads-q-fine", type=float, default=8.0)
+    parser.add_argument("--ads-eta", type=float, default=1.0,
+                        help="reference-to-source target anchor density ratio")
+    budget_group = parser.add_mutually_exclusive_group()
+    budget_group.add_argument("--ads-top-k", type=int, default=None)
+    budget_group.add_argument("--ads-top-ratio", type=float, default=None)
+    budget_group.add_argument("--ads-target-fine-density", type=float, default=None)
+    parser.add_argument("--ads-rounds", type=int, default=1)
+    parser.add_argument("--ads-decay-distance", type=int, default=4)
+    parser.add_argument("--ads-aggregation", choices=["linear", "max", "exp", "relu"],
+                        default="max")
+    parser.add_argument("--ads-sampling-replacement",
+                        action=argparse.BooleanOptionalAction, default=False,
+                        help="sample selected source windows with or without replacement")
+    parser.add_argument("--ads-selection-seed", type=int, default=101)
     parser.add_argument("--cover-density", type=float, default=0.02)
     parser.add_argument("--error-density", type=float, default=0.02)
     parser.add_argument("--split-density", type=float, default=0.005)
@@ -108,7 +128,33 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--student-parallelism", type=int, default=1)
     parser.add_argument("--selection-only", action="store_true")
     parser.add_argument("--out", default="outputs/main_table")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.selector == "ads":
+        try:
+            _ads_config_from_args(args)
+        except ValueError as exc:
+            parser.error(str(exc))
+    return args
+
+
+def _ads_config_from_args(args) -> ADSConfig:
+    modes = sum(value is not None for value in (
+        args.ads_top_k, args.ads_top_ratio, args.ads_target_fine_density))
+    if modes > 1:
+        raise ValueError("specify only one ADS top-k, top-ratio, or target density mode")
+    return ADSConfig(
+        q_coarse=args.ads_q_coarse,
+        q_fine=args.ads_q_fine,
+        eta=args.ads_eta,
+        top_k=(args.ads_top_k if args.ads_top_ratio is None
+               and args.ads_target_fine_density is None else
+               (64 if modes == 0 else None)),
+        top_ratio=args.ads_top_ratio,
+        target_fine_density=args.ads_target_fine_density,
+        rounds=args.ads_rounds,
+        decay_distance=args.ads_decay_distance,
+        aggregation=args.ads_aggregation,
+    )
 
 
 def _cell_path(out_dir: Path, dataset: str, arm: str, seed: int) -> Path:
@@ -138,12 +184,27 @@ def check_baseline_resume(out_dir, args):
     previous = json.loads(path.read_text())["protocol"]
     if previous.get("delivery_revision") != REVISION:
         raise ValueError("Delivery protocol changed; use a new --out run directory.")
-    keys = ("language_baseline_revision", "cover_density", "error_density", "split_density", "random_sampling_revision")
+    keys = (
+        "language_baseline_revision", "cover_density", "error_density",
+        "split_density", "random_sampling_revision",
+    )
     current = {**vars(args), "language_baseline_revision": LANGUAGE_BASELINE_REVISION,
                "random_sampling_revision": RANDOM_SAMPLING_REVISION}
+    previous_selector = previous.get("selector", "rage")
+    if previous_selector != current["selector"]:
+        raise ValueError("Selection method changed; use a new --out run directory.")
     if any(previous.get(key) != current.get(key) for key in keys):
         raise ValueError("Baseline method or Random/sampling protocol changed; use a new --out run directory. "
                          "Old selected sets and student cells are not compatible.")
+    if current["selector"] == "ads":
+        ads_keys = (
+            "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+            "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
+            "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
+            "ads_selection_seed",
+        )
+        if any(previous.get(key) != current.get(key) for key in ads_keys):
+            raise ValueError("ADS configuration changed; use a new --out run directory.")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -211,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
                                          protocol=results)
 
     baseline_names = list(args.with_baselines)
-    arm_names = CORE_ARMS + GRANULARITY_ARMS + tuple(baseline_names)
+    arm_names = CORE_ARMS + (args.selector,) + GRANULARITY_ARMS + tuple(baseline_names)
     pool_block_cache = {}  # One immutable source pool for all tasks in this invocation.
     for spec in specs:
         dataset_started = time.time()
@@ -257,26 +318,70 @@ def main(argv: list[str] | None = None) -> int:
                 flush=True)
             return arm_out
 
-        cached("rage", lambda: rage_crb_select(
-            task.reference_fragments, pool, index,
-            gradient_computer=crb_gradient_computer(
-                engine, args.context_length, args.prediction_length),
-            context_length=args.context_length,
-            prediction_length=args.prediction_length,
-            window_stride=args.pool_stride,
-            cover_density=args.cover_density,
-            error_density=args.error_density,
-            split_density=args.split_density,
-            block_budget=args.block_budget,
-            n_select=args.n_windows,
-            mean_epsilon=args.mean_epsilon,
-            endpoint_epsilon=args.endpoint_epsilon,
-            tie_seed=5,
-            curvature_cap=args.curvature_cap,
-            pool_cache_dir=cache_dir,
-            pool_manifest=pool_manifest,
-            pool_block_cache=pool_block_cache,
-        ))
+        if args.selector == "rage":
+            cached("rage", lambda: rage_crb_select(
+                task.reference_fragments, pool, index,
+                gradient_computer=crb_gradient_computer(
+                    engine, args.context_length, args.prediction_length),
+                context_length=args.context_length,
+                prediction_length=args.prediction_length,
+                window_stride=args.pool_stride,
+                cover_density=args.cover_density,
+                error_density=args.error_density,
+                split_density=args.split_density,
+                block_budget=args.block_budget,
+                n_select=args.n_windows,
+                mean_epsilon=args.mean_epsilon,
+                endpoint_epsilon=args.endpoint_epsilon,
+                tie_seed=5,
+                curvature_cap=args.curvature_cap,
+                pool_cache_dir=cache_dir,
+                pool_manifest=pool_manifest,
+                pool_block_cache=pool_block_cache,
+            ))
+        else:
+            ads_config = _ads_config_from_args(args)
+            print("%s-[main_table]-[ads-config]-[q_coarse=%s q_fine=%s eta=%s "
+                  "top_k=%s top_ratio=%s target_fine_density=%s rounds=%s "
+                  "decay_distance=%s aggregation=%s n_select=%s replacement=%s "
+                  "seed=%s]" % (
+                      time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                      ads_config.q_coarse, ads_config.q_fine, ads_config.eta,
+                      ads_config.top_k, ads_config.top_ratio,
+                      ads_config.target_fine_density, ads_config.rounds,
+                      ads_config.decay_distance, ads_config.aggregation,
+                      args.n_windows, args.ads_sampling_replacement,
+                      args.ads_selection_seed), flush=True)
+
+            def ads_progress(event):
+                eta = event.get("eta_seconds")
+                if eta is None:
+                    eta_text = "n/a"
+                elif eta >= 3600:
+                    eta_text = "%.1fh" % (eta / 3600)
+                elif eta >= 60:
+                    eta_text = "%.1fm" % (eta / 60)
+                else:
+                    eta_text = "%.0fs" % eta
+                detail = " ".join("%s=%s" % (key, value)
+                                  for key, value in event.items()
+                                  if key not in ("stage", "event", "eta_seconds"))
+                print("%s-[main_table]-[ads-%s]-[%s %s eta=%s]" % (
+                    time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    event["stage"], event["event"], detail, eta_text), flush=True)
+
+            cached("ads", lambda: ads_select(
+                task.reference_fragments, pool, index,
+                gradient_computer=crb_gradient_computer(
+                    engine, args.context_length, args.prediction_length),
+                ads_config=ads_config,
+                n_select=args.n_windows,
+                seed=args.ads_selection_seed,
+                sample_with_replacement=args.ads_sampling_replacement,
+                gradient_batch_size=max(args.selection_gradient_batch, 1)
+                if args.selection_gradient_batch else 128,
+                progress_callback=ads_progress,
+            ))
         cached("random", lambda: streaming_random_select(
             index, n_select=args.n_windows, seed=101))
         for arm in GRANULARITY_ARMS:
@@ -351,7 +456,8 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def summarize_run(out_dir: Path, specs, seeds: list[int], arm_names: list[str]) -> dict:
+def summarize_run(out_dir: Path, specs, seeds: list[int], arm_names: list[str],
+                  focal_arm: str = "rage") -> dict:
     """Aggregate cells: per-dataset means, then equal-weight dataset average."""
     summary: dict[str, dict] = {}
     for arm in arm_names:
@@ -376,11 +482,11 @@ def summarize_run(out_dir: Path, specs, seeds: list[int], arm_names: list[str]) 
                 "mase_avg": float(np.mean([v["mase_mean"] for v in per_dataset.values()])),
             }
     # relative improvement over random
-    if "random" in summary and "rage" in summary:
-        common = set(summary["random"]["per_dataset"]) & set(summary["rage"]["per_dataset"])
-        summary["rage_vs_random"] = {
+    if "random" in summary and focal_arm in summary:
+        common = set(summary["random"]["per_dataset"]) & set(summary[focal_arm]["per_dataset"])
+        summary[focal_arm + "_vs_random"] = {
             dataset: {
-                "mase_reduction": 1.0 - summary["rage"]["per_dataset"][dataset]["mase_mean"]
+                "mase_reduction": 1.0 - summary[focal_arm]["per_dataset"][dataset]["mase_mean"]
                 / summary["random"]["per_dataset"][dataset]["mase_mean"],
             }
             for dataset in common

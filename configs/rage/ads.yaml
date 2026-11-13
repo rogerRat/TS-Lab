@@ -1,0 +1,26 @@
+# ADS selection run template. Override algorithm values with --ads-* flags.
+batch: ads-main
+steps: [main]
+selector: ads
+
+context_length: 512
+prediction_length: 64
+pool_stride: 1
+datasets: [ETT_1H]
+series_cap: 2
+n_windows: 512
+pool_equivalents: 2560
+pool_seed: 0
+projection_dimension: 1024
+selection_only: true
+with_baselines: []
+
+ads_q_coarse: 32
+ads_q_fine: 8
+ads_eta: 1.0
+ads_top_k: 64
+ads_rounds: 1
+ads_decay_distance: 4
+ads_aggregation: max
+ads_sampling_replacement: true
+ads_selection_seed: 101

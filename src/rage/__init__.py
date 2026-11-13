@@ -26,6 +26,7 @@ from .selection import (
     FinalSelection,
 )
 from .pipeline import RAGEPipeline, RAGERunReport
+from .ads import ADSConfig, ADSMatch, ADSTrajectoryResult, ADSRunReport, ADSPipeline
 from .crb import (
     CRBConfig,
     GradientBlock,
@@ -58,6 +59,11 @@ __all__ = [
     "FinalSelection",
     "RAGEPipeline",
     "RAGERunReport",
+    "ADSConfig",
+    "ADSMatch",
+    "ADSTrajectoryResult",
+    "ADSRunReport",
+    "ADSPipeline",
     "CRBConfig",
     "GradientBlock",
     "CRBResult",

@@ -4,11 +4,9 @@ Uses explicit CLI + YAML config, serial execution, stop-on-failure and resumable
 steps, and freezes a
 launch-time document for every run:
 
-* ``outputs/<run_id>/RUN.md``     - timestamp, run id, batch, git commit,
-  host/GPU/package versions, every parameter definition and value (protocol,
-  anchor densities, budget ratio, block budget B, N, schedule, seeds) and the
-  exact commands executed;
-* ``outputs/rage_runs/RUNS.md``- central append-only index of all runs.
+* ``outputs/<run_id>/RUN.md`` - timestamp, run id, batch, runtime versions, parameters, and exact commands;
+* ``logs/rage_runs/<run_id>/<step>.log`` - streamed console output for each step;
+* ``outputs/rage_runs/RUNS.md`` - central append-only index of all runs.
 
 Steps (each a resumable ``python -m`` entry):
 
@@ -31,6 +29,7 @@ import argparse
 import json
 import os
 import platform
+import signal
 import subprocess
 import sys
 import time
@@ -80,6 +79,10 @@ SHARED_KEYS = (
     "n_values", "total_budget_seconds",
     "densities", "b_values", "m_values", "rescan", "scan_dir", "density",
     "cancel_ratio",
+    "selector", "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+    "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
+    "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
+    "ads_selection_seed",
 )
 
 
@@ -93,6 +96,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="override the batch label from the config")
     parser.add_argument("--out-root", default="outputs",
                         help="root directory that receives <run_id>/")
+    parser.add_argument("--selector", choices=["rage", "ads"], default=None,
+                        help="override the focal selection method in the config")
+    parser.add_argument("--ads-q-coarse", type=float, default=None)
+    parser.add_argument("--ads-q-fine", type=float, default=None)
+    parser.add_argument("--ads-eta", type=float, default=None)
+    budget_group = parser.add_mutually_exclusive_group()
+    budget_group.add_argument("--ads-top-k", type=int, default=None)
+    budget_group.add_argument("--ads-top-ratio", type=float, default=None)
+    budget_group.add_argument("--ads-target-fine-density", type=float, default=None)
+    parser.add_argument("--ads-rounds", type=int, default=None)
+    parser.add_argument("--ads-decay-distance", type=int, default=None)
+    parser.add_argument("--ads-aggregation", choices=["linear", "max", "exp", "relu"],
+                        default=None)
+    parser.add_argument("--ads-sampling-replacement",
+                        action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--ads-selection-seed", type=int, default=None)
     parser.add_argument("--dry-run", action="store_true",
                         help="freeze RUN.md and print commands without running")
     return parser.parse_args(argv)
@@ -164,6 +183,8 @@ def _step_argv(step: str, config: dict, run_dir: Path) -> list[str]:
             elif isinstance(value, list):
                 if value:
                     command.extend([flag] + [str(item) for item in value])
+                elif key == "with_baselines":
+                    command.append(flag)
             elif value is not None:
                 command.extend([flag, str(value)])
         command.extend(["--out", str(run_dir / step)])
@@ -313,28 +334,55 @@ def freeze_run_doc(run_id: str, config: dict, steps: list[str],
     lines.append("| 步骤 | %s |" % ", ".join(steps))
     lines.append("")
     model = config.get("model_path") or "amazon/chronos-t5-small"
-    lines.append(PARAM_DOC.format(
-        context_length=config.get("context_length", 512),
-        prediction_length=config.get("prediction_length", 64),
-        pool_stride=config.get("pool_stride", 1),
-        cover_density=cover, error_density=error, split_density=split,
-        total_density=total, ratio=ratio,
-        block_budget=config.get("block_budget", 8),
-        mean_epsilon=config.get("mean_epsilon", 1e-8),
-        endpoint_epsilon=config.get("endpoint_epsilon", 1e-8),
-        epsilon_provenance=config.get("epsilon_provenance",
-                                      "未记录（须填 mechanism1 全扫描 p10 溯源）"),
-        n_windows=config.get("n_windows", 4096),
-        pool_equivalents=config.get("pool_equivalents", 20480),
-        pool_seed=config.get("pool_seed", 0),
-        curvature_cap=config.get("curvature_cap", 1.0),
-        source_epochs=config.get("source_epochs", 4),
-        train_batch=config.get("train_batch", 32),
-        learning_rate=config.get("learning_rate", 1e-5),
-        seeds=config.get("seeds", [0, 1, 2]),
-        model=model,
-        projection_dimension=config.get("projection_dimension", 4096),
-    ))
+    if config.get("selector", "rage") == "ads":
+        if config.get("ads_top_k") is not None:
+            top_mode = "K=%s" % config["ads_top_k"]
+        elif config.get("ads_top_ratio") is not None:
+            top_mode = "rho=%s" % config["ads_top_ratio"]
+        elif config.get("ads_target_fine_density") is not None:
+            top_mode = "target_fine_density=%s" % config["ads_target_fine_density"]
+        else:
+            top_mode = "K=64 (default)"
+        lines.append("## ADS Configuration")
+        lines.append("")
+        lines.append("| Parameter | Value | Definition |")
+        lines.append("|---|---|---|")
+        lines.append("| q_coarse / q_fine | %s / %s | Source target spacing; reference spacing is divided by eta |" % (
+            config.get("ads_q_coarse", 32), config.get("ads_q_fine", 8)))
+        lines.append("| eta | %s | Reference-to-source target anchor density ratio |" % (
+            config.get("ads_eta", 1)))
+        lines.append("| Top-K mode | %s | Global similarity-pair retention rule |" % top_mode)
+        lines.append("| Rounds | %s | Fine computation and rematching rounds |" % config.get("ads_rounds", 1))
+        lines.append("| Decay distance | %s | One-sided linear anchor-score decay distance |" % (
+            config.get("ads_decay_distance", 4)))
+        lines.append("| Aggregation | %s | Aggregate reference rows into source-anchor scores |" % (
+            config.get("ads_aggregation", "max")))
+        lines.append("| Sampling replacement | %s | Whether weighted source sampling uses replacement |" % (
+            config.get("ads_sampling_replacement", False)))
+        lines.append("")
+    else:
+        lines.append(PARAM_DOC.format(
+            context_length=config.get("context_length", 512),
+            prediction_length=config.get("prediction_length", 64),
+            pool_stride=config.get("pool_stride", 1),
+            cover_density=cover, error_density=error, split_density=split,
+            total_density=total, ratio=ratio,
+            block_budget=config.get("block_budget", 8),
+            mean_epsilon=config.get("mean_epsilon", 1e-8),
+            endpoint_epsilon=config.get("endpoint_epsilon", 1e-8),
+            epsilon_provenance=config.get("epsilon_provenance",
+                                          "not recorded; add mechanism1 full-scan p10 provenance"),
+            n_windows=config.get("n_windows", 4096),
+            pool_equivalents=config.get("pool_equivalents", 20480),
+            pool_seed=config.get("pool_seed", 0),
+            curvature_cap=config.get("curvature_cap", 1.0),
+            source_epochs=config.get("source_epochs", 4),
+            train_batch=config.get("train_batch", 32),
+            learning_rate=config.get("learning_rate", 1e-5),
+            seeds=config.get("seeds", [0, 1, 2]),
+            model=model,
+            projection_dimension=config.get("projection_dimension", 4096),
+        ))
     lines.append("### 数据")
     datasets = config.get("datasets") or config.get("dataset")
     lines.append("- 数据集: %s" % datasets)
@@ -342,7 +390,7 @@ def freeze_run_doc(run_id: str, config: dict, steps: list[str],
         config.get("pool_equivalents", 20480), config.get("pool_seed", 0)))
     lines.append("")
     lines.append("### 对比方法（主表，F 域）")
-    arms = ["original", "random", "trajectory_level", "rage"]
+    arms = ["original", "random", config.get("selector", "rage")]
     arms += list(config.get("with_baselines") or [])
     lines.append("- " + " / ".join(arms) + "（粒度对照与论文基线均为披露的适配实现）")
     lines.append("")
@@ -395,11 +443,34 @@ def _update_index_status(out_root: Path, run_id: str, status: str) -> None:
     index.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def apply_cli_overrides(config: dict, args: argparse.Namespace) -> dict:
+    """Apply explicit CLI values on top of the selected YAML or JSON config."""
+    merged = dict(config)
+    keys = (
+        "selector", "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+        "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
+        "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
+        "ads_selection_seed",
+    )
+    budget_keys = ("ads_top_k", "ads_top_ratio", "ads_target_fine_density")
+    selected_budget = next((key for key in budget_keys
+                            if getattr(args, key, None) is not None), None)
+    if selected_budget is not None:
+        for key in budget_keys:
+            merged[key] = None
+    for key in keys:
+        value = getattr(args, key, None)
+        if value is not None:
+            merged[key] = value
+    return merged
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     config_path = PROJECT_ROOT / args.resume / "config.yaml" if args.resume else Path(args.config)
     config = (json.loads(config_path.read_text()) if config_path.suffix==".json"
               else yaml.safe_load(config_path.read_text())) or {}
+    config = apply_cli_overrides(config, args)
     if "resampling_revision" in config:
         from .full_pool_run import run_suite
         if args.steps and args.steps != ["main"]:
@@ -439,27 +510,52 @@ def main(argv: list[str] | None = None) -> int:
     failures: list[str] = []
     for step in steps:
         command = step_argv[step]
-        log_path = run_dir / ("%s.log" % step)
+        log_dir = PROJECT_ROOT / "logs" / "rage_runs" / run_id
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_path = log_dir / ("%s.log" % step)
         print("=== step %s -> %s ===" % (step, log_path), flush=True)
         started = time.time()
+        child_env = dict(os.environ)
+        child_env["PYTHONUNBUFFERED"] = "1"
+        for key, env_key in (("source_load", "RAGE_SOURCE_LOAD"),
+                             ("reference_root", "RAGE_REFERENCE_ROOT")):
+            if config.get(key):
+                child_env[env_key] = str((PROJECT_ROOT / config[key]).resolve())
+        return_code = 1
         with log_path.open("a" if args.resume else "w") as log:
-            child_env = dict(os.environ)
-            for key, env_key in (("source_load", "RAGE_SOURCE_LOAD"),
-                                 ("reference_root", "RAGE_REFERENCE_ROOT")):
-                if config.get(key):
-                    child_env[env_key] = str((PROJECT_ROOT / config[key]).resolve())
-            process = subprocess.run(command, cwd=PROJECT_ROOT, stdout=log,
-                                     stderr=subprocess.STDOUT, env=child_env)
+            process = subprocess.Popen(
+                command, cwd=PROJECT_ROOT, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, text=True, bufsize=1, env=child_env)
+            try:
+                if process.stdout is None:
+                    raise RuntimeError("step process did not expose stdout")
+                for line in process.stdout:
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+                    log.write(line)
+                    log.flush()
+                return_code = process.wait()
+            except BaseException:
+                if process.poll() is None:
+                    process.send_signal(signal.SIGINT)
+                    try:
+                        process.wait(timeout=30)
+                    except subprocess.TimeoutExpired:
+                        process.terminate()
+                        process.wait()
+                raise
         elapsed = (time.time() - started) / 60
-        if process.returncode != 0:
+        if return_code != 0:
             print("step %s FAILED (rc=%d) after %.1f min; see %s" % (
-                step, process.returncode, elapsed, log_path), flush=True)
+                step, return_code, elapsed, log_path), flush=True)
             failures.append(step)
             break
         print("step %s done in %.1f min" % (step, elapsed), flush=True)
 
     _update_index_status(out_root, run_id,
                          "failed: %s" % ",".join(failures) if failures else "complete")
+    if not failures:
+        (run_dir / ".complete").write_text("complete\n", encoding="utf-8")
     print("RUN %s %s" % (run_id, "FAILED" if failures else "COMPLETE"), flush=True)
     return 1 if failures else 0
 

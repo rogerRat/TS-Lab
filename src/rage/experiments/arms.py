@@ -367,6 +367,105 @@ def rage_crb_select(
     )
 
 
+def ads_select(
+    reference_fragments: list[TimeSeriesFragment],
+    pool: list[TimeSeriesFragment],
+    index: WindowIndex,
+    *,
+    gradient_computer,
+    ads_config,
+    n_select: int,
+    seed: int = 101,
+    sample_with_replacement: bool = False,
+    gradient_batch_size: int = 128,
+    progress_callback=None,
+    gradient_cache=None,
+) -> ArmOutput:
+    """Run ADS and draw a fixed source-window sample from its probabilities."""
+    from rage.ads import ADSPipeline
+
+    if n_select <= 0:
+        raise ValueError("n_select must be positive")
+    if not sample_with_replacement and n_select > len(index):
+        raise ValueError("n_select exceeds the source window population without replacement")
+    started = time.perf_counter()
+    report = ADSPipeline(
+        ads_config, gradient_computer,
+        context_length=index.context_length,
+        prediction_length=index.prediction_length,
+        window_stride=index.stride,
+        gradient_batch_size=gradient_batch_size,
+        progress_callback=progress_callback,
+        gradient_cache=gradient_cache,
+    ).run(reference_fragments, pool)
+    probabilities_by_fragment = report.source_probabilities
+    results_by_fragment = {item.fragment_id: item for item in report.source_results}
+    probabilities = np.zeros(len(index), dtype=np.float64)
+    for fragment_id, (lo, hi) in index._bounds.items():
+        result = results_by_fragment.get(fragment_id)
+        if result is None:
+            raise ValueError("ADS source fragments do not match the window index")
+        if not np.array_equal(index.starts[lo:hi], result.valid_starts):
+            raise ValueError("ADS positions do not match the window index")
+        probabilities[lo:hi] = probabilities_by_fragment[fragment_id]
+    if not np.isfinite(probabilities).all() or np.any(probabilities < 0):
+        raise ValueError("ADS returned invalid source probabilities")
+    probability_sum = float(probabilities.sum())
+    if probability_sum <= 0:
+        raise ValueError("ADS source probabilities have zero mass")
+    probabilities /= probability_sum
+    if not sample_with_replacement and np.count_nonzero(probabilities) < n_select:
+        raise ValueError(
+            "ADS positive-weight support is smaller than n_select; enable replacement "
+            "or reduce n_select")
+    rng = np.random.default_rng(seed)
+    selected_positions = rng.choice(
+        len(index), size=n_select, replace=sample_with_replacement, p=probabilities)
+    selected_positions = np.asarray(selected_positions, dtype=np.int64)
+    selected_ids = [
+        (int(index.fragment_ids[position]), int(index.starts[position]))
+        for position in selected_positions
+    ]
+    gradient_count = sum(
+        phase["total"] for phase in report.actual_gradient_counts.values())
+    gradient_bytes = sum(
+        gradient.nbytes for result in report.source_results
+        for gradient in result.anchors.values())
+    return ArmOutput(
+        name="ads",
+        selected=index.windows_at(selected_positions),
+        window_ids=selected_ids,
+        cost=SelectionCost(
+            gradient_computations=gradient_count,
+            index_bytes=int(gradient_bytes),
+            wall_seconds=time.perf_counter() - started,
+            notes={
+                "ads": report.actual_gradient_counts,
+                "ads_nominal": report.nominal_gradient_counts,
+                "ads_cached_gradients": report.cached_gradient_counts,
+                "zero_norm_anchors": report.zero_norm_anchors,
+                "zero_norm_pairs": report.zero_norm_pairs,
+                "probability_fallback": report.probability_fallback,
+                "selected_top_k": report.selected_top_k,
+            },
+        ),
+        diagnostics={
+            "aggregation": ads_config.aggregation,
+            "sampling": "weighted with replacement" if sample_with_replacement
+                        else "weighted without replacement",
+            "requested": int(n_select),
+            "selected": int(len(selected_positions)),
+            "probability_fallback": report.probability_fallback,
+            "target_fine_density": report.target_fine_density,
+            "achieved_fine_density": report.achieved_fine_density,
+            "selected_top_k": report.selected_top_k,
+            "source_probability_min": float(probabilities.min()),
+            "source_probability_max": float(probabilities.max()),
+            "matched_pairs_by_round": [len(matches) for matches in report.matches_by_round],
+        },
+    )
+
+
 # ---------------------------------------------------------------------------
 # Random (disjoint grid) and trajectory-level baseline
 # ---------------------------------------------------------------------------
@@ -442,6 +541,7 @@ __all__ = [
     "ArmOutput",
     "WindowIndex",
     "rage_crb_select",
+    "ads_select",
     "random_select",
     "trajectory_level_select",
     "empty_arm",
