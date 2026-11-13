@@ -1,7 +1,9 @@
 # 稀疏梯度重建与数据价值选择：按科学问题重排的实验记录
-最后修改日期：2026-11-09 21:32
+最后修改日期：2026-11-13 CST
 
 **整理原则：**保留原实验设置、数值、表格、结论及适用边界；按研究问题和证据链而非实验时间排列。下文依次检验“能否重建—能否低成本表征—能否据此分配预算—什么指标真正对应采样收益—能否直接排序数据价值”。
+
+覆盖检查：截至 2026-11-12，已对照 docs/exp/EXP.md、docs/RESULTS.md 与 docs/logs/ 补入新增实验、历史批次及当前运行状态；完整覆盖索引见本文第八节。
 
 
 
@@ -188,6 +190,57 @@ CRB 相比单纯均匀覆盖，最关键的是利用已观测梯度预测插值�
 总体上，换成两端均值没有救回 VAGE：表中每种选点方法的平均 L2 都变大、平均余弦都下降。最初每块先放两个锚点的 Static 也不例外。先前的较差结果并非线性插值这一选择单独造成；至少在这些固定锚点上，线性插值比简单取两端均值更好。但这不排除其他重建方法可能有效。
 
 因此，按方差识别“变化较大的区间”这一点并未自动转化为选点收益。下面进一步检验：向量方差究竟预测哪一种重建误差，以及比方差更贴近方向困难的指标，是否能够预测增加锚点的实际收益。
+
+### 3.5 固定区间数下，代理方差 DP 能否改善真实梯度分段指标？——`v0-proxy-dp-segmentation`
+**实验时间戳：**首次记录于 2026-11-09 22:19 CST；内存受控后的两组回放于 2026-11-10 00:08-00:45 CST 完成；本段更新于 2026-11-10 01:37 CST。
+
+这个实验检验：在区间数固定时，精确动态规划能否根据代理梯度改变边界，使真实完整梯度区间方差和方向离散度优于均匀分段。使用保留轨迹中最长的四条：源轨迹序号 01、05、06、09，长度分别为 1388、1393、1393、1394 个合法起点。每条轨迹上 DP 和均匀基线都恰好划成 K=ceil(N/64)=22 段。DP 区间最小长度为 16，不设最大长度；均匀段长为 63 或 64。实验复用缓存的输出头代理梯度和 BF16 完整梯度，没有重新计算梯度。
+
+代理梯度每隔 4 个起点取样，在线性插值后以 BF16 重建整条轨迹，再用精确 DP 求解两种目标：不加权目标为区间代理向量总体方差之和 sum_j V_j；窗口起点长度加权目标为 J_window=(1/N) sum_j n_j V_j，其中 n_j 为第 j 段的起点数，V_j 是该段重建代理向量总体协方差的迹。Gram 矩阵按坐标分块并以 FP32 累加。真实指标直接从缓存的 BF16 完整梯度计算，每次读取 4 个起点并以 FP32 累加，限制内存占用。
+
+**结果：四条轨迹等权平均**
+
+相对区间方差、区间平均方向离散度和绝对区间方差先在各段间取平均，再对四条轨迹等权平均。方向离散度为区间内真实梯度与区间平均梯度方向之间的平均 1-cos。按窗口加权的方向离散度则按各段起点数 n_j/N 加权。该评估指标不同于 DP 的加权目标：DP 优化的是代理向量方差，评估的是完整梯度方向离散度。
+
+| DP 目标 | 指标 | DP | 均匀 | 相对变化 | DP 更低的轨迹数 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 不加权 sum_j V_j | 区间平均相对方差 | 0.50311 | 0.67621 | -25.6% | 4/4 |
+| 不加权 sum_j V_j | 区间平均方向离散度 | 0.29955 | 0.42977 | -30.3% | 4/4 |
+| 不加权 sum_j V_j | 按窗口加权方向离散度 | 0.58440 | 0.42973 | +36.0% | 0/4 |
+| 不加权 sum_j V_j | 区间平均绝对方差 | 3.77871 | 9.49824 | -60.2% | 4/4 |
+| J_window | 区间平均相对方差 | 0.57174 | 0.67621 | -15.4% | 4/4 |
+| J_window | 区间平均方向离散度 | 0.35724 | 0.42977 | -16.9% | 4/4 |
+| J_window | 按窗口加权方向离散度 | 0.49229 | 0.42973 | +14.6% | 0/4 |
+| J_window | 区间平均绝对方差 | 12.56887 | 9.49824 | +32.3% | 0/4 |
+
+
+**逐轨迹结果**
+
+每个指标单元格按“DP / 均匀”排列；段长范围仅列 DP，均匀分段在所有轨迹上均为 63-64。
+
+| 目标 | 源轨迹（N） | 相对方差 | 方向离散度 | 窗口加权方向离散度 | 绝对方差 | DP 段长范围 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 不加权 | 01 (1388) | 0.5903 / 0.7107 | 0.3542 / 0.4601 | 0.6474 / 0.4602 | 4.1509 / 10.4981 | 16-978 |
+| 不加权 | 05 (1393) | 0.4356 / 0.6548 | 0.2662 / 0.4111 | 0.5550 / 0.4110 | 3.3835 / 8.6703 | 16-475 |
+| 不加权 | 06 (1393) | 0.5227 / 0.6476 | 0.3114 / 0.4045 | 0.5421 / 0.4043 | 4.1988 / 9.5251 | 16-506 |
+| 不加权 | 09 (1394) | 0.4638 / 0.6917 | 0.2664 / 0.4434 | 0.5931 / 0.4434 | 3.3817 / 9.2995 | 16-942 |
+| J_window | 01 (1388) | 0.5832 / 0.7107 | 0.3596 / 0.4601 | 0.4982 / 0.4602 | 17.2182 / 10.4981 | 16-400 |
+| J_window | 05 (1393) | 0.5451 / 0.6548 | 0.3391 / 0.4111 | 0.4907 / 0.4110 | 11.7515 / 8.6703 | 16-419 |
+| J_window | 06 (1393) | 0.5518 / 0.6476 | 0.3388 / 0.4045 | 0.4604 / 0.4043 | 10.4985 / 9.5251 | 16-227 |
+| J_window | 09 (1394) | 0.6069 / 0.6917 | 0.3914 / 0.4434 | 0.5198 / 0.4434 | 10.8073 / 9.2995 | 16-232 |
+
+
+**分析与结论**
+
+不加权 DP 在四条轨迹上都降低了区间平均相对方差、方向离散度和绝对方差，但四条轨迹的按窗口加权方向离散度都高于均匀。J_window 在四条轨迹上都降低相对方差和区间平均方向离散度，却同时提高按窗口加权方向离散度和绝对方差。因此，没有一种方差目标在所有真实梯度指标上都优于均匀分段。
+
+两种 DP 的区间数都严格等于均匀基线的 22 段，收益并非来自更多区间。边界位置却发生明显变化：不加权 DP 的段长范围为 16-978，窗口加权 DP 为 16-419，而均匀段长为 63-64。窗口长度加权缩小了本次观测到的最长段，但仍未使真实梯度的窗口加权方向离散度低于均匀。
+
+一种可能解释是，J_window 优化的是 BF16 代理向量的按长度加权方差，不是完整梯度的窗口加权方向离散度。向量方差同时受梯度幅值和方向变化影响，而方向离散度只看方向；代理梯度也只是完整梯度的近似。因此，即使优化目标显式乘上区间长度，也不能保证目标外的真实方向指标同步下降。本实验支持较窄的结论：固定区间数时，代理方差 DP 能在这四条长轨迹上降低区间平均相对方差和方向离散度；窗口加权代理方差目标本身并不能保证降低窗口加权的真实方向误差。四条轨迹是按长度选出的子集，结果属于描述性对照，不宜外推为总体结论。
+
+**原始全量梯度缓存清理：2026-11-10 01:37 CST。**两组 DP 分段结果和指标校验完成后，按用户要求删除了剩余四条轨迹（01、05、06、09）的 BF16 全量梯度向量及对应缓存完成标记，释放约 87.0 GiB。全项目数据盘扫描未发现其他 BF16 全量梯度文件或全量梯度向量缓存。输出头代理梯度、由全梯度计算得到的 Gram 矩阵、汇总统计和实验结果仍保留；它们不是原始全量梯度向量。后续若需重放真实梯度指标，必须重新生成全量梯度缓存。
+
+批次标识为 `v0-proxy-dp-segmentation-longest4-unweighted` 和 `v0-proxy-dp-segmentation-longest4-window`。两组输出均包含 interval_metrics.csv、summary.json、逐轨迹检查点及 .complete 标记。完整定义、验证和限制见 `docs/results/v0-proxy-dp-segmentation.md`；批次状态见 `docs/exp/EXP.md`。
 
 ## 四、什么才代表重建困难？——尺度、方向与新增采样的边际收益
 方差选点没有稳定奏效后，需要进一步区分三个不同的量：区间的向量变化有多大、当前重建误差有多大、再加一个锚点能减少多少误差。下面的实验逐步拆解这三层关系。
@@ -394,7 +447,7 @@ $ D_h=1-\left\|\frac{1}{L_h}\sum_{t\in h}\frac{g_t}{\|g_t\|}\right\|^2 $
 
 
 ## 六、工程链路是否完整可复现？——`rage-smoke-static-cycle`
-**实验记录时间戳：首次启动 2026-11-07；最后更新 2026-11-07。**这项工程验证覆盖六个 Conda 环境的安装检查、数据准备、静态选择、训练和评估的最小完整链路，并验证一键安装脚本。端到端流程通过；完整回归为 **784 项通过、3 项跳过**，安装器验证也通过。它验证的是项目执行链路和安装流程，不属于梯度几何或采样效果的科学对照。批次记录见 `docs/EXP.md` 的 `rage-smoke-static-cycle`。
+**实验记录时间戳：首次启动 2026-11-07；最后更新 2026-11-07。**这项工程验证覆盖六个 Conda 环境的安装检查、数据准备、静态选择、训练和评估的最小完整链路，并验证一键安装脚本。端到端流程通过；完整回归为 **784 项通过、3 项跳过**，安装器验证也通过。它验证的是项目执行链路和安装流程，不属于梯度几何或采样效果的科学对照。批次记录见 `docs/exp/EXP.md` 的 `rage-smoke-static-cycle`。
 
 ## 附录：实验索引（按研究问题与首次出现阶段排序）
 下表保留原记录中的实验最新时间戳和一句话问题。`v0-gradient-proxy-test` 同时包含几何关系、区间风险和跨轨迹排序三个子问题，因此其不同结果分别归入第二、第三、第五组。
@@ -416,4 +469,104 @@ $ D_h=1-\left\|\frac{1}{L_h}\sum_{t\in h}\frac{g_t}{\|g_t\|}\right\|^2 $
 | 2026-11-08 | `v0-directional-marginal-gain` | 方向越难重建的区间，多加一个真实梯度锚点就越有用吗？ |
 | 2026-11-08 | `v0-uni-data-evaluation` | 不重建梯度、只看它与 reference 的相似分数时，相邻窗口的分数是否连续？ |
 | 2026-11-09 | `v0-active-value-rank` | 真正好的窗口在代理排序中落在哪里；相同预算下，简单查询和现有复杂方法谁选得更准？ |
+| 2026-11-10 01:37 CST | `v0-proxy-dp-segmentation` | 固定区间预算下，稀疏代理梯度上的精确 DP 能否比均匀分段带来更好的真实梯度区间指标？ |
 
+
+## 七、补充实验：mock 重建机制、虚拟分块与数据准备
+
+**整理日期：2026-11-11。**本节补齐此前索引未覆盖的实验与批次。结论依据 `docs/exp/EXP.md`、`docs/RESULTS.md`、`docs/logs/` 和对应结果报告；尚在运行或仅作估算的内容明确标记，未把计划写成结果。
+
+### 7.1 平滑 mock 上的 CRB、均匀重建与 CES 对照：`v0-crb-mech-test`
+
+该实验固定 64 条、4096 维、每条 4000 点的平滑 mock 轨迹，按不同锚点预算比较 CRB、Uniform、曲率自适应 CES 及多种重建器。主批次 `64-smooth-anchor-reconstruction` 的 512 条方法级记录显示，在 q={4,8,16,32} 下，Uniform 的平均 L2 与方向误差均低于 CRB。`64-smooth-uniform-reconstructors` 比较自然三次、平滑样条、PCHIP、低 lambda 样条等重建器；结果随预算变化，不能从测试误差挑选样条参数。`64-smooth-ces-pilot` 的 CES 误差接近 Uniform 且低于 CRB，q=32 时 L2 在 64/64 条轨迹低于 CRB。解析曲率的 `64-smooth-ces-oracle` 也没有超过 Uniform 或估计版 CES，说明已知曲率并未转化为明显重建优势。
+
+块内方差诊断 `64-smooth-block-internal-variance` 显示，q=32 时 CRB 的相对向量方差和方向方差在 64/64 条轨迹较低，但绝对模长方差不一致。`ultra-smooth-single-reconstruction` 只含一条极平缓轨迹，Uniform 的 L2 较低，仅作补充，不支持总体推断；`ultra-smooth-block-variance` 是对应块方差诊断。
+
+### 7.2 Cancellation 虚拟分块诊断：`v0-crb-mech-test`
+
+`64-smooth-cancellation-split-diagnostic`、`64-smooth-cancellation-six-methods-real-real` 和 `64-smooth-cancellation-six-methods-est-real` 使用同一批平滑 mock 与固定 Uniform 锚点，比较按 cancellation 阈值选区间、随机匹配切分数、全区间切分以及 midpoint/minimum-norm 位置。虚拟切分不增加真实梯度计算，也不改变逐点线性重建。第一阶段以块内真实点均值构造代表值，属于 real-real oracle 诊断，不能用于宣称估计能力。随后 est-real 复评改用原 Uniform+Linear 在块内的估计值均值作为代表，再用 mock 真值评估。tau=0.9 按覆盖点数加权时，cancellation 选区的误差优于匹配随机基线；等块权下部分预算方向相反，收益依赖汇总口径。midpoint 与 minimum-norm 没有稳定胜负。
+
+`64-smooth-virtual-split-selection-k-error` 在 q={4,8,16,32} 下对 K=0 至 q−1 的切分数做完整比较，含 Random-K、Cancellation-K、Endpoint-Difference-K、Predicted-Gain-K 及分别按 L2/方向收益排序的 Oracle。每轨迹每档有 100 次随机重复，配对 bootstrap 为 5000 次。K=1 时，平滑 mock 上 Cancellation 相对 Random 的点加权 L2 与方向误差差值在四个 q 的配对 95% 区间均低于零；区间排序分数对真实 L2 收益的 pooled Spearman，Cancellation/Endpoint/Predicted 分别为 0.817/0.972/0.985，对方向收益为 0.959/0.888/0.897。Oracle 依赖真实收益，只是上限诊断。
+
+`64-smooth-virtual-split-mse-decomposition` 将总误差分为 Representation 与 Estimation 两项，恒等残差最大为 8.99e-15。所有 q 的 K=1 都降低 Representation MSE、提高 Estimation MSE，但 Total 净下降。该平滑 mock 结论不应直接外推到不同变化结构的数据。
+
+### 7.3 高变化 mock 上的虚拟切分：`64-large-var-k-error-composition`
+
+新生成 64 条 4096 维、4000 点轨迹；相邻点完整向量差比实测均值为 0.50005，lag-16 方向余弦均值为 0.0000375，梯度模长变异系数为 0.3225。固定 Uniform 锚点和线性重建，比较 q={4,8,16,32,64,128} 的 K 全扫描，Random 每档 100 次，配对 bootstrap 5000 次，并分解 Representation/Estimation/Total MSE。
+
+全切分改善方向误差，但 L2 在 q≤64 时上升，q=128 仅略有下降。Cancellation 的 K=1 没有稳定胜过 Random；Endpoint-Difference 与 Predicted-Gain 也没有一致优势。q≤64 的每条轨迹 L2 最优点均为 K=0；q=128 的 L2 Oracle 平均曲线最优点为 K=81/127，64/64 条轨迹的内部最优点也落在该档。与平滑 mock 对照，切分收益随梯度变化结构而变，不能由一种 mock 概括。
+
+### 7.4 其他 CRB 重建与分散度实验
+
+`v0-crb-reconst-fine` 先在一条 M5 轨迹比较 CRB 与 Uniform，随后扩展到 12 条 FOODS_1 轨迹、q={2,4,8,26,32,64,128}。扩展结果中，等轨迹平均 L2 只有 q=2 时 CRB 较低；q=4 至 128 均由 Uniform 较低，q=26 为 12/12 条轨迹胜出。按用户指定的方向余弦标准，Uniform 在每个非平凡预算都较高。结论限于所选轨迹及固定初始化，不支持 CRB 一般优越。
+
+`v0-crb-cos-var` 在 12 条轨迹上比较 CRB 与 Uniform 区间内投影梯度的方向离散度。按等区间、等轨迹平均，CRB 在 q=2,8,16,32,64,128 较低，q=4 时 Uniform 较低；按区间内部窗口加权，q>1 时 Uniform 均较低。两种汇总均保留，因为 CRB 区间长度不同。
+
+此前正文已总结的 `v0-crb-var`、`v0-proxy-dp-segmentation`、`v0-gradient-proxy-test`、`v0-vage`、`v0-var-proxy-estimate`、`v0-grad-traj-level-norm-gap`、`v0-gradient-variance-decomposition`、`v0-directional-marginal-gain`、`v0-uni-data-evaluation`、`v0-active-value-rank` 与 `rage-smoke-static-cycle` 均保留原摘要；具体参数和逐批结果见实验索引及引用报告。
+
+### 7.5 v1 数据选择与训练历史
+
+`v1-computational-effort-estimate` 完成了 9 个计时批次和资源估算，正式训练实验未开始。`v1-rage-crb-vs-uniform-timerXL-84m` 的单任务及同卡并行计时已完成，但因 source 数据选择无效而废弃，只保留性能参考，不作为科学结果。
+
+`v1-rage-trev` 的 Chronos、TimerXL、TimesFM seed 0 随机池与完整池训练均完成 4000 步和八个 FEV/TIME 检查点；最终对比只采用 MASE。用户随后关闭研究范围于 seed 0，并判定全部早期 v1-rage 批次的 source 选择不合适，因此这些指标全部标为废弃，仅作历史参考。Chronos seed 1 随机池曾部分运行至 2445 步后停止，其余 seed 1–3 批次未训练；部分产物和准备文件已按记录清理。不得将这些历史数字引用为正式比较结论。
+
+### 7.6 数据源与梯度准备
+
+`src-8192` 是数据准备而非训练结果：当前版本包含 35 个合格配置的 8192 条轨迹、191,176,690 个标量值；此前版本已按记录移除，旧数据也按用户决定清理。更早的 `v0-grad-prepare-src-4096tr-q32-4096d` 因计算负担过大而失败终止，数据与梯度缓存已删除，只保留失败记录。
+
+`v0-grad-prepare-src-96tr-q16-4096d` 当前范围为 96 条轨迹、35 个配置、三种模型、仅 Uniform 的 q=16 BF16 LoRA 梯度准备。TimerXL 与 TimesFM 的 Uniform 各完成 96/96 条；Chronos 的 Uniform 仍在运行，尚无三模型整批完成标记。原 CRB 部分已按用户决定停止并删除，不能把旧 CRB+Uniform 完成状态沿用到新协议。
+
+`src-96、q=4 输出头梯度资源估算` 只是估算，未运行新梯度：每模型预计 666,575 个锚点，三模型投影缓存约 15.3–16.2 GiB；用时区间为低置信度估计，不是实测结果，也没有改变当前 Uniform 批次。
+
+## 八、覆盖范围索引
+
+以下各项均已在本文得到独立摘要或归入明确的研究问题。批次级明细和状态以 `docs/exp/EXP.md` 为准，正式指标以 `docs/RESULTS.md` 和其引用报告为准。
+
+| 实验或批次 | 本文位置与摘要状态 |
+|---|---|
+| `rage-smoke-static-cycle` | 第六节；工程链路通过，784 项通过、3 项跳过 |
+| `v0-grad-mech-test`、`v0-grad-mech-l2-norm`、`v0-crb-reconst-test`、`v0-crb-var` | 第一节；平滑性、均匀基线、部分终止重放及区间诊断 |
+| `v0-gradient-proxy-cost`、`v0-gradient-proxy-test` | 第二节；计算成本、Local-Risk、稀疏代理与 Cross-Rank |
+| `v0-gradient-proxy-local-risk-sparse`、`v0-gradient-proxy-local-risk-64`、`v0-gradient-proxy-local-risk-long` | 第三节 3.3；各长度与稀疏采样档位的方差排序 |
+| `v0-vage` | 第三节 3.4；Static、Quota、Residual、Fusion、Oracle 及两端均值补充 |
+| `v0-proxy-dp-segmentation` | 第三节 3.5；不加权及按窗口数加权的固定区间数 DP |
+| `v0-var-proxy-estimate`、`v0-grad-traj-level-norm-gap`、`v0-gradient-variance-decomposition`、`v0-directional-marginal-gain` | 第四节；误差指标、轨迹尺度、方差分解及新增锚点边际收益 |
+| `v0-uni-reconst-scale`、`v0-uni-data-evaluation` | 第一节与第五节；均匀重建尺度及 reference 分数局部变化 |
+| `v0-active-value-rank` | 第五节 5.3–5.5；候选排序、代理覆盖和相同预算查询 |
+| `v0-crb-mech-test` | 第七节 7.1–7.3；平滑 mock、CES、重建器、Cancellation、K 扫描及误差分解各批次 |
+| `64-large-var-k-error-composition` | 第七节 7.3；高变化 mock 全 K 扫描及误差分解 |
+| `v0-crb-reconst-fine`、`v0-crb-cos-var` | 第七节 7.4；12 轨迹重建与方向分散度对照 |
+| `v1-computational-effort-estimate`、`v1-rage-crb-vs-uniform-timerXL-84m` | 第七节 7.5；计时估算与已废弃性能试验 |
+| `v1-rage-trev` 及 Chronos、TimerXL、TimesFM 的 seed 0/seed 1–3 批次 | 第七节 7.5；历史训练、停止及废弃范围 |
+| `src-8192`、`v0-grad-prepare-src-4096tr-q32-4096d`、`v0-grad-prepare-src-96tr-q16-4096d` | 第七节 7.6；数据版本、失败批次及当前仅 Uniform 进度 |
+| `src-96、q=4 输出头梯度资源估算` | 第七节 7.6；未运行的低置信度资源估算 |
+
+最后修改日期：2026-11-11
+
+### v1 seed 0 批次名称与代表性数值补充
+
+已完成的六个历史训练批次分别为 `v1-rage-chronosT5-trev-base-rand`、`v1-rage-chronosT5-trev-base-full`、`v1-rage-timerXL-trev-84m-rand`、`v1-rage-timerXL-trev-84m-full`、`v1-rage-timesFM-trev-2.5-rand`、`v1-rage-timesFM-trev-2.5-full`，均为 seed 0 的随机池/完整池 LoRA 训练，各完成 4000 步和八个评估检查点。TimerXL 在第 4000 步、FEV 的医院收治、M_DENSE、美国能源消费、全球二氧化碳排放四项 MASE，随机池/完整池依次为 0.6672/0.6675、2.0354/2.0330、13.4942/12.5499、5.7754/5.2563。TimesFM 对应为 0.6547/0.6646、1.3943/1.4042、8.8224/8.8852、3.9751/3.9794。Chronos 的 seed 0 两批也已完成，但全组 v1-rage 结果因数据源选择被判定不合适而废弃；最终报告 `v1-rage-trev-seed0-final` 只留作历史记录。所有 seed 1、2、3 的随机池与完整池批次均已在 `docs/exp/EXP.md` 逐项标为废弃：Chronos seed 1 随机池曾部分运行后停止，其余相应批次未训练，不产生正式比较结果。
+
+最后修改日期：2026-11-11
+
+
+## 九、v0 实验全量状态与归档索引（2026-11-12）
+
+以下索引覆盖 docs/exp/EXP.md 中登记的 v0 专题；完成结论以链接报告为准，终止、单轨和 oracle 结果均保留其证据边界。当前没有 v0 计算进程。全部非缓存 v0/v00 生成输出与日志已归档；梯度缓存（包括已停止批次的部分缓存）继续保存在原路径。
+
+| 实验专题 | 当前状态与结果入口 |
+|---|---|
+| 梯度机制与 L2 平滑性 | 完成；[完整梯度机制与 L2](docs/results/v0-grad-mech-l2-norm.md)、[轨迹尺度差异](docs/results/v0-grad-traj-level-norm-gap.md) |
+| 代理梯度成本、Local-Risk 与 Cross-Rank | 完成；[代理成本](docs/results/v0-gradient-proxy-cost.md)、[代理评估](docs/results/v0-gradient-proxy-test.md) |
+| 代理方差、VAGE 与方向边际收益 | 完成；[方差估计](docs/results/v0-var-proxy-estimate.md)、[方差分解](docs/results/v0-gradient-variance-decomposition.md)、[VAGE](docs/results/v0-vage.md)、[方向边际收益](docs/results/v0-directional-marginal-gain.md)、[代理 DP](docs/results/v0-proxy-dp-segmentation.md) |
+| 均匀锚点与 reference-source 评分/排序 | 完成；[均匀重建尺度](docs/results/v0-uni-reconst-scale.md)、[均匀数据评分](docs/results/v0-uni-data-evaluation.md)、[活动价值排序](docs/results/v0-active-value-rank.md)、[排序诊断](docs/results/v0-active-value-rank-diagnostics.md) |
+| CRB 机制、方差与重建 | 含完成和终止批次；[CRB 方差](docs/results/v0-crb-var.md)、[早期重建（部分后终止）](docs/results/v0-crb-reconst-test.md)、[精细重建](docs/results/v0-crb-reconst-fine.md)、[方向离散](docs/results/v0-crb-cos-var.md)、[mock/CES/切分](docs/results/v0-crb-mech-test.md) |
+| TimerXL 四轨时间变化、曲率和输出头 | 完成；[四轨变化](docs/results/v0-timer-XL-grad-4-change-velocity.md)、[曲率](docs/results/v0-timer-XL-grad-4-curvature.md)、[随机短块](docs/results/v0-timer-XL-grad-4-two-random-16-blocks.md)、[输出头几何](docs/results/v0-timerXL-grad-4-lm-head.md)、[输出头变化曲线](docs/results/v0-timerXL-grad-4-lm-head-change-velocity.md) |
+| TimerXL 64 轨梯度、PCA、输出头代理与 CRB 比较 | 完成；[64 轨时间变化](docs/results/v0-timer-XL-grad-64-change-velocity.md)、[PCA](docs/results/v0-timerxl-grad64-pca.md)、[CRB 最终比较](docs/results/v0-crb-final-test-timerXL-64tr.md) |
+| ChronosTiny ordinal 0 对照 TimerXL | 单轨完成；非临近窗口对 Spearman=0.0758；单轨不足以作总体推断，见 [专题结果](docs/results/v0-chronostiny-timerxl-20261112.md) |
+| ChronosTiny 前 64 轨全窗口扩展 | 用户调整后停止；保留部分缓存，无全轨分析结果，见 [实验登记](docs/exp/EXP.md) |
+| src-96 三模型 q=16 梯度准备及旧 src-4096 失败批次 | TimerXL、TimesFM 完成；Chronos 未完成且当前无运行进程；失败批次按历史记录保留，详见 [EXP.md](docs/exp/EXP.md) 和 [RESULTS.md](docs/RESULTS.md) |
+
+专题结果和归档副本索引：[v0 总览](docs/results/v0-consolidated-summary-20261112.md)、[远程归档说明](archive/v0-consolidated-20261112/README.md)。
+
+最后修改日期：2026-11-12

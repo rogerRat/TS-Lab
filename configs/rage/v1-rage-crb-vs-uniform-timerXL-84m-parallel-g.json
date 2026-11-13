@@ -1,0 +1,32 @@
+{
+  "adapter_seed": 0,
+  "batch_sizes": [
+    32
+  ],
+  "compile_mode": "default",
+  "context_length": 512,
+  "experiment_version": "v1-rage-crb-vs-uniform-timerXL-84m",
+  "lora": {
+    "alpha": 16,
+    "dropout": 0.0,
+    "r": 8,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ]
+  },
+  "model_key": "timerxl-84m",
+  "output_dir": "outputs/train/v1-rage-crb-vs-uniform-timerXL-84m/pilot/hospital_admissions_1D/parallel-eight/g",
+  "phase": "gradient-optimization-pilot",
+  "prediction_length": 64,
+  "projection_dimension": 4096,
+  "projection_seed": 42,
+  "sample_source_windows": 4096,
+  "sampling_seed": 0,
+  "source_pool_config": "configs/rage/v1-rage-timerXL-trev-84m-full.json",
+  "task": "hospital_admissions_1D",
+  "try_compile": false,
+  "vjp_batches": [
+    32
+  ]
+}

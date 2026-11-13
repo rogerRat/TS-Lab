@@ -1,0 +1,55 @@
+{
+  "experiment": "v0-crb-cos-var",
+  "source_dataset": "autogluon/chronos_datasets:m5",
+  "source_manifest": "outputs/train/v0-grad-mech-test/input_manifest.json",
+  "source_bundle": "data/src/shard_dataset/v0-grad-mech-test/m5/load/load",
+  "checkpoint": "outputs/train/v0-grad-mech-test/chronos-tiny-warmup-100",
+  "trajectory_ordinals": [
+    771,
+    835,
+    633,
+    220,
+    763,
+    706,
+    817,
+    619,
+    530,
+    522,
+    140,
+    64
+  ],
+  "model_seed": 0,
+  "projection_dimension": 4096,
+  "projection_seed": 42,
+  "projection": "ParameterHashProjector random sign CountSketch over concatenated trainable LoRA gradients",
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0,
+    "target_modules": [
+      "q",
+      "v"
+    ]
+  },
+  "context_length": 512,
+  "prediction_length": 64,
+  "stride": 1,
+  "block_spacings": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    64,
+    128
+  ],
+  "budget_rule": "K=max(2,ceil(N/q)) anchors per trajectory including endpoints; both policies use exactly K",
+  "block_rule": "Each block is the strict interior between consecutive true-gradient anchors; endpoint anchors are excluded",
+  "representative_rule": "Arithmetic mean of the two known endpoint projected gradients",
+  "comparison": "Uniform versus equal-budget CRB; divide K-2 discretionary anchors equally among coverage, error-risk, recursive minimum-kappa stages",
+  "dispersion": "Mean 1-cosine between each true interior projected gradient and the direction of the endpoint-mean representative",
+  "aggregation": "Equal-block and interior-window-weighted means per trajectory and method",
+  "parallel_tracks": 2,
+  "output": "outputs/train/v0-crb-cos-var"
+}

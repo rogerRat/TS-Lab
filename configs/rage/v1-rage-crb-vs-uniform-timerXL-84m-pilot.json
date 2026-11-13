@@ -1,0 +1,25 @@
+{
+  "experiment_version": "v1-rage-crb-vs-uniform-timerXL-84m",
+  "phase": "feasibility-pilot",
+  "task": "hospital_admissions_1D",
+  "fev_task_index": 9,
+  "source_pool_config": "configs/rage/v1-rage-timerXL-trev-84m-full.json",
+  "model_key": "timerxl-84m",
+  "context_length": 512,
+  "prediction_length": 64,
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.0,
+    "target_modules": ["q_proj", "v_proj"]
+  },
+  "adapter_seed": 0,
+  "projection_dimension": 4096,
+  "projection_seed": 42,
+  "sample_reference_windows": 32,
+  "sample_source_windows": 32,
+  "gradient_batch_size": 8,
+  "score_source_tile": 512,
+  "score_repetitions": 20,
+  "sampling_seed": 0
+}

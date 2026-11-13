@@ -1,0 +1,27 @@
+{
+  "experiment": "v0-crb-mech-test-ces",
+  "trajectory_count": 64,
+  "trajectory_length": 4000,
+  "dimension": 4096,
+  "seed": 20261111,
+  "roughness_min": 0.05,
+  "roughness_max": 2.0,
+  "frequency_min": 0.25,
+  "frequency_max": 18.0,
+  "normalize_track": false,
+  "budgets": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "pilot_fraction": 0.5,
+  "pilot_minimum": 3,
+  "curvature_power": 0.4,
+  "curvature_epsilon": 1e-12,
+  "adaptive_allocation": "largest remainder proportional to interval_length * (curvature^2 + epsilon^2)^(1/5)",
+  "within_interval_placement": "evenly spaced",
+  "reconstruction": "piecewise linear interpolation over all 4096 dimensions",
+  "output": "outputs/train/v0-crb-mech-test/64-smooth-ces-pilot",
+  "batch": "64-smooth-ces-pilot"
+}

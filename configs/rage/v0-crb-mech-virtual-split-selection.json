@@ -1,0 +1,28 @@
+{
+  "experiment": "v0-crb-mech-test",
+  "batch": "64-smooth-virtual-split-selection-k-error",
+  "trajectory_count": 64,
+  "trajectory_length": 4000,
+  "dimension": 4096,
+  "seed": 20261111,
+  "roughness_min": 0.05,
+  "roughness_max": 2.0,
+  "frequency_min": 0.25,
+  "frequency_max": 18.0,
+  "normalize_track": false,
+  "budgets": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "split": "midpoint",
+  "random_repeats": 100,
+  "random_seed_offset": 271828,
+  "bootstrap_replicates": 5000,
+  "bootstrap_seed_offset": 314159,
+  "ci_level": 0.95,
+  "oracle_gain_near_zero_tolerance": 1e-08,
+  "baseline_metrics": "outputs/train/v0-crb-mech-test/trajectory_metrics.csv",
+  "output": "outputs/train/v0-crb-mech-test/64-smooth-virtual-split-selection-k-error"
+}

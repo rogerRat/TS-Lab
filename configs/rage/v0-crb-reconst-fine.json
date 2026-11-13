@@ -1,0 +1,60 @@
+{
+  "experiment": "v0-crb-reconst-fine",
+  "source_dataset": "autogluon/chronos_datasets:m5",
+  "source_manifest": "outputs/train/v0-grad-mech-test/input_manifest.json",
+  "source_bundle": "data/src/shard_dataset/v0-grad-mech-test/m5/load/load",
+  "checkpoint": "outputs/train/v0-grad-mech-test/chronos-tiny-warmup-100",
+  "selection_seed": 20261110,
+  "model_seed": 0,
+  "context_length": 512,
+  "prediction_length": 64,
+  "stride": 1,
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.0,
+    "target_modules": [
+      "q",
+      "v"
+    ]
+  },
+  "gradient_dtype": "float32",
+  "budget_denominators": [
+    1,
+    2,
+    4,
+    8,
+    26,
+    32,
+    64,
+    128
+  ],
+  "budget_rule": "K=max(2,ceil(N/q)); mandatory endpoint calls count toward K",
+  "crb_stage_rule": "Split K-2 discretionary calls as evenly as possible among coverage, error-risk, and recursive minimum-kappa; remainder assigned in that order",
+  "uniform_rule": "K rounded evenly spaced anchors including both endpoints",
+  "reconstruction": "linear interpolation of endpoint gradient vectors",
+  "primary_metric": "mean per-window L2 reconstruction error",
+  "secondary_metrics": [
+    "median L2",
+    "p95 L2",
+    "mean cosine"
+  ],
+  "output": "outputs/train/v0-crb-reconst-fine",
+  "trajectory_ordinals": [
+    771,
+    835,
+    633,
+    220,
+    763,
+    706,
+    817,
+    619,
+    530,
+    522,
+    140,
+    64
+  ],
+  "trajectory_count": 12,
+  "selection_rule": "Original seed-selected ordinal 771 plus 11 distinct draws without replacement from remaining 999 eligible manifest rows using seed 20261110",
+  "cache_retention": "Release each dense gradient cache only after the per-track result and anchor-count validation; keep metrics, metadata, and selection"
+}

@@ -1,0 +1,27 @@
+{
+  "experiment": "v0-crb-mech-test",
+  "batch": "64-large-var-k-error-composition",
+  "trajectory_count": 64,
+  "trajectory_length": 4000,
+  "dimension": 4096,
+  "seed": 20261112,
+  "variation_block_size": 8,
+  "budgets": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128
+  ],
+  "random_repeats": 100,
+  "random_seed_offset": 271828,
+  "bootstrap_replicates": 5000,
+  "bootstrap_seed_offset": 314159,
+  "ci_level": 0.95,
+  "oracle_gain_near_zero_tolerance": 1e-08,
+  "trajectory_data_path": "data/v0-crb-mech-test/64-large-var/gradient_tracks.npy",
+  "trajectory_characteristics": "outputs/train/v0-crb-mech-test/64-large-var-k-error-composition/mock-generation/trajectory_characteristics.csv",
+  "generation_output": "outputs/train/v0-crb-mech-test/64-large-var-k-error-composition/mock-generation",
+  "output": "outputs/train/v0-crb-mech-test/64-large-var-k-error-composition"
+}

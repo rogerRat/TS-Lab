@@ -1,0 +1,39 @@
+{
+  "experiment": "v0-crb-mech-uniform-reconstructors",
+  "trajectory_count": 64,
+  "trajectory_length": 4000,
+  "dimension": 4096,
+  "seed": 20261111,
+  "roughness_min": 0.05,
+  "roughness_max": 2.0,
+  "frequency_min": 0.25,
+  "frequency_max": 18.0,
+  "normalize_track": false,
+  "budgets": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "uniform_anchor_source": "outputs/train/v0-crb-mech-test/trajectory_metrics.csv",
+  "reconstructors": [
+    "linear",
+    "natural_cubic",
+    "pchip",
+    "chebyshev_degree_q_minus_1",
+    "rbf_gp"
+  ],
+  "gp_lengthscale_interval_factors": [
+    1.0,
+    2.0
+  ],
+  "gp_alpha": 1e-06,
+  "smoothing_lambdas": [
+    1e-08,
+    1e-06,
+    0.0001
+  ],
+  "smoothing_spline_minimum_anchors": 5,
+  "output": "outputs/train/v0-crb-mech-test/64-smooth-uniform-reconstructors",
+  "batch": "64-smooth-uniform-reconstructors"
+}

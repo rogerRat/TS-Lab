@@ -14,60 +14,60 @@
 
 | 实验代号 | 记录文件 | 批次数 |
 |---|---|---:|
-| `v0-crb-mech-test` | [v0-crb-mech-test.md](exp/v0-crb-mech-test/exp.md) | 15 |
-| `v0-crb-reconst-test` | [v0-crb-reconst-test.md](exp/v0-crb-reconst-test/exp.md) | 14 |
-| `v0-uni-reconst-scale` | [v0-uni-reconst-scale.md](exp/v0-uni-reconst-scale/exp.md) | 9 |
-| `v0-directional-marginal-gain` | [v0-directional-marginal-gain.md](exp/v0-directional-marginal-gain/exp.md) | 6 |
-| `v0-gradient-proxy-test` | [v0-gradient-proxy-test.md](exp/v0-gradient-proxy-test/exp.md) | 6 |
-| `v0-grad-mech-test` | [v0-grad-mech-test.md](exp/v0-grad-mech-test/exp.md) | 5 |
-| `v0-gradient-variance-decomposition` | [v0-gradient-variance-decomposition.md](exp/v0-gradient-variance-decomposition/exp.md) | 5 |
-| `v0-var-proxy-estimate` | [v0-var-proxy-estimate.md](exp/v0-var-proxy-estimate/exp.md) | 5 |
-| `rage-smoke-static-cycle` | [rage-smoke-static-cycle.md](exp/rage-smoke-static-cycle/exp.md) | 4 |
-| `v0-active-value-rank` | [v0-active-value-rank.md](exp/v0-active-value-rank/exp.md) | 4 |
-| `v0-timer-XL-grad-64-change-velocity` | [v0-timer-XL-grad-64-change-velocity.md](exp/v0-timer-XL-grad-64-change-velocity/exp.md) | 4 |
-| `v0-uni-data-evaluation` | [v0-uni-data-evaluation.md](exp/v0-uni-data-evaluation/exp.md) | 4 |
-| `v0-vage` | [v0-vage.md](exp/v0-vage/exp.md) | 4 |
-| `v0-crb-final-test-timerXL-64tr` | [v0-crb-final-test-timerXL-64tr.md](exp/v0-crb-final-test-timerXL-64tr/exp.md) | 3 |
-| `v0-grad-mech-l2-norm` | [v0-grad-mech-l2-norm.md](exp/v0-grad-mech-l2-norm/exp.md) | 3 |
-| `v0-grad-traj-level-norm-gap` | [v0-grad-traj-level-norm-gap.md](exp/v0-grad-traj-level-norm-gap/exp.md) | 3 |
-| `v0-timer-XL-grad-4-change-velocity` | [v0-timer-XL-grad-4-change-velocity.md](exp/v0-timer-XL-grad-4-change-velocity/exp.md) | 3 |
+| `v0-crb-mech-test` | [v0-crb-mech-test.md](exp/archive/v0-crb-mech-test/exp.md) | 15 |
+| `v0-crb-reconst-test` | [v0-crb-reconst-test.md](exp/archive/v0-crb-reconst-test/exp.md) | 14 |
+| `v0-uni-reconst-scale` | [v0-uni-reconst-scale.md](exp/archive/v0-uni-reconst-scale/exp.md) | 9 |
+| `v0-directional-marginal-gain` | [v0-directional-marginal-gain.md](exp/archive/v0-directional-marginal-gain/exp.md) | 6 |
+| `v0-gradient-proxy-test` | [v0-gradient-proxy-test.md](exp/archive/v0-gradient-proxy-test/exp.md) | 6 |
+| `v0-grad-mech-test` | [v0-grad-mech-test.md](exp/archive/v0-grad-mech-test/exp.md) | 5 |
+| `v0-gradient-variance-decomposition` | [v0-gradient-variance-decomposition.md](exp/archive/v0-gradient-variance-decomposition/exp.md) | 5 |
+| `v0-var-proxy-estimate` | [v0-var-proxy-estimate.md](exp/archive/v0-var-proxy-estimate/exp.md) | 5 |
+| `rage-smoke-static-cycle` | [rage-smoke-static-cycle.md](exp/archive/rage-smoke-static-cycle/exp.md) | 4 |
+| `v0-active-value-rank` | [v0-active-value-rank.md](exp/archive/v0-active-value-rank/exp.md) | 4 |
+| `v0-timer-XL-grad-64-change-velocity` | [v0-timer-XL-grad-64-change-velocity.md](exp/archive/v0-timer-XL-grad-64-change-velocity/exp.md) | 4 |
+| `v0-uni-data-evaluation` | [v0-uni-data-evaluation.md](exp/archive/v0-uni-data-evaluation/exp.md) | 4 |
+| `v0-vage` | [v0-vage.md](exp/archive/v0-vage/exp.md) | 4 |
+| `v0-crb-final-test-timerXL-64tr` | [v0-crb-final-test-timerXL-64tr.md](exp/archive/v0-crb-final-test-timerXL-64tr/exp.md) | 3 |
+| `v0-grad-mech-l2-norm` | [v0-grad-mech-l2-norm.md](exp/archive/v0-grad-mech-l2-norm/exp.md) | 3 |
+| `v0-grad-traj-level-norm-gap` | [v0-grad-traj-level-norm-gap.md](exp/archive/v0-grad-traj-level-norm-gap/exp.md) | 3 |
+| `v0-timer-XL-grad-4-change-velocity` | [v0-timer-XL-grad-4-change-velocity.md](exp/archive/v0-timer-XL-grad-4-change-velocity/exp.md) | 3 |
 | `v1-crb-redo` | [v1-crb-redo.md](exp/v1-crb-redo/exp.md) | 14 |
-| `v0-proxy-dp-segmentation` | [v0-proxy-dp-segmentation.md](exp/v0-proxy-dp-segmentation/exp.md) | 2 |
-| `v0-timerXL-grad-4-lm-head` | [v0-timerXL-grad-4-lm-head.md](exp/v0-timerXL-grad-4-lm-head/exp.md) | 2 |
-| `v0-chronostiny-timerxl-lora-full-64` | [v0-chronostiny-timerxl-lora-full-64.md](exp/v0-chronostiny-timerxl-lora-full-64/exp.md) | 1 |
-| `v0-chronostiny-timerxl-lora-track0` | [v0-chronostiny-timerxl-lora-track0.md](exp/v0-chronostiny-timerxl-lora-track0/exp.md) | 1 |
-| `v0-crb-var` | [v0-crb-var.md](exp/v0-crb-var/exp.md) | 1 |
-| `v0-grad-prepare-src-4096tr-q32-4096d` | [v0-grad-prepare-src-96tr-q16-4096d.md](exp/v0-grad-prepare-src-96tr-q16-4096d/exp.md) | 1 |
-| `v0-grad-prepare-src-96tr-q16-4096d` | [v0-grad-prepare-src-96tr-q16-4096d.md](exp/v0-grad-prepare-src-96tr-q16-4096d/exp.md) | 1 |
-| `v0-gradient-proxy-cost` | [v0-gradient-proxy-cost.md](exp/v0-gradient-proxy-cost/exp.md) | 1 |
-| `v0-timer-XL-grad-4-curvature` | [v0-timer-XL-grad-4-curvature.md](exp/v0-timer-XL-grad-4-curvature/exp.md) | 1 |
-| `v0-timerxl-src96-first4-full-grad-4096d-bf16` | [v0-timerxl-src96-first4-full-grad-4096d-bf16.md](exp/v0-timerxl-src96-first4-full-grad-4096d-bf16/exp.md) | 1 |
-| `v1-computational-effort-estimate` | [v1-computational-effort-estimate.md](exp/v1-computational-effort-estimate/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-full` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-full-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-full-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-full-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-rand` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-rand-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-rand-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-chronosT5-trev-base-rand-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-crb-vs-uniform-timerXL-84m` | [v1-rage-crb-vs-uniform-timerXL-84m.md](exp/v1-rage-crb-vs-uniform-timerXL-84m/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-full` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-full-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-full-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-full-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-rand` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-rand-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-rand-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timerXL-trev-84m-rand-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-full` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-full-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-full-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-full-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-rand` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-rand-seed1` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-rand-seed2` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
-| `v1-rage-timesFM-trev-2.5-rand-seed3` | [v1-rage-trev.md](exp/v1-rage-trev/exp.md) | 1 |
+| `v0-proxy-dp-segmentation` | [v0-proxy-dp-segmentation.md](exp/archive/v0-proxy-dp-segmentation/exp.md) | 2 |
+| `v0-timerXL-grad-4-lm-head` | [v0-timerXL-grad-4-lm-head.md](exp/archive/v0-timerXL-grad-4-lm-head/exp.md) | 2 |
+| `v0-chronostiny-timerxl-lora-full-64` | [v0-chronostiny-timerxl-lora-full-64.md](exp/archive/v0-chronostiny-timerxl-lora-full-64/exp.md) | 1 |
+| `v0-chronostiny-timerxl-lora-track0` | [v0-chronostiny-timerxl-lora-track0.md](exp/archive/v0-chronostiny-timerxl-lora-track0/exp.md) | 1 |
+| `v0-crb-var` | [v0-crb-var.md](exp/archive/v0-crb-var/exp.md) | 1 |
+| `v0-grad-prepare-src-4096tr-q32-4096d` | [v0-grad-prepare-src-96tr-q16-4096d.md](exp/archive/v0-grad-prepare-src-96tr-q16-4096d/exp.md) | 1 |
+| `v0-grad-prepare-src-96tr-q16-4096d` | [v0-grad-prepare-src-96tr-q16-4096d.md](exp/archive/v0-grad-prepare-src-96tr-q16-4096d/exp.md) | 1 |
+| `v0-gradient-proxy-cost` | [v0-gradient-proxy-cost.md](exp/archive/v0-gradient-proxy-cost/exp.md) | 1 |
+| `v0-timer-XL-grad-4-curvature` | [v0-timer-XL-grad-4-curvature.md](exp/archive/v0-timer-XL-grad-4-curvature/exp.md) | 1 |
+| `v0-timerxl-src96-first4-full-grad-4096d-bf16` | [v0-timerxl-src96-first4-full-grad-4096d-bf16.md](exp/archive/v0-timerxl-src96-first4-full-grad-4096d-bf16/exp.md) | 1 |
+| `v1-computational-effort-estimate` | [v1-computational-effort-estimate.md](exp/archive/v1-computational-effort-estimate/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-full` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-full-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-full-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-full-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-rand` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-rand-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-rand-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-chronosT5-trev-base-rand-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-crb-vs-uniform-timerXL-84m` | [v1-rage-crb-vs-uniform-timerXL-84m.md](exp/archive/v1-rage-crb-vs-uniform-timerXL-84m/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-full` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-full-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-full-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-full-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-rand` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-rand-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-rand-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timerXL-trev-84m-rand-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-full` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-full-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-full-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-full-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-rand` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-rand-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-rand-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
+| `v1-rage-timesFM-trev-2.5-rand-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
 | `v2-foundation-expansion` | [v2-foundation-expansion.md](exp/v2-foundation-expansion/exp.md) | 1 |
 
 ## 批次总表
@@ -99,7 +99,7 @@
 | v0-crb-final-test-timerXL-64tr | CRB-1:1:0 | 同预算coverage:error CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；Uniform在全部q的窗口加权误差更低 |
 | v0-crb-final-test-timerXL-64tr | CRB-1:0:0 | 同预算coverage-only CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；CRB仅q=64的窗口加权误差更低 |
 | v0-timer-XL-grad-64-change-velocity | 自动分析 | 轨迹内与轨迹间速度差异、头梯度代理、两段均匀16窗口代理 | 完成 | 轨迹内/间差异、头代理与两段16窗口估计均完成；详见独立报告 |
-| v0-timer-XL-grad-64-change-velocity | per-track-pca | 64轨真实4096维LoRA投影的逐轨PC1解释率与方向差异 | 完成 | PC1解释率中位数12.1%；PC1两两夹角中位数87.3°；rank80均值174、中位数137；v/L均值4.07%、中位数1.63%，L为每轨完整合法起点缓存行数；稳定性和限制见docs/exp/v0-timer-XL-grad-64-change-velocity/v0-timerxl-grad64-pca.md |
+| v0-timer-XL-grad-64-change-velocity | per-track-pca | 64轨真实4096维LoRA投影的逐轨PC1解释率与方向差异 | 完成 | PC1解释率中位数12.1%；PC1两两夹角中位数87.3°；rank80均值174、中位数137；v/L均值4.07%、中位数1.63%，L为每轨完整合法起点缓存行数；稳定性和限制见docs/exp/archive/v0-timer-XL-grad-64-change-velocity/v0-timerxl-grad64-pca.md |
 | v0-timer-XL-grad-64-change-velocity | two-head-16-blocks | 每轨两段均匀16窗口的lm-head梯度代理，评估LoRA数值与排序恢复 | 完成 | 排序rho 0.868/0.829/0.294，前16重合11/11/5 |
 | v0-timerXL-grad-4-lm-head | 四轨同窗口输出头梯度及代表性 | 每轨均匀取128个窗口，比较非临近窗口对的输出头与LoRA方向相似性 | 完成 | 三条可评估轨迹 Spearman 0.249–0.303；详见独立报告 |
 | v0-timerXL-grad-4-lm-head | change-velocity-comparison | 在匹配连续窗口段上比较输出头与LoRA三项滞后曲线 | 完成 | 4761个头梯度窗口；模长变化系统性低估，见独立报告 |
@@ -124,7 +124,7 @@
 | v0-crb-mech-test | 64-large-var-k-error-composition | 新建 64 条 4096D×4000 mock；相邻点完整向量差比 0.50005，lag-16 余弦均值 0.0000375；q={4,8,16,32,64,128} | 完成 | 12 张 K-error 图、18 张 MSE 分解图；MSE 恒等式残差 7.55e-15；详见批次报告 |
 | v0-grad-prepare-src-96tr-q16-4096d | src-96；三模型；仅 Uniform | 96 条轨迹、35 配置，q=16、4096 维 BF16 LoRA 梯度 | TimerXL、TimesFM 的 Uniform 已完成；Chronos 未完成，当前无运行进程，部分缓存保留 | 每模型 Uniform 预算 166,659 锚点；CRB 产物已删除 |
 | v0-grad-prepare-src-4096tr-q32-4096d | 旧批次 | src-4096、q=32 的梯度准备 | 失败并终止：计算负担过大 | 结果及梯度缓存已删除；仅保留本失败记录 |
-| v1-computational-effort-estimate | 9 个计时批次；目标清单及正式实验 | 三种模型的计算与存储估算 | 计时完成；正式实验未开始 | 旧候选池估算见[独立报告](exp/v1-computational-effort-estimate/results.md) |
+| v1-computational-effort-estimate | 9 个计时批次；目标清单及正式实验 | 三种模型的计算与存储估算 | 计时完成；正式实验未开始 | 旧候选池估算见[独立报告](exp/archive/v1-computational-effort-estimate/results.md) |
 | v1-rage-crb-vs-uniform-timerXL-84m | single-task optimization timing | optimize TimerXL LoRA gradient computation and measure one task | Deprecated | single worker 575-597 points/s; 8-worker same-GPU pilot 1,159 points/s aggregate (~2.0x); source gradients tentatively ~2.70 days with 8 workers; source selection invalid; retained for reference only |
 | v0-crb-var | 1-ten-trajectory-replay | 按原定批次执行 v0-crb-var 的实验 | 完成 | 10/10、0.6410、0.6802、0.4051、0.4402；详情见历史原文与结果文档 |
 | v0-proxy-dp-segmentation | longest4-unweighted | 按原定批次执行 v0-proxy-dp-segmentation 的实验 | 完成 | 4/4、0.5031、0.6762、0.2995、0.4298；详情见历史原文与结果文档 |

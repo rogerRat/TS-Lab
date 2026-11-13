@@ -1,0 +1,37 @@
+{
+  "experiment": "v0-crb-mech-test",
+  "trajectory_count": 64,
+  "trajectory_length": 4000,
+  "dimension": 4096,
+  "seed": 20261111,
+  "roughness_min": 0.05,
+  "roughness_max": 2.0,
+  "frequency_min": 0.25,
+  "frequency_max": 18.0,
+  "normalize_track": false,
+  "budgets": [
+    4,
+    8,
+    16,
+    32
+  ],
+  "thresholds": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "split_rules": [
+    "midpoint",
+    "minimum_norm"
+  ],
+  "minimum_child_fraction": 0.1,
+  "reference_budget": 32,
+  "reference_aggregation": "linearSum",
+  "reference_protocol": "two-fold cross-fit; opposite-half Uniform q=32 blocks; block width normalized to unit interval; source scores averaged by covered anchor span (L-1)",
+  "output": "outputs/train/v0-crb-mech-test/64-smooth-cancellation-split-diagnostic",
+  "batch": "64-smooth-cancellation-split-diagnostic"
+}
