@@ -9,48 +9,48 @@
 
 | 实验代号 | 报告 |
 |---|---|
-| `64-large-var-k-error-composition` | [results/64-large-var-k-error-composition.md](results/64-large-var-k-error-composition.md) |
-| `64-large-var-k-error-composition-full-tables` | [results/64-large-var-k-error-composition-full-tables.md](results/64-large-var-k-error-composition-full-tables.md) |
-| `src-8192-source-coverage` | [results/src-8192-source-coverage.md](results/src-8192-source-coverage.md) |
-| `src-96-q4-output-head-estimate` | [results/src-96-q4-output-head-estimate.md](results/src-96-q4-output-head-estimate.md) |
-| `v0-active-value-rank` | [results/v0-active-value-rank.md](results/v0-active-value-rank.md) |
-| `v0-active-value-rank-diagnostics` | [results/v0-active-value-rank-diagnostics.md](results/v0-active-value-rank-diagnostics.md) |
-| `v0-chronostiny-timerxl-20261112` | [results/v0-chronostiny-timerxl-20261112.md](results/v0-chronostiny-timerxl-20261112.md) |
-| `v0-consolidated-summary-20261112` | [results/v0-consolidated-summary-20261112.md](results/v0-consolidated-summary-20261112.md) |
-| `v0-crb-cos-var` | [results/v0-crb-cos-var.md](results/v0-crb-cos-var.md) |
-| `v0-crb-final-test-timerXL-64tr` | [results/v0-crb-final-test-timerXL-64tr.md](results/v0-crb-final-test-timerXL-64tr.md) |
-| `v0-crb-final-test-timerXL-64tr-spacing-q-dir` | [results/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md](results/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md) |
-| `v0-crb-mech-test` | [results/v0-crb-mech-test.md](results/v0-crb-mech-test.md) |
-| `v0-crb-reconst-fine` | [results/v0-crb-reconst-fine.md](results/v0-crb-reconst-fine.md) |
-| `v0-crb-reconst-test` | [results/v0-crb-reconst-test.md](results/v0-crb-reconst-test.md) |
-| `v0-crb-var` | [results/v0-crb-var.md](results/v0-crb-var.md) |
-| `v0-directional-marginal-gain` | [results/v0-directional-marginal-gain.md](results/v0-directional-marginal-gain.md) |
-| `v0-grad-mech-l2-norm` | [results/v0-grad-mech-l2-norm.md](results/v0-grad-mech-l2-norm.md) |
-| `v0-grad-mech-test` | [results/v0-grad-mech-test.md](results/v0-grad-mech-test.md) |
-| `v0-grad-prepare-src-96tr-q16-4096d` | [results/v0-grad-prepare-src-96tr-q16-4096d.md](results/v0-grad-prepare-src-96tr-q16-4096d.md) |
-| `v0-grad-traj-level-norm-gap` | [results/v0-grad-traj-level-norm-gap.md](results/v0-grad-traj-level-norm-gap.md) |
-| `v0-gradient-proxy-cost` | [results/v0-gradient-proxy-cost.md](results/v0-gradient-proxy-cost.md) |
-| `v0-gradient-proxy-test` | [results/v0-gradient-proxy-test.md](results/v0-gradient-proxy-test.md) |
-| `v0-gradient-variance-decomposition` | [results/v0-gradient-variance-decomposition.md](results/v0-gradient-variance-decomposition.md) |
-| `v0-proxy-dp-segmentation` | [results/v0-proxy-dp-segmentation.md](results/v0-proxy-dp-segmentation.md) |
-| `v0-timer-XL-grad-4-change-velocity` | [results/v0-timer-XL-grad-4-change-velocity.md](results/v0-timer-XL-grad-4-change-velocity.md) |
-| `v0-timer-XL-grad-4-curvature` | [results/v0-timer-XL-grad-4-curvature.md](results/v0-timer-XL-grad-4-curvature.md) |
-| `v0-timer-XL-grad-4-two-random-16-blocks` | [results/v0-timer-XL-grad-4-two-random-16-blocks.md](results/v0-timer-XL-grad-4-two-random-16-blocks.md) |
-| `v0-timer-XL-grad-64-change-velocity` | [results/v0-timer-XL-grad-64-change-velocity.md](results/v0-timer-XL-grad-64-change-velocity.md) |
-| `v0-timerXL-grad-4-lm-head` | [results/v0-timerXL-grad-4-lm-head.md](results/v0-timerXL-grad-4-lm-head.md) |
-| `v0-timerXL-grad-4-lm-head-change-velocity` | [results/v0-timerXL-grad-4-lm-head-change-velocity.md](results/v0-timerXL-grad-4-lm-head-change-velocity.md) |
-| `v0-timerxl-grad64-pca` | [results/v0-timerxl-grad64-pca.md](results/v0-timerxl-grad64-pca.md) |
-| `v0-uni-data-evaluation` | [results/v0-uni-data-evaluation.md](results/v0-uni-data-evaluation.md) |
-| `v0-uni-reconst-scale` | [results/v0-uni-reconst-scale.md](results/v0-uni-reconst-scale.md) |
-| `v0-vage` | [results/v0-vage.md](results/v0-vage.md) |
-| `v0-var-proxy-estimate` | [results/v0-var-proxy-estimate.md](results/v0-var-proxy-estimate.md) |
-| `v1-computational-effort-estimate` | [results/v1-computational-effort-estimate.md](results/v1-computational-effort-estimate.md) |
-| `v1-crb-redo` | [results/v1-crb-redo.md](results/v1-crb-redo.md) |
-| `v1-crb-redo-timerxl-baselines` | [results/v1-crb-redo-timerxl-baselines.md](results/v1-crb-redo-timerxl-baselines.md) |
-| `v1-rage-trev-seed0-final` | [results/v1-rage-trev-seed0-final.md](results/v1-rage-trev-seed0-final.md) |
-| `v1-rage-trev-timerxl-seed0` | [results/v1-rage-trev-timerxl-seed0.md](results/v1-rage-trev-timerxl-seed0.md) |
-| `v1-rage-trev-timesfm-seed0` | [results/v1-rage-trev-timesfm-seed0.md](results/v1-rage-trev-timesfm-seed0.md) |
-| `v2-foundation-expansion` | [results/v2-foundation-expansion.md](results/v2-foundation-expansion.md) |
+| `64-large-var-k-error-composition` | [results/64-large-var-k-error-composition.md](exp/v0-crb-mech-test/64-large-var-k-error-composition.md) |
+| `64-large-var-k-error-composition-full-tables` | [results/64-large-var-k-error-composition-full-tables.md](exp/v0-crb-mech-test/64-large-var-k-error-composition-full-tables.md) |
+| `src-8192-source-coverage` | [results/src-8192-source-coverage.md](exp/src-8192-source-coverage/results.md) |
+| `src-96-q4-output-head-estimate` | [results/src-96-q4-output-head-estimate.md](exp/src-96-q4-output-head-estimate/results.md) |
+| `v0-active-value-rank` | [results/v0-active-value-rank.md](exp/v0-active-value-rank/results.md) |
+| `v0-active-value-rank-diagnostics` | [results/v0-active-value-rank-diagnostics.md](exp/v0-active-value-rank/v0-active-value-rank-diagnostics.md) |
+| `v0-chronostiny-timerxl-20261112` | [results/v0-chronostiny-timerxl-20261112.md](exp/v0-chronostiny-timerxl-20261112/results.md) |
+| `v0-consolidated-summary-20261112` | [results/v0-consolidated-summary-20261112.md](exp/v0-consolidated-summary-20261112/results.md) |
+| `v0-crb-cos-var` | [results/v0-crb-cos-var.md](exp/v0-crb-cos-var/results.md) |
+| `v0-crb-final-test-timerXL-64tr` | [results/v0-crb-final-test-timerXL-64tr.md](exp/v0-crb-final-test-timerXL-64tr/results.md) |
+| `v0-crb-final-test-timerXL-64tr-spacing-q-dir` | [results/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md](exp/v0-crb-final-test-timerXL-64tr/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md) |
+| `v0-crb-mech-test` | [results/v0-crb-mech-test.md](exp/v0-crb-mech-test/results.md) |
+| `v0-crb-reconst-fine` | [results/v0-crb-reconst-fine.md](exp/v0-crb-reconst-fine/results.md) |
+| `v0-crb-reconst-test` | [results/v0-crb-reconst-test.md](exp/v0-crb-reconst-test/results.md) |
+| `v0-crb-var` | [results/v0-crb-var.md](exp/v0-crb-var/results.md) |
+| `v0-directional-marginal-gain` | [results/v0-directional-marginal-gain.md](exp/v0-directional-marginal-gain/results.md) |
+| `v0-grad-mech-l2-norm` | [results/v0-grad-mech-l2-norm.md](exp/v0-grad-mech-l2-norm/results.md) |
+| `v0-grad-mech-test` | [results/v0-grad-mech-test.md](exp/v0-grad-mech-test/results.md) |
+| `v0-grad-prepare-src-96tr-q16-4096d` | [results/v0-grad-prepare-src-96tr-q16-4096d.md](exp/v0-grad-prepare-src-96tr-q16-4096d/results.md) |
+| `v0-grad-traj-level-norm-gap` | [results/v0-grad-traj-level-norm-gap.md](exp/v0-grad-traj-level-norm-gap/results.md) |
+| `v0-gradient-proxy-cost` | [results/v0-gradient-proxy-cost.md](exp/v0-gradient-proxy-cost/results.md) |
+| `v0-gradient-proxy-test` | [results/v0-gradient-proxy-test.md](exp/v0-gradient-proxy-test/results.md) |
+| `v0-gradient-variance-decomposition` | [results/v0-gradient-variance-decomposition.md](exp/v0-gradient-variance-decomposition/results.md) |
+| `v0-proxy-dp-segmentation` | [results/v0-proxy-dp-segmentation.md](exp/v0-proxy-dp-segmentation/results.md) |
+| `v0-timer-XL-grad-4-change-velocity` | [results/v0-timer-XL-grad-4-change-velocity.md](exp/v0-timer-XL-grad-4-change-velocity/results.md) |
+| `v0-timer-XL-grad-4-curvature` | [results/v0-timer-XL-grad-4-curvature.md](exp/v0-timer-XL-grad-4-curvature/results.md) |
+| `v0-timer-XL-grad-4-two-random-16-blocks` | [results/v0-timer-XL-grad-4-two-random-16-blocks.md](exp/v0-timer-XL-grad-4-change-velocity/v0-timer-XL-grad-4-two-random-16-blocks.md) |
+| `v0-timer-XL-grad-64-change-velocity` | [results/v0-timer-XL-grad-64-change-velocity.md](exp/v0-timer-XL-grad-64-change-velocity/results.md) |
+| `v0-timerXL-grad-4-lm-head` | [results/v0-timerXL-grad-4-lm-head.md](exp/v0-timerXL-grad-4-lm-head/results.md) |
+| `v0-timerXL-grad-4-lm-head-change-velocity` | [results/v0-timerXL-grad-4-lm-head-change-velocity.md](exp/v0-timerXL-grad-4-lm-head/v0-timerXL-grad-4-lm-head-change-velocity.md) |
+| `v0-timerxl-grad64-pca` | [results/v0-timerxl-grad64-pca.md](exp/v0-timer-XL-grad-64-change-velocity/v0-timerxl-grad64-pca.md) |
+| `v0-uni-data-evaluation` | [results/v0-uni-data-evaluation.md](exp/v0-uni-data-evaluation/results.md) |
+| `v0-uni-reconst-scale` | [results/v0-uni-reconst-scale.md](exp/v0-uni-reconst-scale/results.md) |
+| `v0-vage` | [results/v0-vage.md](exp/v0-vage/results.md) |
+| `v0-var-proxy-estimate` | [results/v0-var-proxy-estimate.md](exp/v0-var-proxy-estimate/results.md) |
+| `v1-computational-effort-estimate` | [results/v1-computational-effort-estimate.md](exp/v1-computational-effort-estimate/results.md) |
+| `v1-crb-redo` | [results/v1-crb-redo.md](exp/v1-crb-redo/results.md) |
+| `v1-crb-redo-timerxl-baselines` | [results/v1-crb-redo-timerxl-baselines.md](exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md) |
+| `v1-rage-trev-seed0-final` | [results/v1-rage-trev-seed0-final.md](exp/v1-rage-trev/v1-rage-trev-seed0-final.md) |
+| `v1-rage-trev-timerxl-seed0` | [results/v1-rage-trev-timerxl-seed0.md](exp/v1-rage-trev/v1-rage-trev-timerxl-seed0.md) |
+| `v1-rage-trev-timesfm-seed0` | [results/v1-rage-trev-timesfm-seed0.md](exp/v1-rage-trev/v1-rage-trev-timesfm-seed0.md) |
+| `v2-foundation-expansion` | [results/v2-foundation-expansion.md](exp/v2-foundation-expansion/results.md) |
 
 ## 批次结果总表
 
@@ -59,8 +59,8 @@
 | v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
 | v1-crb-redo | 12tasks-ref-grad-prepare | 12 项安全历史资格检查，8 项准备 CRB/Uniform 梯度 | 完成；4 项放弃 | 8 项每方法各 9079 个名义锚点，4 项因无法支持筛选不再使用 |
 | v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |
-| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/results/v1-crb-redo-timerxl-baselines.md |
-| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/results/v1-crb-redo-timerxl-baselines.md |
+| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md |
+| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md |
 | v1-crb-redo | timerXL-base-uni-01-traj-rr | 双侧 Uniform 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.601606；选样 55分42秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-base-uni-01-block-rr | 双侧 Uniform 块 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.527675；选样 53分30秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-traj-rr | 双侧 CRB 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.590119；选样 56分12秒；索引文件每任务 2.03 MiB |
@@ -75,7 +75,7 @@
 | v0-crb-final-test-timerXL-64tr | CRB-1:1:0 | 同预算coverage:error CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；Uniform在全部q的窗口加权误差更低 |
 | v0-crb-final-test-timerXL-64tr | CRB-1:0:0 | 同预算coverage-only CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；CRB仅q=64的窗口加权误差更低 |
 | v0-timer-XL-grad-64-change-velocity | 自动分析 | 轨迹内与轨迹间速度差异、头梯度代理、两段均匀16窗口代理 | 完成 | 轨迹内/间差异、头代理与两段16窗口估计均完成；详见独立报告 |
-| v0-timer-XL-grad-64-change-velocity | per-track-pca | 64轨真实4096维LoRA投影的逐轨PC1解释率与方向差异 | 完成 | PC1解释率中位数12.1%；PC1两两夹角中位数87.3°；rank80均值174、中位数137；v/L均值4.07%、中位数1.63%，L为每轨完整合法起点缓存行数；稳定性和限制见docs/results/v0-timerxl-grad64-pca.md |
+| v0-timer-XL-grad-64-change-velocity | per-track-pca | 64轨真实4096维LoRA投影的逐轨PC1解释率与方向差异 | 完成 | PC1解释率中位数12.1%；PC1两两夹角中位数87.3°；rank80均值174、中位数137；v/L均值4.07%、中位数1.63%，L为每轨完整合法起点缓存行数；稳定性和限制见docs/exp/v0-timer-XL-grad-64-change-velocity/v0-timerxl-grad64-pca.md |
 | v0-timer-XL-grad-64-change-velocity | two-head-16-blocks | 每轨两段均匀16窗口的lm-head梯度代理，评估LoRA数值与排序恢复 | 完成 | 排序rho 0.868/0.829/0.294，前16重合11/11/5 |
 | v0-timerXL-grad-4-lm-head | 四轨同窗口输出头梯度及代表性 | 每轨均匀取128个窗口，比较非临近窗口对的输出头与LoRA方向相似性 | 完成 | 三条可评估轨迹 Spearman 0.249–0.303；详见独立报告 |
 | v0-timerXL-grad-4-lm-head | change-velocity-comparison | 在匹配连续窗口段上比较输出头与LoRA三项滞后曲线 | 完成 | 4761个头梯度窗口；模长变化系统性低估，见独立报告 |
@@ -100,7 +100,7 @@
 | v0-crb-mech-test | 64-large-var-k-error-composition | 新建 64 条 4096D×4000 mock；相邻点完整向量差比 0.50005，lag-16 余弦均值 0.0000375；q={4,8,16,32,64,128} | 完成 | 12 张 K-error 图、18 张 MSE 分解图；MSE 恒等式残差 7.55e-15；详见批次报告 |
 | v0-grad-prepare-src-96tr-q16-4096d | src-96；三模型；仅 Uniform | 96 条轨迹、35 配置，q=16、4096 维 BF16 LoRA 梯度 | TimerXL、TimesFM 的 Uniform 已完成；Chronos 未完成，当前无运行进程，部分缓存保留 | 每模型 Uniform 预算 166,659 锚点；CRB 产物已删除 |
 | v0-grad-prepare-src-4096tr-q32-4096d | 旧批次 | src-4096、q=32 的梯度准备 | 失败并终止：计算负担过大 | 结果及梯度缓存已删除；仅保留本失败记录 |
-| v1-computational-effort-estimate | 9 个计时批次；目标清单及正式实验 | 三种模型的计算与存储估算 | 计时完成；正式实验未开始 | 旧候选池估算见[独立报告](results/v1-computational-effort-estimate.md) |
+| v1-computational-effort-estimate | 9 个计时批次；目标清单及正式实验 | 三种模型的计算与存储估算 | 计时完成；正式实验未开始 | 旧候选池估算见[独立报告](exp/v1-computational-effort-estimate/results.md) |
 | v1-rage-crb-vs-uniform-timerXL-84m | single-task optimization timing | optimize TimerXL LoRA gradient computation and measure one task | Deprecated | single worker 575-597 points/s; 8-worker same-GPU pilot 1,159 points/s aggregate (~2.0x); source gradients tentatively ~2.70 days with 8 workers; source selection invalid; retained for reference only |
 | v0-crb-var | 1-ten-trajectory-replay | 按原定批次执行 v0-crb-var 的实验 | 完成 | 10/10、0.6410、0.6802、0.4051、0.4402；详情见历史原文与结果文档 |
 | v0-proxy-dp-segmentation | longest4-unweighted | 按原定批次执行 v0-proxy-dp-segmentation 的实验 | 完成 | 4/4、0.5031、0.6762、0.2995、0.4298；详情见历史原文与结果文档 |
