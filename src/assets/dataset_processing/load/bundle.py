@@ -24,6 +24,7 @@ class BundleLoadWriter:
         if writer_class is None:
             raise ValueError("scope must be source or reference")
         self.writer = writer_class(Path(bundle_root), shard_bytes=shard_bytes)
+        self.staging = Path(bundle_root)
         self.load_metadata = dict(load_metadata) if load_metadata is not None else None
         self.rows_written = 0
         self.duplicate_rows = 0

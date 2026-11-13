@@ -141,7 +141,7 @@ def _completed_files(raw_root, config):
     return paths if paths and all(path.is_file() and path.stat().st_size > 0 for path in paths) else None
 
 
-def _list_arrow_files(config):
+def _list_arrow_files(config, revision=None):
     """List exact repository-relative Arrow source paths for one UTSD config.
 
     @input: config is one UTSD HuggingFace configuration name.
@@ -152,7 +152,7 @@ def _list_arrow_files(config):
 
     files = sorted(
         item.path for item in list_repo_tree(
-            _UTSD_HF_DATASET, repo_type="dataset", path_in_repo=config, recursive=True
+            _UTSD_HF_DATASET, repo_type="dataset", path_in_repo=config, revision=revision, recursive=True
         ) if item.path.endswith(".arrow")
     )
     if not files:
@@ -170,8 +170,8 @@ def fetch(output_dir, subsets=None, force=False, sample_probability=None, seed=4
     @scenario: Keep UTSD config resolution and Arrow handling in its adapter.
     @logic: Resolves the default/all/explicit config list and runs each config in order.
     """
-    if revision not in (None, SOURCE_REVISIONS["utsd"]):
-        raise ValueError("UTSD revision must be %s" % SOURCE_REVISIONS["utsd"])
+    if revision is not None and revision != "main" and not (len(revision) == 40 and all(char in "0123456789abcdef" for char in revision)):
+        raise ValueError("UTSD revision must be main or a full commit ID")
     if subsets is None:
         configs = [UTSD_DEFAULT_CONFIG]
     elif subsets == ["all"]:
@@ -187,14 +187,14 @@ def fetch(output_dir, subsets=None, force=False, sample_probability=None, seed=4
     return max(
         fetch_utsd(output_dir, config=config, force=force,
                    sample_probability=sample_probability, seed=seed,
-                   num_workers=num_workers)
+                   num_workers=num_workers, revision=revision)
         for config in configs
     )
 
 
 def fetch_utsd(output_dir, config=UTSD_DEFAULT_CONFIG, max_series=float("inf"), seed=42,
                force=False, streaming=False, delete_sources=False,
-               sample_probability=None, num_workers=1):
+               sample_probability=None, num_workers=1, revision=None):
     """Download original UTSD Arrow shards without record conversion.
 
     @input: output_dir is data/utsd; config selects a Hub configuration; max_series
@@ -204,6 +204,8 @@ def fetch_utsd(output_dir, config=UTSD_DEFAULT_CONFIG, max_series=float("inf"), 
     """
     sample_probability = validate_sample_probability(sample_probability)
     if sample_probability is not None:
+        if revision not in (None, "main"):
+            raise ValueError("Pinned revision is not supported with fetch-stage sampling")
         if not math.isinf(max_series) or streaming or delete_sources:
             log.error("UTSD sampling mode cannot combine with legacy sampling flags.")
             return 1
@@ -223,17 +225,21 @@ def fetch_utsd(output_dir, config=UTSD_DEFAULT_CONFIG, max_series=float("inf"), 
     raw_root = output_dir
     raw_root.mkdir(parents=True, exist_ok=True)
     existing = None if force else _completed_files(raw_root, config)
+    if existing is not None and revision not in (None, "main"):
+        payload = json.loads(_raw_marker(raw_root, config).read_text(encoding="ascii"))
+        if payload.get("revision") != revision:
+            existing = None
     if existing is not None:
         log.info("UTSD raw config '%s' is complete (%d file(s)); skipping.", config, len(existing))
         return 0
     failures = DownloadFailureStack()
     downloader = RetryingHuggingFaceDownloader(failure_stack=failures)
     try:
-        files = _list_arrow_files(config)
+        files = _list_arrow_files(config, revision=revision)
         log.info("Downloading UTSD raw config '%s' (%d Arrow file(s))...", config, len(files))
         def download_one(filename):
             downloaded = downloader.download_file(
-                _UTSD_HF_DATASET, filename, repo_type="dataset", local_dir=raw_root,
+                _UTSD_HF_DATASET, filename, repo_type="dataset", revision=revision, local_dir=raw_root,
                 force_download=force or _has_sampled_marker(raw_root, config),
             )
             local_path = raw_root / filename
@@ -243,7 +249,7 @@ def fetch_utsd(output_dir, config=UTSD_DEFAULT_CONFIG, max_series=float("inf"), 
         parallel_map(download_one, files, num_workers)
         marker = _raw_marker(raw_root, config)
         partial = marker.with_name(marker.name + ".partial")
-        partial.write_text(json.dumps({"dataset": _UTSD_HF_DATASET, "files": files}) + "\n", encoding="ascii")
+        partial.write_text(json.dumps({"dataset": _UTSD_HF_DATASET, "files": files, "revision": revision or "main"}) + "\n", encoding="ascii")
         partial.replace(marker)
     except Exception as exc:
         log.warning("UTSD raw fetch failed for '%s': %s", config, exc)

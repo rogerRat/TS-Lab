@@ -80,7 +80,7 @@ def _completed_raw_files(raw_root, config_name):
     return paths
 
 
-def _list_config_parquet_files(config_name):
+def _list_config_parquet_files(config_name, revision=None):
     """List the exact original Parquet paths for one Chronos configuration.
 
     @input: config_name is a HuggingFace dataset configuration name.
@@ -97,6 +97,7 @@ def _list_config_parquet_files(config_name):
         _CHRONOS_HF_DATASET,
         repo_type="dataset",
         path_in_repo=path_in_repo,
+        revision=revision,
         recursive=True,
     )
     filenames = sorted(
@@ -108,7 +109,7 @@ def _list_config_parquet_files(config_name):
     return filenames
 
 
-def _write_complete_marker(raw_root, config_name, filenames):
+def _write_complete_marker(raw_root, config_name, filenames, revision=None):
     """Atomically record one fully validated raw Chronos configuration.
 
     @input: raw_root is the destination root; config_name identifies one config;
@@ -120,7 +121,7 @@ def _write_complete_marker(raw_root, config_name, filenames):
     marker.parent.mkdir(parents=True, exist_ok=True)
     partial = marker.with_name(marker.name + ".partial")
     partial.write_text(
-        json.dumps({"dataset": _CHRONOS_HF_DATASET, "files": filenames}, sort_keys=True) + "\n",
+        json.dumps({"dataset": _CHRONOS_HF_DATASET, "files": filenames, "revision": revision or "main"}, sort_keys=True) + "\n",
         encoding="ascii",
     )
     partial.replace(marker)
@@ -254,7 +255,7 @@ def fetch_chronos(
     delete_sources=False,
     reservoir_dir=None,
     parallel=False,
-    sample_probability=None, num_workers=1,
+    sample_probability=None, num_workers=1, revision=None,
 ):
     """Download original Chronos Parquet files without data conversion.
 
@@ -267,6 +268,8 @@ def fetch_chronos(
     """
     sample_probability = validate_sample_probability(sample_probability)
     if sample_probability is not None:
+        if revision not in (None, "main"):
+            raise ValueError("Pinned revision is not supported with fetch-stage sampling")
         if not math.isinf(max_series) or streaming or parallel or delete_sources:
             log.error("Chronos sampling mode cannot combine with legacy sampling or conversion flags.")
             return 1
@@ -296,18 +299,24 @@ def fetch_chronos(
 
     for config_name in configs:
         existing = None if force else _completed_raw_files(raw_root, config_name)
+        if existing is not None and revision not in (None, "main"):
+            marker = _complete_marker(raw_root, config_name)
+            payload = json.loads(marker.read_text(encoding="ascii"))
+            if payload.get("revision") != revision:
+                existing = None
         if existing is not None:
             log.info("Config '%s' raw files are complete (%d file(s)); skipping.", config_name, len(existing))
             completed.append(config_name)
             continue
         log.info("Downloading raw Chronos config '%s'...", config_name)
         try:
-            filenames = _list_config_parquet_files(config_name)
+            filenames = _list_config_parquet_files(config_name, revision=revision)
             def download_one(filename):
                 downloaded = downloader.download_file(
                     _CHRONOS_HF_DATASET,
                     filename,
                     repo_type="dataset",
+                    revision=revision,
                     local_dir=raw_root,
                     force_download=force or _has_sampled_marker(raw_root, config_name),
                 )
@@ -316,7 +325,7 @@ def fetch_chronos(
                     raise RuntimeError("Invalid raw Parquet after download: %s" % filename)
                 return filename
             parallel_map(download_one, filenames, num_workers)
-            _write_complete_marker(raw_root, config_name, filenames)
+            _write_complete_marker(raw_root, config_name, filenames, revision=revision)
             _remove_legacy_config_shards(output_dir, config_name)
             completed.append(config_name)
             log.info("Config '%s' raw download is complete (%d file(s)).", config_name, len(filenames))
@@ -432,12 +441,13 @@ def fetch(output_dir, subsets=None, force=False, sample_probability=None, seed=4
     @logic: Rejects an unsupported revision, resolves the explicit all token to
             all supported configs, then delegates format-specific work to fetch_chronos.
     """
-    if revision not in (None, SOURCE_REVISIONS["chronos"]):
-        raise ValueError("Chronos revision must be %s" % SOURCE_REVISIONS["chronos"])
+    if revision is not None and revision != "main" and not (len(revision) == 40 and all(char in "0123456789abcdef" for char in revision)):
+        raise ValueError("Chronos revision must be main or a full commit ID")
     if subsets == ["all"]:
         from assets.dataset_processing.configs.chronos import CHRONOS_SUPPORTED_SUBSETS
         subsets = list(CHRONOS_SUPPORTED_SUBSETS)
     return fetch_chronos(
         output_dir, force=force, subsets=subsets,
         sample_probability=sample_probability, seed=seed, num_workers=num_workers,
+        revision=revision,
     )

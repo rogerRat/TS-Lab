@@ -62,8 +62,8 @@ def fetch(output_dir, subsets=None, force=False, sample_probability=None, seed=4
     @scenario: Keep Monash selection rules inside its source adapter, not runner.
     @logic: Rejects revisions, resolves aliases and all, then calls fetch_monash.
     """
-    if revision not in (None, SOURCE_REVISIONS["monash"]):
-        raise ValueError("Monash revision must be %s" % SOURCE_REVISIONS["monash"])
+    if revision is not None and revision != "main" and not (len(revision) == 40 and all(char in "0123456789abcdef" for char in revision)):
+        raise ValueError("Monash revision must be main or a full commit ID")
     if subsets is None:
         resolved = None
     elif subsets == ["all"]:
@@ -78,6 +78,7 @@ def fetch(output_dir, subsets=None, force=False, sample_probability=None, seed=4
     return fetch_monash(
         output_dir, force=force, subsets=resolved,
         sample_probability=sample_probability, seed=seed, num_workers=num_workers,
+        revision=revision,
     )
 
 
@@ -187,7 +188,7 @@ def _sample_monash_zip(source_path, destination_path, probability, seed, config)
 
 def fetch_monash(output_dir, max_series=float("inf"), seed=42, force=False,
                  subsets=None, streaming=False, delete_sources=False, parallel=False,
-                 sample_probability=None, num_workers=1):
+                 sample_probability=None, num_workers=1, revision=None):
     """Download original Monash zip archives without parsing TSF records.
 
     @input: output_dir is data/monash; max_series must be infinity; seed is unused;
@@ -197,6 +198,8 @@ def fetch_monash(output_dir, max_series=float("inf"), seed=42, force=False,
     """
     sample_probability = validate_sample_probability(sample_probability)
     if sample_probability is not None:
+        if revision not in (None, "main"):
+            raise ValueError("Pinned revision is not supported with fetch-stage sampling")
         if not math.isinf(max_series) or streaming or delete_sources:
             log.error("Monash sampling mode cannot combine with legacy sampling flags.")
             return 1
@@ -222,6 +225,10 @@ def fetch_monash(output_dir, max_series=float("inf"), seed=42, force=False,
 
     def fetch_one(config):
         existing = None if force else _completed_zip(raw_root, config)
+        if existing is not None and revision not in (None, "main"):
+            payload = json.loads(_marker(raw_root, config).read_text(encoding="ascii"))
+            if payload.get("revision") != revision:
+                existing = None
         if existing is not None:
             log.info("Monash raw config '%s' is complete; skipping.", config)
             return None
@@ -232,7 +239,7 @@ def fetch_monash(output_dir, max_series=float("inf"), seed=42, force=False,
         filename = "data/%s.zip" % zip_stem
         log.info("Downloading Monash raw config '%s' (%s)...", config, filename)
         downloaded = downloader.download_file(
-            MONASH_HF_DATASET, filename, repo_type="dataset", local_dir=raw_root,
+            MONASH_HF_DATASET, filename, repo_type="dataset", revision=revision, local_dir=raw_root,
             force_download=force or _has_sampled_marker(raw_root, config),
         )
         local_path = raw_root / filename
@@ -241,7 +248,7 @@ def fetch_monash(output_dir, max_series=float("inf"), seed=42, force=False,
         marker = _marker(raw_root, config)
         marker.parent.mkdir(parents=True, exist_ok=True)
         partial = marker.with_name(marker.name + ".partial")
-        partial.write_text(json.dumps({"dataset": MONASH_HF_DATASET, "file": filename}) + "\n", encoding="ascii")
+        partial.write_text(json.dumps({"dataset": MONASH_HF_DATASET, "file": filename, "revision": revision or "main"}) + "\n", encoding="ascii")
         partial.replace(marker)
         log.info("Monash raw config '%s' is complete.", config)
         return None
