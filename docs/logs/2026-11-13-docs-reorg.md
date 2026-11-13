@@ -61,6 +61,7 @@
 - `docs/lora-support.md`、`docs/third_parties/` 保持原位。
 - 空目录 `docs/results/` 已删除。
 - `docs_legacy/` 在本次重排后整体删除（见提交 2），删除前内容已由备份与提交 1 完整保存。
+- 删除导致 16 个 exp.md 中的历史原文链接 `../../../docs_legacy/EXP.md` 成为悬空链接（重排时路径改写正确，目标在删除前存在）。涉及：`rage-smoke-static-cycle`、`v0-active-value-rank`、`v0-crb-reconst-test`、`v0-crb-var`、`v0-directional-marginal-gain`、`v0-grad-mech-l2-norm`、`v0-grad-mech-test`、`v0-grad-traj-level-norm-gap`、`v0-gradient-proxy-cost`、`v0-gradient-proxy-test`、`v0-gradient-variance-decomposition`、`v0-proxy-dp-segmentation`、`v0-uni-data-evaluation`、`v0-uni-reconst-scale`、`v0-vage`、`v0-var-proxy-estimate`。目标可通过 `git show 596f114:docs_legacy/EXP.md` 或备份 tarball 恢复。
 
 ## 3. 链接与路径字符串改写规则
 
@@ -84,12 +85,13 @@
 
 - 文件总数：重排前后 docs 下均为 91 个文件，无丢失、无新增内容文件。
 - 目录结构：37 个实验文件夹（32 个含 exp.md，31 个含 results.md，其中 5 个孤立文件夹仅含 results.md）。
-- 链接校验：82 个非 logs Markdown 文件中的 208 个相对链接全部解析到存在的目标，0 断链。
+- 链接校验：82 个非 logs Markdown 文件中的 208 个相对链接，在删除 docs_legacy 前全部解析到存在的目标，0 断链；删除 docs_legacy 后仅剩第 2.7 节记录的 16 个历史原文悬空链接，其余 192 个链接仍然有效。
 - 旧形式残留：非 logs 文档中 `](results/`、`](../results/`、`](../exp/` 残留为 0。
 - git 识别：78 个移动全部为 rename（19 个纯 rename，59 个 rename 加路径改写），`docs/RESULTS.md` 为原地修改。
 
 ## 6. 未解决问题与待办
 
+- 16 个指向已删除 `docs_legacy/EXP.md` 的悬空历史链接（清单见 2.7）：需用户决定是改为指向 git 历史/备份，还是移除链接保留文字。
 - 第 4 节列出的 5 处占位符/目录级描述需后续按新结构人工改写正文（本次不允许内容变更，未处理）。
 - `docs/lora-support.md`、`docs/third_parties/` 在 AGENTS.md 规范树中没有对应位置，本次保持原位，待用户决定归属。
 - 根目录 `TEMP.md` 含 26 处 `docs/results/...` 旧路径引用，不在本次 docs 重排范围内，未修改。
