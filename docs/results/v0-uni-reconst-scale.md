@@ -1,16 +1,16 @@
-# v0-uni-reconst-scale: Uniform linear reconstruction by anchor spacing
+# v0-uni-reconst-scale：按锚点间距的 Uniform 线性重建
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Protocol
+## 协议
 
-Use the same ten retained M5 trajectories and complete BF16 gradients as v0-vage, represented by validated full-coordinate Gram matrices. Each trajectory has N=T-575 legal starts for 512 context and 64 prediction observations. For each spacing denominator s in {1,2,4,8,16,32,64,128}, set K=ceil(N/s) unique complete-gradient anchors per trajectory. Place K anchors evenly over the entire legal-start range, including both endpoints. Reconstruct each unobserved gradient by linear interpolation between its neighboring true-gradient anchors. Queried anchors return their true gradient exactly. No proxy gradient is used.
+使用与 v0-vage 相同的十条保留 M5 轨迹和完整 BF16 梯度，以校验过的全坐标 Gram 矩阵表示。每条轨迹有 N=T-575 个合法起点，对应 512 上下文和 64 预测观测。对每个间距分母 s ∈ {1,2,4,8,16,32,64,128}，每条轨迹设置 K=ceil(N/s) 个唯一的完整梯度锚点。在整个合法起点范围内均匀放置 K 个锚点，包括两个端点。用相邻真实梯度锚点之间的线性插值重建每个未观测梯度。被查询的锚点精确返回其真实梯度。不使用任何代理梯度。
 
-For each trajectory, mean L2 is the average of the per-start Euclidean norm of the difference between the true and reconstructed full vectors. Mean cosine is the average per-start cosine between those vectors. The primary summary averages the ten trajectory means equally. A window-weighted summary is also saved. The same full-gradient Gram reconstruction formula used in the preceding VAGE replay evaluates the unqueried starts; queried anchor errors are set exactly to zero and their cosine to one. This is a retrospective budget sweep, not a measurement of new model runtime. All 12,836 legal starts contribute at every budget, including the queried anchors.
+对每条轨迹，平均 L2 是每个起点上真实完整向量与重建完整向量之差的欧氏范数的平均。平均余弦是这些向量在每个起点上的余弦的平均。主汇总对十条轨迹的均值等权平均。也保存按窗口加权的汇总。未查询起点使用与前一次 VAGE replay 相同的 full-gradient Gram 重建公式评估；被查询锚点的误差精确设为零，余弦设为一。这是回溯性的预算扫描，不是对新模型运行时的测量。所有 12,836 个合法起点在每个预算下都参与，包括被查询锚点。
 
-## Results
+## 结果
 
-| Starts per anchor s | Total anchors, ten tracks | Mean L2, lower better | Mean cosine, higher better |
+| 每个锚点的起点数 s | 十条轨迹总锚点数 | 平均 L2，越低越好 | 平均余弦，越高越好 |
 |---:|---:|---:|---:|
 | 1 | 12,836 | 0.0000 | 1.0000 |
 | 2 | 6,420 | 0.9650 | 0.8952 |
@@ -21,19 +21,19 @@ For each trajectory, mean L2 is the average of the per-start Euclidean norm of t
 | 64 | 204 | 3.4824 | 0.3971 |
 | 128 | 103 | 3.8809 | 0.2563 |
 
-The q=64 row reproduces the Uniform mean L2 and cosine from v0-vage. Direction alignment declines substantially as anchors become sparse: approximately 0.90 at s=2, 0.70 at s=8, 0.51 at s=32, and 0.40 at s=64. These results describe this fixed model, checkpoint, selected ten M5 trajectories, BF16 gradient caches, and whole-trajectory linear interpolation. They do not establish performance on other datasets or a nonlinear reconstruction method.
+q=64 行复现了 v0-vage 中的 Uniform 平均 L2 和余弦。随着锚点变得稀疏，方向对齐显著下降：s=2 时约为 0.90，s=8 时约 0.70，s=32 时约 0.51，s=64 时约 0.40。这些结果描述的是这个固定模型、checkpoint、选定的十条 M5 轨迹、BF16 梯度缓存以及全轨迹线性插值。它们不确立在其他数据集上的性能，也不确立非线性重建方法的性能。
 
-## Validation and artifacts
+## 验证与产物
 
-All ten proxy-analysis cache completion markers, ten full-gradient cache markers and file sizes, Gram shapes, and finite values were checked. Exactly 80 trajectory-scale metric rows were written. The s=1 case was checked to have mean L2 zero and cosine one on every trajectory. The s=64 result matches the preceding Uniform replay. Config: configs/rage/v0-uni-reconst-scale.json. Entry: scripts/v0_uni_reconst_scale.py. Raw output: outputs/train/v0-uni-reconst-scale/trajectory_metrics.csv, summary.csv, config_snapshot.json, and .complete. Logs: logs/v0-uni-reconst-scale/.
+校验了全部十个代理分析缓存完成标记、十个 full-gradient 缓存标记与文件大小、Gram 形状以及有限值。恰好写入了 80 行轨迹级指标。验证了 s=1 情形在每条轨迹上平均 L2 为零、余弦为一。s=64 结果与前一次 Uniform replay 一致。配置：configs/rage/v0-uni-reconst-scale.json。入口：scripts/v0_uni_reconst_scale.py。原始输出：outputs/train/v0-uni-reconst-scale/trajectory_metrics.csv、summary.csv、config_snapshot.json 和 .complete。日志：logs/v0-uni-reconst-scale/。
 
-## Pair-mean reconstruction supplement
+## 配对均值重建补充
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-Keep the exact Uniform anchors and K=ceil(N/s) budgets of the original eight spacing groups. Between adjacent true-gradient anchors a and b, replace linear interpolation by the fixed representative (g_a+g_b)/2 for every unobserved start. Queried anchors return their true gradient exactly. There is no extrapolation because Uniform includes both global endpoints. No model or proxy calls were added.
+保持原八个间距组的精确 Uniform 锚点和 K=ceil(N/s) 预算。在相邻真实梯度锚点 a 和 b 之间，对每个未观测起点用固定代表 (g_a+g_b)/2 替换线性插值。被查询锚点精确返回其真实梯度。由于 Uniform 包含两个全局端点，因此没有外推。未增加模型或代理调用。
 
-| Starts per anchor s | Pair-mean L2 | Linear L2 | Pair-mean cosine | Linear cosine |
+| 每个锚点的起点数 s | 配对均值 L2 | 线性 L2 | 配对均值余弦 | 线性余弦 |
 |---:|---:|---:|---:|---:|
 | 1 | 0.0000 | 0.0000 | 1.0000 | 1.0000 |
 | 2 | 0.9652 | 0.9650 | 0.8952 | 0.8952 |
@@ -44,6 +44,19 @@ Keep the exact Uniform anchors and K=ceil(N/s) budgets of the original eight spa
 | 64 | 3.5445 | 3.4824 | 0.3498 | 0.3971 |
 | 128 | 3.8954 | 3.8809 | 0.2146 | 0.2563 |
 
-Values are ten-trajectory equal-weight means. At s=1, both methods return exact gradients. At s=2, most gaps contain no unobserved starts and results are nearly identical. At every other tested spacing, the constant pair mean has larger mean L2 and lower mean cosine than linear interpolation. This comparison isolates the reconstruction rule because anchors and budgets are identical. It does not evaluate a learned or variance-adaptive representative.
+数值为十条轨迹等权均值。在 s=1 时，两种方法都返回精确梯度。在 s=2 时，大多数间隙不含未观测起点，结果几乎相同。在其他每个测试间距下，常数配对均值比线性插值具有更大的平均 L2 和更低的平均余弦。由于锚点和预算相同，该比较隔离了重建规则的影响。它不评估学习型或方差自适应的代表。
 
-Raw per-trajectory and summary tables: outputs/train/v0-uni-reconst-scale/pairmean/. Shared config: configs/rage/v0-pairmean-supplements.json. Entry: scripts/evaluate_pairmean_reconstruction.py. The supplement has its own .complete marker.
+逐轨迹原始表和汇总表：outputs/train/v0-uni-reconst-scale/pairmean/。共享配置：configs/rage/v0-pairmean-supplements.json。入口：scripts/evaluate_pairmean_reconstruction.py。该补充有其自己的 .complete 标记。
+
+## v0-uni-reconst-scale
+
+于 2026-11-08 完成，在十条保留轨迹上使用真实完整梯度锚点和全轨迹线性插值。s={1,2,4,8,16,32,64,128} 的等轨迹平均 L2 为 {0.0000,0.9650,1.6969,2.2654,2.7382,3.1250,3.4824,3.8809}；平均余弦为 {1.0000,0.8952,0.7941,0.6956,0.6002,0.5063,0.3971,0.2563}。s=64 行与先前 Uniform 基线一致。完整协议、锚点总数和限制：docs/results/v0-uni-reconst-scale.md。
+
+最后修改日期：2026-11-08
+
+
+## 配对均值重建补充：v0-vage 与 v0-uni-reconst-scale
+
+于 2026-11-08 完成，使用与前面线性重建运行相同的十条轨迹、已缓存的完整梯度锚点和精确预算。每个锚点间隙中的每个未观测起点由其两个端点梯度的均值表示；被观测锚点返回精确梯度。在 204 个总锚点处，Uniform 等轨迹平均 L2/余弦从线性插值下的 3.4824/0.3971 变为配对均值下的 3.5445/0.3498。VAGE-Static n_min=2 从 3.5437/0.3651 变为 3.5880/0.3205。在测试的 VAGE 分配上，配对均值规则平均而言使两个主要等轨迹指标都变差。在 Uniform 间距扫描中，s=1 保持精确，s=2 几乎不变；s=4-128 具有更高的平均 L2 和更低的平均余弦。完整表格和限制：docs/results/v0-vage.md 和 docs/results/v0-uni-reconst-scale.md。
+
+最后修改日期：2026-11-08

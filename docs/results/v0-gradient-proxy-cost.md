@@ -1,32 +1,36 @@
-# Direct computation cost of gradient proxies
+# 梯度代理的直接计算成本
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Protocol
+## 协议
 
-Measured on the same Chronos-T5 Tiny warmed checkpoint and ten M5 trajectories used by v0-gradient-proxy-test. Eight evenly spaced windows per trajectory (80 total) were selected, each method was timed three times per window at batch size one, and method order was randomized after three warmup calls per method. All methods process the same window and include CPU tokenization, model forward, method-specific computation, copying the result to CPU, and CUDA synchronization. Full BP returns the complete gradient converted to BF16 for storage; the head proxy returns all output-weight coordinates converted to BF16. Embedding and loss return their respective vectors/scalars.
+在 v0-gradient-proxy-test 所用的同一个 Chronos-T5 Tiny warm 过的 checkpoint 和十条 M5 轨迹上进行测量。每条轨迹选取八个均匀间隔的窗口（共 80 个），每种方法对每个窗口在 batch size 为 1 下计时三次，并在每种方法三次 warmup 调用之后随机化方法顺序。所有方法处理同一窗口，并包含 CPU tokenization、模型前向、方法相关计算、将结果复制到 CPU 以及 CUDA 同步。Full BP 返回转换为 BF16 用于存储的完整梯度；head 代理返回转换为 BF16 的全部输出权重坐标。Embedding 和 loss 返回各自对应的向量/标量。
 
-Hardware: NVIDIA GeForce RTX 4080. The measurements describe this implementation, precision, device, and batch size.
+硬件：NVIDIA GeForce RTX 4080。这些测量描述的是本实现、精度、设备以及 batch size。
 
-## Results
+## 结果
 
-| Method | Median ms/window | Mean ms/window | P90 ms/window | Paired speedup vs full BP | Per-window speedup range | Across-track median range (ms) |
+| 方法 | 中位 ms/窗口 | 平均 ms/窗口 | P90 ms/窗口 | 相对 full BP 的配对加速比 | 逐窗口加速比范围 | 跨轨迹中位数范围（ms） |
 |---|---:|---:|---:|---:|---:|---:|
 | Full BP | 42.80 | 42.79 | 47.29 | 1.00x | 1.00x-1.00x | 40.29-44.62 |
-| Output head gradient | 14.21 | 14.75 | 16.96 | 2.93x | 2.17x-3.83x | 14.02-14.79 |
-| Mean decoder embedding | 11.35 | 11.65 | 13.03 | 3.72x | 2.92x-4.86x | 11.04-11.76 |
-| Forward loss | 11.28 | 11.59 | 12.55 | 3.71x | 2.84x-4.66x | 11.03-12.05 |
+| 输出头梯度 | 14.21 | 14.75 | 16.96 | 2.93x | 2.17x-3.83x | 14.02-14.79 |
+| 解码器嵌入均值 | 11.35 | 11.65 | 13.03 | 3.72x | 2.92x-4.86x | 11.04-11.76 |
+| 前向 loss | 11.28 | 11.59 | 12.55 | 3.71x | 2.84x-4.66x | 11.03-12.05 |
 
-Each row has 240 timed calls: 80 windows times three repeats. Median speedup compares paired per-window median latency against full BP. The per-window range and across-track range are descriptive, not confidence intervals.
+每行有 240 次计时调用：80 个窗口，每个三次重复。中位加速比是将配对的逐窗口中位延迟与 full BP 比较。逐窗口范围和跨轨迹范围是描述性的，不是置信区间。
 
-## Validation
+## 验证
 
-The head proxy direction matched the saved head-gradient cache on one sampled window per trajectory (cosine greater than 0.999). The mean embedding matched the saved feature with maximum absolute error at most 1.9e-06; forward loss differed by at most 4.8e-07. All ten trajectory checks passed.
+head 代理方向在每条轨迹的一个采样窗口上与已保存的 head-gradient 缓存一致（余弦大于 0.999）。平均嵌入与已保存特征的匹配最大绝对误差至多为 1.9e-06；前向 loss 的差异至多为 4.8e-07。全部十条轨迹检查均通过。
 
-Raw repeat timings and exact sample starts: outputs/train/v0-gradient-proxy-cost/per_window_timings.csv. Machine-readable summary: outputs/train/v0-gradient-proxy-cost/summary.json.
+原始重复计时和精确采样起点：outputs/train/v0-gradient-proxy-cost/per_window_timings.csv。机器可读摘要：outputs/train/v0-gradient-proxy-cost/summary.json。
 
-## Interpretation
+## 解读
 
-On this GPU and implementation, output-head gradients take about one third of full BP time. Embedding means and loss are each about 3.7 times faster than full BP, and cost almost the same as each other because both require the same model forward; extracting the embedding adds little overhead. The head proxy costs more because it also computes the loss derivative with respect to logits and forms the output-weight gradient.
+在此 GPU 和实现下，输出头梯度耗时约为 full BP 的三分之一。嵌入均值和 loss 各自约为 full BP 的 3.7 倍快，且彼此成本几乎相同，因为二者都需要相同的模型前向；提取嵌入只增加很少开销。head 代理成本更高，因为它还要计算 loss 对 logits 的导数并构造输出权重梯度。
 
-These times include data preparation and result transfer. They do not include large-scale storage throughput, concurrent CRB replay, or a different batching strategy. The CRB queue remains paused under its STOP marker after the observed container memory pressure.
+这些时间包含数据准备和结果传输。它们不包含大规模存储吞吐、并发 CRB replay，或不同的 batching 策略。在观察到容器内存压力后，CRB 队列仍在其 STOP 标记下暂停。
+
+## v0-gradient-proxy-cost
+
+于 2026-11-08 完成。在来自十条固定轨迹的 80 个窗口上，每种方法在 batch size 为 1 下重复计时三次。中位端到端延迟：full BP 42.80 ms/窗口，输出头梯度 14.21 ms（配对加速比 2.93x），解码器嵌入均值 11.35 ms（3.72x），前向 loss 11.28 ms（3.71x）。计时包含窗口 tokenization、GPU 计算、CPU 结果传输以及同步。详情：docs/results/v0-gradient-proxy-cost.md；原始重复：outputs/train/v0-gradient-proxy-cost/per_window_timings.csv。

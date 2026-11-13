@@ -1,48 +1,66 @@
-# v0-gradient-variance-decomposition
+# v0-gradient-variance-decomposition：梯度方差分解
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Question and fixed inputs
+## 问题与固定输入
 
-Does block-level vector variance mainly reflect gradient magnitude or directional change, and does controlling gradient scale and trajectory identity resolve the previously positive association between vector variance and linear-reconstruction cosine? Reuse exactly the 46 complete, nonoverlapping 256-start blocks from v0-var-proxy-estimate across the same ten retained trajectories. Reuse the complete full-gradient Gram matrices, eight-point output-head proxy variance, and four-anchor linear reconstruction at local positions 0, 85, 170, and 255. No model, gradient, or proxy calls were made.
+block 级向量方差主要反映梯度幅度还是方向变化，以及控制梯度尺度和轨迹身份能否消除此前向量方差与线性重建余弦之间的正相关？精确复用来自 v0-var-proxy-estimate 的同样 46 个完整、不重叠的 256 起点 block，跨越同样的十条保留轨迹。复用完整全梯度 Gram 矩阵、八点输出 head proxy 方差，以及局部位置 0、85、170、255 处的四锚点线性重建。没有进行任何模型、梯度或 proxy 调用。
 
-For each block, let `r_t=||g_t||`, `u_t=g_t/r_t`, and use population averages over all 256 starts. Define mean gradient norm `E r_t`, amplitude variance `Var(r_t)=E r_t^2-(E r_t)^2`, full direction dispersion `D_h=1-||E u_t||^2`, total vector variance `V_g=E r_t^2-||E g_t||^2`, and relative vector variance `V_g/E r_t^2`. Here `D_h` is computed from complete full-gradient directions, not the output-head proxy. The exact directional variance component is `V_g-Var(r_t)=(E r_t)^2-||E g_t||^2`; it is not generally equal to `(E r_t)^2 D_h` when magnitudes and directions covary.
+对每个 block，令 `r_t=||g_t||`、`u_t=g_t/r_t`，并使用对全部 256 个起点的总体平均。定义平均梯度范数 `E r_t`、幅度方差 `Var(r_t)=E r_t^2-(E r_t)^2`、完整方向离散度 `D_h=1-||E u_t||^2`、总向量方差 `V_g=E r_t^2-||E g_t||^2` 以及相对向量方差 `V_g/E r_t^2`。这里的 `D_h` 由完整全梯度方向计算，而非输出 head proxy。精确的方向方差分量为 `V_g-Var(r_t)=(E r_t)^2-||E g_t||^2`；当幅度与方向协变时，它一般不等于 `(E r_t)^2 D_h`。
 
-Recompute mean L2, absolute norm difference, directional cosine, and `1-cosine` from the same Gram blocks. Record both all 256 positions and the 252 non-anchor positions. Raw Pearson and Spearman correlations pool 46 blocks. Equal-track Spearman averages nine defined within-track correlations; track 00 has only two blocks. Controlled Pearson residualizes both variables on mean gradient norm and ten track fixed effects. Controlled Spearman ranks both variables and mean gradient norm globally, then residualizes the ranks on ranked mean norm and track fixed effects before correlating. These are descriptive partial associations, with no independent-window p-values. Leave-one-track-out ranges recalculate the controlled rank association after omitting each track in turn.
+从同样的 Gram block 重算平均 L2、绝对范数差、方向余弦和 `1-cosine`。同时记录全部 256 个位置和 252 个非锚点位置。原始 Pearson 和 Spearman 相关性合并 46 个 block。等 track Spearman 对九个已定义的 track 内相关性求平均；track 00 只有两个 block。受控 Pearson 将两个变量对平均梯度范数和十个 track 固定效应做残差化。受控 Spearman 先对两个变量和平均梯度范数做全局排序，然后在排序后的平均范数和 track 固定效应上残差化这些秩，再做相关。这些是描述性的偏相关，不含独立窗口 p 值。留一 track 范围通过在省略每条 track 后重新计算受控秩关联得到。
 
-Entry: `scripts/v0_gradient_variance_decomposition.py`. Environment: `rage` Conda. Command: `PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_gradient_variance_decomposition`. Output: `outputs/train/v0-gradient-variance-decomposition/`. Logs: `logs/v0-gradient-variance-decomposition/`.
+入口：`scripts/v0_gradient_variance_decomposition.py`。环境：`rage` Conda。命令：`PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_gradient_variance_decomposition`。输出：`outputs/train/v0-gradient-variance-decomposition/`。日志：`logs/v0-gradient-variance-decomposition/`。
 
-## Variance composition and scale
+## 方差构成与尺度
 
-| Association across 46 blocks | Pooled Pearson | Pooled Spearman | Controlled rank association |
+| 跨 46 个 block 的关联 | 合并 Pearson | 合并 Spearman | 受控秩关联 |
 |---|---:|---:|---:|
-| `V_g` versus mean gradient norm | 0.945 | 0.970 | Undefined: mean norm is a control |
-| `V_g` versus amplitude variance | 0.690 | 0.569 | 0.663 |
-| `V_g` versus direction dispersion `D_h` | -0.123 | -0.222 | 0.578 |
-| `V_g` versus relative vector variance | -0.282 | -0.289 | 0.603 |
+| `V_g` 对平均梯度范数 | 0.945 | 0.970 | 未定义：平均范数是控制变量 |
+| `V_g` 对幅度方差 | 0.690 | 0.569 | 0.663 |
+| `V_g` 对方向离散度 `D_h` | -0.123 | -0.222 | 0.578 |
+| `V_g` 对相对向量方差 | -0.282 | -0.289 | 0.603 |
 
-Mean gradient norm ranges 1.337-6.467 across blocks and strongly co-varies with absolute vector variance. Amplitude variance ranges 0.331-13.157. The exact amplitude-variance fraction `Var(r_t)/V_g` has median 0.176 and mean 0.202; it exceeds 0.5 in only one of 46 blocks. Thus amplitude variance does not numerically dominate the within-block vector-variance decomposition. The remaining component is direction-related but magnitude-weighted. The negative pooled `V_g` versus `D_h` association and positive controlled rank association show that block scale and track differences can mask directional relations. The term "scale driven" here describes cross-block variation in absolute `V_g`; it does not mean the within-block variance is mostly amplitude variance.
+平均梯度范数在 block 间的范围为 1.337-6.467，并与绝对向量方差强烈共变。幅度方差范围为 0.331-13.157。精确的幅度方差占比 `Var(r_t)/V_g` 的中位数为 0.176、均值为 0.202；仅有 46 个 block 中的一个超过 0.5。因此幅度方差在数值上并未主导 block 内的向量方差分解。剩余分量与方向有关但带有幅度加权。`V_g` 对 `D_h` 的合并关联为负，而受控秩关联为正，表明 block 尺度与 track 差异会掩盖方向关系。此处的"尺度驱动"描述的是绝对 `V_g` 的跨 block 变化；它并不意味着 block 内方差主要是幅度方差。
 
-## Reconstruction associations
+## 重建关联
 
-The following values use the 252 non-anchor positions per block. Correlations including anchors are identical to displayed precision because the same four exact anchors occur in every block: non-anchor mean errors equal all-position mean errors multiplied by `256/252`, while non-anchor mean cosine is an affine transform of all-position mean cosine. Exclusion changes metric levels but not Pearson, Spearman, or these residualized associations.
+以下数值使用每个 block 的 252 个非锚点位置。包含锚点的相关性在显示精度上与前者相同，因为每个 block 中都出现同样的四个精确锚点：非锚点平均误差等于全位置平均误差乘以 `256/252`，而非锚点平均余弦是全位置平均余弦的仿射变换。排除锚点会改变指标水平，但不改变 Pearson、Spearman 或这些残差化关联。
 
-| Predictor versus reconstruction target | Pooled Pearson | Pooled Spearman | Equal-track Spearman | Controlled Pearson | Controlled rank association |
+| 预测子对重建目标 | 合并 Pearson | 合并 Spearman | 等 track Spearman | 受控 Pearson | 受控秩关联 |
 |---|---:|---:|---:|---:|---:|
-| `V_g` versus magnitude error | 0.702 | 0.638 | 0.622 | 0.420 | 0.286 |
-| Amplitude variance versus magnitude error | 0.707 | 0.541 | 0.567 | 0.560 | 0.373 |
-| `V_g` versus direction error | -0.122 | -0.324 | -0.444 | 0.109 | 0.431 |
-| `D_h` versus direction error | 0.776 | 0.701 | 0.689 | 0.842 | 0.713 |
-| Relative vector variance versus direction error | 0.546 | 0.639 | 0.544 | 0.585 | 0.605 |
-| Eight-point proxy variance versus direction error | -0.177 | -0.398 | -0.344 | -0.001 | 0.202 |
+| `V_g` 对幅度误差 | 0.702 | 0.638 | 0.622 | 0.420 | 0.286 |
+| 幅度方差对幅度误差 | 0.707 | 0.541 | 0.567 | 0.560 | 0.373 |
+| `V_g` 对方向误差 | -0.122 | -0.324 | -0.444 | 0.109 | 0.431 |
+| `D_h` 对方向误差 | 0.776 | 0.701 | 0.689 | 0.842 | 0.713 |
+| 相对向量方差对方向误差 | 0.546 | 0.639 | 0.544 | 0.585 | 0.605 |
+| 八点 proxy 方差对方向误差 | -0.177 | -0.398 | -0.344 | -0.001 | 0.202 |
 
-Direction error is `E[1-cos(g_t, ghat_t)]`, so its correlation signs are the opposite of those for mean cosine. The original positive pooled `V_g` versus cosine Spearman of 0.324 becomes a controlled rank association of -0.431 (equivalently, +0.431 with direction error) after controlling mean gradient norm and track. The eight-proxy variance versus cosine association changes from +0.398 pooled to -0.202 controlled. Direction dispersion is more directly associated with directional reconstruction error than absolute vector variance: pooled Spearman 0.701 versus -0.324, and controlled rank association 0.713 versus 0.431 for the positive error target. Relative vector variance also aligns positively with direction error after scale normalization.
+方向误差为 `E[1-cos(g_t, ghat_t)]`，因此其相关性符号与平均余弦者相反。原本 `V_g` 对余弦的合并 Spearman 正相关 0.324，在控制平均梯度范数和 track 后变为受控秩关联 -0.431（等价地，对方向误差为 +0.431）。八 proxy 方差对余弦的关联从合并 +0.398 变为受控 -0.202。方向离散度比绝对向量方差更直接地与方向重建误差相关：以正误差目标计，合并 Spearman 为 0.701 对 -0.324，受控秩关联为 0.713 对 0.431。相对向量方差在尺度归一化后也与方向误差呈正对齐。
 
-Leave-one-track-out controlled rank ranges are -0.524 to -0.329 for `V_g` versus cosine, -0.349 to -0.057 for proxy variance versus cosine, and 0.617 to 0.756 for `D_h` versus direction error. Their signs persist across all ten omissions, although the proxy association is weak. This is a fixed-effects descriptive sensitivity check, not a causal result or a population-level inference.
+留一 track 的受控秩范围：`V_g` 对余弦为 -0.524 到 -0.329，proxy 方差对余弦为 -0.349 到 -0.057，`D_h` 对方向误差为 0.617 到 0.756。它们的符号在全部十次省略中保持不变，尽管 proxy 关联较弱。这是一个固定效应的描述性敏感性检查，而非因果结论或总体层面的推断。
 
-The non-anchor mean magnitude error is 1.100 versus 1.083 with anchors; mean direction error is 0.648 versus 0.638. Every block uses 252 of 256 points after exclusion. The positive pooled variance-cosine association is therefore not caused by the four exact anchor positions. Its direction changes after controlling gradient scale and track identity.
+非锚点平均幅度误差为 1.100，含锚点为 1.083；平均方向误差为 0.648，含锚点为 0.638。排除后每个 block 使用 256 个点中的 252 个。因此，合并的方差-余弦正相关并非由四个精确锚点位置造成。其方向在控制梯度尺度和 track 身份后发生改变。
 
-## Figures and artifacts
+## 图表与产物
 
-`figures/scatter_all.png` and `figures/scatter_nonanchor.png` show 46 blocks colored by track. Each has raw and controlled-rank panels for full variance versus cosine, proxy variance versus cosine, and full direction dispersion versus direction error. SVG versions are also provided. `block_metrics.csv` contains all 46 derived block rows, `correlations.csv` gives pooled, equal-track, and controlled associations for all requested checks, and `input_manifest.json` records definitions and source paths. The `.complete` marker is present. The selected ten trajectories and overlapping raw windows limit generalization; the regression has only 46 block observations and ten track groups.
+`figures/scatter_all.png` 和 `figures/scatter_nonanchor.png` 展示按 track 着色的 46 个 block。每个图都包含全方差对余弦、proxy 方差对余弦、全方向离散度对方向误差的原始与受控秩面板。同时也提供 SVG 版本。`block_metrics.csv` 包含全部 46 行派生 block 记录，`correlations.csv` 给出所有要求检查的合并、等 track 和受控关联，`input_manifest.json` 记录定义和源路径。`.complete` 标记存在。所选十条轨迹和相互重叠的原始窗口限制了泛化性；回归只有 46 个 block 观测值和十个 track 分组。
 EOF'
+
+## v0-gradient-variance-decomposition：梯度方差分解
+
+于 2026-11-08 完成，使用来自 v0-var-proxy-estimate 的 46 个固定 256 起点 block、全部缓存全梯度 Gram 矩阵，以及同样的四锚点线性重建。该表报告在调整平均梯度范数和 track 固定效应后的合并 Spearman 与受控秩关联。重建误差使用每个 block 的 252 个非锚点位置。
+
+| 预测子与目标 | 合并 Spearman | 受控秩关联 |
+|---|---:|---:|
+| 向量方差对平均梯度范数 | 0.970 | 平均范数是控制变量 |
+| 向量方差对幅度方差 | 0.569 | 0.663 |
+| 向量方差对方向离散度 | -0.222 | 0.578 |
+| 向量方差对幅度重建误差 | 0.638 | 0.286 |
+| 方向离散度对方向重建误差 | 0.701 | 0.713 |
+| 相对向量方差对方向重建误差 | 0.639 | 0.605 |
+| 向量方差对方向重建误差 | -0.324 | 0.431 |
+
+总向量方差中幅度方差占比的中位数为 0.176；46 个 block 中只有一个的占比超过 0.5。这区分了与梯度尺度的强跨 block 关联和 block 内方差分解。原本向量方差对重建余弦的合并 Spearman 正相关 +0.324，在受控秩关联下变为 -0.431，而受控 Pearson 仅为 -0.109。八 proxy 方差对余弦从合并 Spearman +0.398 变为受控秩关联 -0.202，受控 Pearson 接近零（+0.001）。这些是固定十条 track 样本的描述性结果。
+
+排除四个精确锚点使平均幅度误差从 1.083 升至 1.100，平均方向误差从 0.638 升至 0.648。相关性保持不变，因为每个 block 排除的是同样的四个零误差位置。完整定义、Pearson 和逐 track 结果、留一 track 检查以及局限性：docs/results/v0-gradient-variance-decomposition.md。原始与受控散点图为 `outputs/train/v0-gradient-variance-decomposition/figures/scatter_all.png` 和 `scatter_nonanchor.png`（另有 SVG）。block 数据、相关性表和 `.complete` 位于 `outputs/train/v0-gradient-variance-decomposition/`。

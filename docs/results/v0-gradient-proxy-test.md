@@ -1,24 +1,24 @@
-# v0-gradient-proxy-test: Local-Risk and Cross-Rank
+# v0-gradient-proxy-test：Local-Risk 与 Cross-Rank
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-12
 
-Status: Local-Risk and Cross-Rank complete. Local-Risk scope: 12,836 windows of the selected M5 tail sample at the fixed warmed Chronos-T5 checkpoint.
+状态：Local-Risk 与 Cross-Rank 已完成。Local-Risk 范围：在固定的已预热 Chronos-T5 checkpoint 下，所选 M5 尾部样本的 12,836 个窗口。
 
-## Batch questions and conclusions
+## 批次问题与结论
 
-### Part Local-Risk
+### Local-Risk 部分
 
-Question: Within nonoverlapping blocks of 32 consecutive window starts, do inexpensive proxy statistics preserve the ranking of full-gradient vector variance and full-gradient direction dispersion? Does that relationship persist when only a subset of proxy gradients is observed?
+问题：在由 32 个连续窗口起点构成的不重叠 block 内，低成本的代理统计量能否保持完整梯度向量方差与完整梯度方向离散度的排名？当只观测一部分代理梯度时，这种关系是否仍然成立？
 
-Result category: Other. The 32-point result is strongly positive; the sparse-sampling extension finds that variance ranking remains strong down to 4 points, while direction ranking degrades more at low counts. No budgeted interval-selection policy was evaluated. Output-head dispersion has equal-trajectory mean Spearman 0.9476 with full vector variance and 0.8161 with full direction dispersion. This supports using the head proxy to flag candidate high-variation blocks for follow-up, but does not show how many full-gradient calls such a policy saves at a chosen coverage level.
+结果类别：Other。32 点结果强烈为正；稀疏采样扩展发现，方差排名在低至 4 点时仍保持强劲，而方向排名在低点数时下降更多。未评估任何带预算的区间选择策略。输出头离散度与完整向量方差的等权轨迹平均 Spearman 为 0.9476，与完整方向离散度为 0.8161。这支持使用头代理来标记候选高变化 block 以供后续跟进，但未表明在选定覆盖水平下此类策略能节省多少次完整梯度调用。
 
-#### Local-Risk sampling extension: sparse proxy measurements
+#### Local-Risk 采样扩展：稀疏代理测量
 
-Question: If only k output-head gradients are computed in each 32-start block, with k in {32,24,16,8,4}, how strongly do sampled-head variance and direction-dispersion estimates correlate with the full-gradient statistics computed from all 32 points?
+问题：如果在每个 32 起点 block 中只计算 k 个输出头梯度，且 k 取 {32,24,16,8,4}，那么采样头方差与方向离散度估计与由全部 32 点计算出的完整梯度统计量的相关强度如何？
 
-Result category: Other (the variance ranking stays strong with sparse samples, while direction ranking degrades more quickly). Across 396 complete blocks from ten tracks, each count below 32 was evaluated using 20 fixed-seed nested random subsets per block. The table gives equal-track Pearson and median equal-track Spearman; bracketed ranges are the 10th-90th percentiles across sampling replicates.
+结果类别：Other（稀疏样本下方差排名仍保持强劲，而方向排名下降更快）。在来自十条轨迹的 396 个完整 block 上，每个小于 32 的点数均使用每个 block 20 个固定种子嵌套随机子集进行评估。表中给出等权轨迹 Pearson 与等权轨迹 Spearman 中位数；方括号范围为跨采样重复的第 10-90 百分位数。
 
-| Proxy points per block | Full vector variance Pearson | Full vector variance Spearman | Full direction dispersion Pearson | Full direction dispersion Spearman |
+| 每 block 代理点数 | 完整向量方差 Pearson | 完整向量方差 Spearman | 完整方向离散度 Pearson | 完整方向离散度 Spearman |
 |---:|---:|---:|---:|---:|
 | 32 | 0.944 | 0.948 | 0.854 | 0.816 |
 | 24 | 0.941 | 0.942 (0.938-0.945) | 0.845 | 0.806 (0.801-0.813) |
@@ -26,19 +26,19 @@ Result category: Other (the variance ranking stays strong with sparse samples, w
 | 8 | 0.921 | 0.916 (0.907-0.922) | 0.755 | 0.704 (0.688-0.737) |
 | 4 | 0.878 | 0.867 (0.852-0.889) | 0.600 | 0.579 (0.538-0.619) |
 
-Interpretation: For full vector variance, sampling 8 of 32 proxy points preserves most of the block-ranking association; 4 points still provide a useful but weaker signal. Direction dispersion is more sensitive: it remains fairly strong at 16 points, is moderate at 8, and drops more clearly at 4. At 4 points, the proxy still tends to distinguish more variable blocks, but is substantially less reliable for ranking direction changes.
+解释：对于完整向量方差，从 32 个代理点中采样 8 个可保留大部分 block 排名关联性；4 个点仍提供有用但较弱的信号。方向离散度更敏感：在 16 点时仍相当强，在 8 点时中等，在 4 点时下降更明显。在 4 点时，代理仍倾向于区分变化更大的 block，但用于排名方向变化时可靠性显著降低。
 
-This is a retrospective subsampling analysis of saved head Gram matrices: the selected-point statistics match what those same sampled gradients would produce, but all proxy gradients had already been computed and cached. It measures statistical information loss, not actual end-to-end runtime savings. The sampled variance uses the same population formula on the observed subset; correlation, rather than absolute variance calibration, is the target. Sampling ranges describe sensitivity to the fixed random-subset design, not confidence intervals over datasets. No interval-selection policy or downstream training outcome was tested.
+这是对已保存的头 Gram 矩阵的回顾性子采样分析：选点统计量与这些相同采样梯度本应产生的结果一致，但所有代理梯度均已事先计算并缓存。它衡量的是统计信息损失，而非实际的端到端运行时间节省。采样方差在观测子集上使用相同总体公式；目标是相关性，而非绝对方差的校准。采样范围描述的是对固定随机子集设计的敏感性，而非数据集上的置信区间。未测试任何区间选择策略或下游训练结果。
 
-Artifacts: outputs/train/v0-gradient-proxy-test/local_risk_sparse/summary.csv gives the summary table; replicate_correlations.csv gives per-track/per-replicate associations; sampled_block_statistics.csv contains sampled and full block statistics; input_manifest.json records the fixed sampling design.
+产物：outputs/train/v0-gradient-proxy-test/local_risk_sparse/summary.csv 给出汇总表；replicate_correlations.csv 给出按轨迹/按重复的关联；sampled_block_statistics.csv 包含采样与完整 block 统计量；input_manifest.json 记录固定的采样设计。
 
-### Local-Risk 64-point sampling extension
+### Local-Risk 64 点采样扩展
 
-Question: In consecutive 64-start blocks, if only k output-head gradients are computed for k in {64,48,32,16,8,4}, how strongly do sampled proxy variance and direction dispersion correlate with the true full-gradient statistics computed from all 64 points?
+问题：在连续的 64 起点 block 中，如果仅计算 k 个输出头梯度，k 取 {64,48,32,16,8,4}，那么采样代理方差与方向离散度与由全部 64 点计算出的真实完整梯度统计量的相关强度如何？
 
-Result category: Other (variance ranking remains strong at low counts; direction ranking degrades more). Across 194 complete blocks from ten tracks, each count below 64 was tested with 20 fixed-seed nested random subsets per block. Values are equal-track Pearson and median equal-track Spearman; Spearman ranges in parentheses are the 10th-90th percentiles over sampling replicates.
+结果类别：Other（方差排名在低点数下仍保持强劲；方向排名下降更多）。在来自十条轨迹的 194 个完整 block 上，每个小于 64 的点数均使用每个 block 20 个固定种子嵌套随机子集进行测试。数值为等权轨迹 Pearson 与等权轨迹 Spearman 中位数；括号中的 Spearman 范围为跨采样重复的第 10-90 百分位数。
 
-| Proxy points per 64-start block | Full vector variance Pearson | Full vector variance Spearman | Full direction dispersion Pearson | Full direction dispersion Spearman |
+| 每 64 起点 block 代理点数 | 完整向量方差 Pearson | 完整向量方差 Spearman | 完整方向离散度 Pearson | 完整方向离散度 Spearman |
 |---:|---:|---:|---:|---:|
 | 64 | 0.936 | 0.935 | 0.858 | 0.808 |
 | 48 | 0.934 | 0.931 (0.926-0.935) | 0.853 | 0.808 (0.800-0.816) |
@@ -47,23 +47,23 @@ Result category: Other (variance ranking remains strong at low counts; direction
 | 8 | 0.896 | 0.886 (0.868-0.899) | 0.733 | 0.693 (0.651-0.741) |
 | 4 | 0.845 | 0.837 (0.792-0.859) | 0.579 | 0.557 (0.512-0.650) |
 
-Interpretation: With 8 proxy points out of 64, the block ranking by overall gradient variance remains strong (Spearman 0.886), while direction-dispersion ranking is moderate (0.693). With 4 points, variance ranking remains useful (0.837) but direction ranking is weaker (0.557). Using 16 points preserves stronger direction ranking (0.771); 32 points brings it close to the all-64 baseline (0.805 versus 0.808).
+解释：在 64 个代理点中取 8 个时，按整体梯度方差的 block 排名仍保持强劲（Spearman 0.886），而方向离散度排名为中等（0.693）。取 4 个点时，方差排名仍有用（0.837），但方向排名较弱（0.557）。使用 16 个点可保持更强的方向排名（0.771）；32 个点使其接近全部 64 点基线（0.805 对 0.808）。
 
-The all-64 baseline correlations (0.935 for variance and 0.808 for direction) are slightly below the 32-start-block baselines (0.948 and 0.816). This is an observed block-scale difference; this experiment does not identify its cause. There are fewer complete 64-start blocks (194 versus 396 32-start blocks).
+全 64 点基线相关性（方差 0.935、方向 0.808）略低于 32 起点 block 基线（0.948 和 0.816）。这是观测到的 block 尺度差异；本实验未确定其原因。完整的 64 起点 block 数量更少（194 个，对 396 个 32 起点 block）。
 
-This is retrospective subsampling of saved Gram matrices. It measures information loss in the block statistics, not actual runtime savings, online interval selection, or downstream training gains. Sampling ranges are design sensitivity summaries, not confidence intervals over trajectories. The sampled windows overlap in raw observations, and the ten tracks are the same selected M5 tail sample.
+这是对已保存 Gram 矩阵的回顾性子采样。它衡量的是 block 统计量中的信息损失，而非实际运行时间节省、在线区间选择或下游训练收益。采样范围是设计敏感性汇总，而非轨迹上的置信区间。采样窗口在原始观测中重叠，且十条轨迹为同一所选 M5 尾部样本。
 
-Artifacts: outputs/train/v0-gradient-proxy-test/local_risk_sparse_64/summary.csv, replicate_correlations.csv, sampled_block_statistics.csv, and input_manifest.json. The part .complete marker is present.
+产物：outputs/train/v0-gradient-proxy-test/local_risk_sparse_64/summary.csv、replicate_correlations.csv、sampled_block_statistics.csv 和 input_manifest.json。该部分的 .complete 标记已存在。
 
-### Local-Risk 128-, 256-, and 576-start sampling extension
+### Local-Risk 128、256 与 576 起点采样扩展
 
-Question: As the interval grows to 128, 256, or 576 consecutive window starts, how do sparse output-head variance and direction-dispersion statistics correlate with the full-gradient statistics over every start in the interval?
+问题：当区间增长到 128、256 或 576 个连续窗口起点时，稀疏输出头方差与方向离散度统计量与区间内每个起点上的完整梯度统计量的相关强度如何？
 
-Result category: Other. The 128- and 256-start results show useful within-track associations under sparse sampling. The 576-start case has only 19 blocks total and at most two per track; its correlations are pooled across tracks and are exploratory, not a reliable within-track estimate.
+结果类别：Other。128 与 256 起点结果在稀疏采样下显示出有用的轨迹内关联。576 起点情形总共只有 19 个 block，且每条轨迹至多两个；其相关性跨轨迹合并，属探索性结果，而非可靠的轨迹内估计。
 
-Proxy counts preserve the fractions 100%, 75%, 50%, 25%, 12.5%, and 6.25%: 128 blocks use {128,96,64,32,16,8}; 256 blocks use {256,192,128,64,32,16}; 576 blocks use {576,432,288,144,72,36}. Each count below the full block size uses 20 nested, fixed-seed samples without replacement. The following rows show Pearson r and median Spearman rho; bracketed rho ranges are the 10th-90th sampling-replicate percentiles. The 128 block correlations average ten track-level correlations; the 256 results average nine tracks with at least three blocks; 576 results pool all blocks.
+代理点数保持 100%、75%、50%、25%、12.5% 与 6.25% 的比例：128 block 使用 {128,96,64,32,16,8}；256 block 使用 {256,192,128,64,32,16}；576 block 使用 {576,432,288,144,72,36}。每个小于完整 block 大小的点数使用 20 个无放回嵌套、固定种子样本。以下各行给出 Pearson r 与 Spearman rho 中位数；方括号中的 rho 范围为跨采样重复的第 10-90 百分位数。128 block 相关性平均十条轨迹级相关性；256 结果平均九条至少含三个 block 的轨迹；576 结果合并所有 block。
 
-| Block starts | Proxy points | Full variance r / rho | Full direction dispersion r / rho |
+| Block 起点 | 代理点数 | 完整方差 r / rho | 完整方向离散度 r / rho |
 |---:|---:|---:|---:|
 | 128 | 128 | 0.907 / 0.872 | 0.899 / 0.827 |
 | 128 | 96 | 0.906 / 0.869 (0.850-0.877) | 0.897 / 0.830 (0.820-0.837) |
@@ -84,21 +84,21 @@ Proxy counts preserve the fractions 100%, 75%, 50%, 25%, 12.5%, and 6.25%: 128 b
 | 576 | 72 | 0.919 / 0.921 (0.900-0.946) | 0.763 / 0.767 (0.689-0.829) |
 | 576 | 36 | 0.875 / 0.892 (0.822-0.926) | 0.705 / 0.704 (0.544-0.785) |
 
-Interpretation: At 128 starts, 8 sampled proxy points (6.25%) retain variance rho 0.809 and direction rho 0.702. At 256 starts, 16 points (6.25%) retain variance rho 0.867 and direction rho 0.772; 32 points improve direction rho to 0.811. This suggests longer blocks can preserve the cross-block ranking with fewer proxy points in this sample, but block-level and track-level results have different numbers of observations and should not be read as a proven benefit of longer intervals.
+解释：在 128 起点下，采样 8 个代理点（6.25%）保持方差 rho 0.809 与方向 rho 0.702。在 256 起点下，16 个点（6.25%）保持方差 rho 0.867 与方向 rho 0.772；32 个点将方向 rho 提升至 0.811。这表明在本样本中更长的 block 能以更少的代理点保持跨 block 排名，但 block 级与轨迹级结果具有不同数量的观测，不应被解读为更长区间已被证明的收益。
 
-The 576-start pooled numbers look high even at 36 points, but they come from only 19 blocks across ten tracks. No track has three such blocks, so within-track correlations cannot be calculated. The pooled result can reflect differences between tracks as well as true within-track proxy performance. Treat this as exploratory only.
+576 起点的合并数值即使在 36 点时看起来也偏高，但它们仅来自十条轨迹中的 19 个 block。没有任何轨迹拥有三个此类 block，因此无法计算轨迹内相关性。合并结果可能反映轨迹之间的差异以及真实的轨迹内代理性能。仅将其视为探索性结果。
 
-All results are retrospective calculations from saved full/head Gram matrices. They do not measure actual runtime savings or test an online policy that selects intervals for full-gradient computation. Blocks do not overlap by starting index, but their underlying 576-point windows can overlap in raw observations.
+所有结果均基于已保存的完整/头 Gram 矩阵的回顾性计算。它们不衡量实际运行时间节省，也不测试选择区间以进行完整梯度计算的在线策略。block 在起始索引上不重叠，但其底层的 576 点窗口在原始观测中可能重叠。
 
-Artifacts: outputs/train/v0-gradient-proxy-test/local_risk_sparse_long/summary.csv, replicate_correlations.csv, sampled_block_statistics.csv, and input_manifest.json. The part .complete marker is present.
+产物：outputs/train/v0-gradient-proxy-test/local_risk_sparse_long/summary.csv、replicate_correlations.csv、sampled_block_statistics.csv 和 input_manifest.json。该部分的 .complete 标记已存在。
 
-### Local-Risk target variance spread
+### Local-Risk 目标方差分布
 
-Question: Do the full-gradient variance targets actually vary enough across blocks to support screening, or do most blocks sit near one common value?
+问题：完整梯度方差目标在 block 之间是否确实变化足够大以支持筛选，还是大多数 block 都接近某个共同值？
 
-Result: The full-gradient variance targets show substantial within-track spread for 32- to 256-start blocks. To reduce between-track scale effects, each block variance was divided by its own track's median variance before pooling. The normalized p90/p10 ratio remains 7.44 at 32 starts, 5.25 at 64, 4.42 at 128, and 3.88 at 256. Thus the differences are not only due to some tracks having larger gradients overall.
+结果：完整梯度方差目标在 32 至 256 起点 block 中显示出显著的轨迹内分布。为减少轨迹间尺度效应，在合并前将每个 block 方差除以自身轨迹的中位方差。归一化后的 p90/p10 比率在 32 起点为 7.44，在 64 为 5.25，在 128 为 4.42，在 256 为 3.88。因此这些差异不仅仅是由于某些轨迹整体梯度更大。
 
-| Block starts | Complete blocks | Full variance p10 | Median | p90 | Within-track-normalized p90/p10 | Median within-track CV |
+| Block 起点 | 完整 block 数 | 完整方差 p10 | 中位数 | p90 | 轨迹内归一化 p90/p10 | 轨迹内 CV 中位数 |
 |---:|---:|---:|---:|---:|---:|---:|
 | 32 | 396 | 2.12 | 6.21 | 15.75 | 7.44 | 0.810 |
 | 64 | 194 | 2.98 | 7.82 | 17.19 | 5.25 | 0.697 |
@@ -106,41 +106,41 @@ Result: The full-gradient variance targets show substantial within-track spread 
 | 256 | 46 | 5.14 | 11.69 | 20.32 | 3.88 | 0.435 |
 | 576 | 19 | 8.91 | 13.06 | 21.10 | 2.06 | 0.218* |
 
-The median within-track coefficient of variation (CV) is calculated only for tracks with at least two blocks. The 576-start CV uses two blocks per track and is highly unstable; only 19 blocks exist overall. The 576 normalized spread is also pooled over those blocks and remains exploratory.
+轨迹内变异系数（CV）中位数仅对至少含两个 block 的轨迹计算。576 起点 CV 使用每条轨迹两个 block，极不稳定；总体仅有 19 个 block。576 归一化分布也是在这些 block 上合并的，仍属探索性。
 
-Interpretation: There are genuinely lower- and higher-variance intervals in this sample, especially at shorter block lengths. The spread shrinks as block length grows, consistent with averaging over more starts. This answers whether the target has useful variation, but not whether a chosen proxy budget reliably finds the highest-variance tail. The prior sparse-sampling correlations show the proxy tracks the broad variation; a next decision-quality check should measure top-quantile recall or enrichment at a fixed sampling budget.
+解释：本样本中确实存在较低与较高方差的区间，在较短 block 长度下尤其如此。随着 block 长度增长，分布收窄，这与对更多起点取平均一致。这回答了目标是否具有有用变化，但未回答选定代理预算是否能可靠找到最高方差尾部。先前的稀疏采样相关性显示代理能跟踪总体变化；下一步质量决策检验应在固定采样预算下测量最高分位数召回率或富集度。
 
-Full direction-dispersion targets also vary, but their distribution moves toward the upper bound as block length increases: pooled p10-p90 is 0.391-0.706 at 32 starts, 0.502-0.803 at 64, 0.644-0.912 at 128, 0.716-0.920 at 256, and 0.875-0.957 at 576. The 576 result again has only 19 pooled blocks.
+完整方向离散度目标也有变化，但其分布随 block 长度增加向趋近上界移动：合并 p10-p90 在 32 起点为 0.391-0.706，在 64 为 0.502-0.803，在 128 为 0.644-0.912，在 256 为 0.716-0.920，在 576 为 0.875-0.957。576 结果同样仅有 19 个合并 block。
 
-## Part Cross-Rank
+## Cross-Rank 部分
 
-Question: For each reference window from the two shortest retained tracks, do proxy scores rank nonoverlapping source windows from the other eight tracks in the same order as full-gradient cosine, and do proxy cosine values approximate the full-gradient cosine values?
+问题：对于来自两条最短保留轨迹的每个参考窗口，代理分数对其他八条轨迹的非重叠源窗口进行排名时，其顺序是否与完整梯度余弦相同，且代理余弦值是否接近完整梯度余弦值？
 
-Result category: Other (qualified positive ranking signal for output-head cosine on this fixed pool; per-reference ordering is moderate, so direct substitution for full gradients is not established).
+结果类别：Other（在该固定候选池上，输出头余弦给出了有条件的正向排名信号；逐参考排序为中等，因此尚未确立可替代完整梯度）。
 
-The comparison contains 1,877 reference queries and 24 source candidates (three disjoint 576-point windows from each of eight source tracks), for 45,048 cross-track pairs. Output-head cosine has pair-weighted Pearson 0.786 and Spearman 0.795 across all pairs. For the decision-relevant per-reference rankings, query-weighted mean Spearman is 0.640, mean Kendall tau-b is 0.481, and mean top-5 overlap is 0.487. A random five-of-24 ranking has expected overlap 0.208. Per-reference mean Spearman is 0.620 for reference track 00 and 0.649 for track 07. Head cosine calibration has mean per-reference MAE 0.071, RMSE 0.091, and signed bias -0.016.
+该比较包含 1,877 个参考查询与 24 个源候选（来自八条源轨迹各三个不相交的 576 点窗口），共 45,048 个跨轨迹对。输出头余弦在所有对上的对加权 Pearson 为 0.786、Spearman 为 0.795。对于决策相关的逐参考排名，查询加权平均 Spearman 为 0.640，平均 Kendall tau-b 为 0.481，平均 top-5 重叠度为 0.487。24 个中随机取 5 个的排名期望重叠度为 0.208。逐参考平均 Spearman 对参考轨迹 00 为 0.620，对轨迹 07 为 0.649。头余弦校准的逐参考平均 MAE 为 0.071、RMSE 为 0.091，带符号偏差为 -0.016。
 
-The embedding cosine is not useful for this cross-track ranking in this sample (mean per-reference Spearman -0.020; top-5 overlap 0.250). Negative absolute loss difference is weak (mean per-reference Spearman 0.222; top-5 overlap 0.285). The two reference tracks give similar average head-ranking strength, but there are only two reference providers and 24 candidates. The 1,877 queries overlap within their tracks and are dependent; these summaries are descriptive, not independent-query significance tests. The ten tracks are a nonrepresentative selected tail sample, so this does not establish performance on unrestricted M5 windows, other datasets, or other models.
+嵌入余弦在本样本中对这种跨轨迹排名无用（逐参考平均 Spearman 为 -0.020；top-5 重叠度 0.250）。负绝对损失差较弱（逐参考平均 Spearman 为 0.222；top-5 重叠度 0.285）。两条参考轨迹给出的平均头排名强度相似，但只有两个参考提供者与 24 个候选。1,877 个查询在其轨迹内重叠且相互依赖；这些汇总为描述性的，而非独立查询显著性检验。十条轨迹为非代表性的所选尾部样本，因此这不能确立在无限制 M5 窗口、其他数据集或其他模型上的性能。
 
-Artifacts: outputs/train/v0-gradient-proxy-test/cross_rank/input_manifest.json records exact track identities and selected source starts; cross_track_pair_scores.csv has all 45,048 scores; query_ranking.csv has all 1,877 per-reference summaries; aggregate.json has aggregate and per-reference-track summaries. The Cross-Rank .complete marker is present.
+产物：outputs/train/v0-gradient-proxy-test/cross_rank/input_manifest.json 记录精确的轨迹身份与所选源起点；cross_track_pair_scores.csv 含全部 45,048 个分数；query_ranking.csv 含全部 1,877 个逐参考汇总；aggregate.json 含聚合与逐参考轨迹汇总。Cross-Rank 的 .complete 标记已存在。
 
-Protocol: ../gradient-proxy-protocol.md. Direction is primary. Full reference gradients are BF16 copies of FP32 BP; every coordinate is included. Proxy head gradients are FP32 output-path derivatives with detached backbone states. Embeddings are valid-token means of final decoder states under teacher forcing. Loss is the original CE.
+协议：../gradient-proxy-protocol.md。方向为主。完整参考梯度为 FP32 BP 的 BF16 副本；每个坐标均包含在内。代理头梯度为带分离主干状态的 FP32 输出路径导数。嵌入为教师强制下最终解码器状态的有效 token 均值。损失为原始 CE。
 
-All reported summary correlations weight trajectories equally. Ranges are observed trajectory ranges, not confidence intervals. Overlapping pairs are dependent; no pair-independent p-values are used.
+所有报告的汇总相关性对轨迹等权。范围为观测到的轨迹范围，而非置信区间。重叠对相互依赖；未使用对独立的 p 值。
 
-## Window norm associations
+## 窗口范数关联
 
-| Proxy | Mean Pearson | Mean Spearman | Spearman range |
+| 代理 | 平均 Pearson | 平均 Spearman | Spearman 范围 |
 |---|---:|---:|---:|
 | head_norm | 0.9312 | 0.9249 | 0.7156 to 0.9765 |
 | embedding_norm | 0.1606 | 0.1245 | -0.0877 to 0.3461 |
 | loss | 0.4637 | 0.4778 | 0.3078 to 0.7287 |
 
-## Direction associations at fixed lag
+## 固定滞后下的方向关联
 
-Head and embedding entries correlate pairwise cosine with full-gradient cosine. Loss entries correlate absolute loss difference with full-gradient angular distance (1-cosine). Larger positive values indicate better ordering in all columns. These measure association, not equality of cosine values.
+头与嵌入条目将成对余弦与完整梯度余弦进行相关。损失条目将绝对损失差与完整梯度角距离（1-cosine）进行相关。在所有列中，较大的正值表示更好的排序。这些衡量的是关联，而非余弦值的相等性。
 
-| Lag | Proxy | Mean Pearson | Mean Spearman | Spearman range |
+| 滞后 | 代理 | 平均 Pearson | 平均 Spearman | Spearman 范围 |
 |---:|---|---:|---:|---:|
 | 1 | head_cosine | 0.9483 | 0.9379 | 0.8961 to 0.9611 |
 | 1 | embedding_cosine | 0.8838 | 0.8568 | 0.8302 to 0.8881 |
@@ -176,11 +176,11 @@ Head and embedding entries correlate pairwise cosine with full-gradient cosine. 
 | 575 | embedding_cosine | 0.0079 | -0.0157 | -0.1785 to 0.2577 |
 | 575 | loss_difference | 0.3280 | 0.3300 | 0.1086 to 0.6829 |
 
-## Within-block variation
+## block 内变异
 
-Nonoverlapping blocks of 32 starts; partial terminal blocks are excluded from these correlations. Vector variance includes magnitude and direction. Direction dispersion uses normalized gradients and therefore isolates directional spread.
+由 32 起点构成的不重叠 block；部分终止 block 从这些相关性中排除。向量方差包含幅度与方向。方向离散度使用归一化梯度，因此隔离了方向散布。
 
-| Target | Proxy | Mean Pearson | Mean Spearman | Spearman range |
+| 目标 | 代理 | 平均 Pearson | 平均 Spearman | Spearman 范围 |
 |---|---|---:|---:|---:|
 | full_variance | head_variance | 0.9436 | 0.9476 | 0.8514 to 0.9810 |
 | full_variance | embedding_variance | 0.3754 | 0.4268 | 0.0083 to 0.7668 |
@@ -189,16 +189,29 @@ Nonoverlapping blocks of 32 starts; partial terminal blocks are excluded from th
 | full_direction_dispersion | embedding_direction_dispersion | 0.3366 | 0.3301 | 0.0355 to 0.5329 |
 | full_direction_dispersion | loss_variance | 0.0124 | 0.0162 | -0.3381 to 0.3787 |
 
-## Checks and artifacts
+## 检查与产物
 
-Three full FP32 BP cache-alignment checks per trajectory and one analytic-head/autograd comparison per trajectory passed. See per-trajectory validation_and_timing.json for numerical errors. Cache checks use relative L2 <=0.01 and cosine >=0.9999; head derivative checks use relative L2 <=0.0001 for FP32 batched accumulation differences.
+每条轨迹的三次完整 FP32 BP 缓存对齐检查与每条轨迹一次解析头/autograd 比较均通过。数值误差见逐轨迹 validation_and_timing.json。缓存检查使用相对 L2 <=0.01 与 cosine >=0.9999；头导数检查对 FP32 批量累加差异使用相对 L2 <=0.0001。
 
-Artifacts under outputs/train/v0-gradient-proxy-test: correlations.csv (per trajectory), trajectory_equal_weight_summary.csv, cosine_calibration.csv (absolute cosine means/spread and proxy MAE), blocks.csv, and per-trajectory head_gradients.npy, window_features.npz, gram_matrices.npz, pair_metrics.npz, manifests and validation records.
+完成时，产物包括 correlations.csv（逐轨迹）、trajectory_equal_weight_summary.csv、cosine_calibration.csv、blocks.csv、逐轨迹 head_gradients.npy、window_features.npz、gram_matrices.npz、pair_metrics.npz、清单与验证记录。2026-11-12，十个原始逐窗口 head_gradients.npy 数组被删除，以保留数据盘容量供未来正式 v1 实验使用；派生分析产物保留。
 
-## Direct compute cost
+## 直接计算开销
 
-Matched batch-size-one measurements on 80 windows (8 from each of the ten trajectories), three repeats per window, give median wall times of 42.80 ms for full BP, 14.21 ms for output-head gradients, 11.35 ms for mean decoder embeddings, and 11.28 ms for forward loss. Paired median speedups over full BP are 2.93x, 3.72x, and 3.71x. Timing includes tokenization, model computation, CPU result transfer, and CUDA synchronization. Full protocol and per-track ranges: docs/results/v0-gradient-proxy-cost.md.
+在 80 个窗口（来自十条轨迹各 8 个）上进行批次大小为一的匹配测量，每窗口三次重复，给出完整 BP 的墙钟时间中位数 42.80 ms、输出头梯度 14.21 ms、平均解码器嵌入 11.35 ms、前向损失 11.28 ms。相对完整 BP 的成对中位加速为 2.93x、3.72x 和 3.71x。计时包括分词、模型计算、CPU 结果传输与 CUDA 同步。完整协议与逐轨迹范围：docs/results/v0-gradient-proxy-cost.md。
 
-## Interpretation limits
+## 解释局限
 
-Full and proxy dimensions differ: direct cross-space cosine was not computed. A strong correlation does not imply calibrated absolute cosine. The head proxy shares output-path information with the full gradient. Teacher-forced features require future labels. This study does not fit a mapping or evaluate CoVar allocation, held-out training outcomes, or matched proxy speed benchmarks. Any proxy selection from these trajectories needs held-out confirmation.
+完整与代理维度不同：未计算直接跨空间余弦。强相关并不意味着校准后的绝对余弦。头代理与完整梯度共享输出路径信息。教师强制特征需要未来标签。本研究未拟合映射，也未评估 CoVar 分配、留出训练结果或匹配的代理速度基准。从这些轨迹中进行的任何代理选择都需要留出确认。
+
+## 缓存保留更新（2026-11-12）
+
+十个未投影的 FP32 `head_gradients.npy` 数组（53,838,087,424 字节；约 50.14 GiB）被删除，以保留数据盘容量供未来正式 v1 实验使用。派生分析输出、验证记录与本报告保留。需要原始逐窗口输出头向量的分析重放需重新生成这些数组。TimerXL 64 轨迹 4096D BF16 输出头缓存是独立数据集，未被删除。
+
+## v0-gradient-proxy-test
+
+于 2026-11-08 使用相同的十条保留 M5 尾部轨迹完成了两个部分。
+
+- Local-Risk：结果类别 Other。完整方差目标具有真实的轨迹内分布：在将每条轨迹按其自身中位数归一化后，p90/p10 在 block 长度 32、64、128 和 256 下分别为 7.44、5.25、4.42 和 3.88。在 576 起点下该比率为 2.06，但仅有 19 个 block，属探索性结果。稀疏输出头样本保持方差排名的能力优于方向排名；详情与 block 分布见 docs/results/v0-gradient-proxy-test.md。这些是回顾性子采样结果，而非运行时间节省或带预算的区间选择测试。
+- Cross-Rank：结果类别 Other（在固定候选池上，输出头余弦给出了有条件的正向排名信号；逐参考顺序仍为中等）。在 45,048 个跨轨迹对上，合并 Pearson/Spearman 为 0.786/0.795。逐参考平均 Spearman/Kendall 为 0.640/0.481；平均 top-5 重叠度为 0.487，而随机期望为 0.208。头余弦 MAE/偏差为 0.071/-0.016。嵌入余弦接近随机或更差；CE 损失差较弱。
+
+这些发现为描述性的，使用重叠参考查询且仅有两个参考提供者，不确立一般 M5 性能或带预算的区间选择收益。详细的逐问题结论与产物：docs/results/v0-gradient-proxy-test.md。

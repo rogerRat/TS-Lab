@@ -1,179 +1,204 @@
-# Experiment results
-
-Last modified: 2026-11-10
-
-## v0-active-value-rank
-
-Completed 2026-11-09 on ten cached trajectories and 100 references. Batch 1 expanded the cross-track pool to 714-766 candidates per reference (mean 721.8) and found mean per-reference head/full cosine Spearman 0.7104. Direct head-proxy top-10-percent recall was 0.4023 with oracle regret 0.07525. In batch 2, a per-reference ridge residual model and boundary-uncertainty query policy reduced mean 10-percent regret to 0.06536, 0.05454, and 0.04192 at candidate full-gradient budgets 16, 32, and 64. Highest-proxy query regret was 0.07337, 0.06244, and 0.05148 at those budgets. Eight shared initial labels alone worsened direct proxy. At 5-percent selection and B=64, highest-proxy queries beat the boundary policy, which targets a 10-percent cutoff. The result is cached-score replay, not downstream training or measured online savings. Detailed protocol, track sensitivity, cost accounting, and limits: docs/results/v0-active-value-rank.md. Artifacts and .complete markers: outputs/train/v0-active-value-rank/batch-1/ and batch-2/.
-
-## v0-directional-marginal-gain
-
-Completed 2026-11-08 on 46 fixed 256-start blocks at four full-gradient anchor budgets. A fixed leftmost largest-gap midpoint adds one anchor; mean direction-error gains are 0.1072, 0.0407, 0.0144, and 0.0075 for n=2,4,8,16. Most average gain at n=2 and n=4 occurs away from the new anchor.
-
-| Starting anchors | True dispersion versus starting error rho | True dispersion versus gain rho | Sparse proxy dispersion versus gain rho | Sparse proxy versus nonnew gain rho |
-|---:|---:|---:|---:|---:|
-| 2 | 0.616 | -0.074 | -0.002 | -0.012 |
-| 4 | 0.701 | 0.142 | 0.380 | 0.370 |
-| 8 | 0.547 | 0.256 | 0.235 | 0.212 |
-| 16 | 0.395 | 0.060 | 0.056 | 0.032 |
-
-Direction error is the mean of 1-cosine between each true and linearly reconstructed gradient; zero is aligned, one is orthogonal, and two is opposite. A positive one-anchor gain means that this average error falls; a negative gain means it rises. Pooled Spearman between starting error and total gain is 0.461/0.280/0.254/0.021 for n=2/4/8/16. At n=16, the block with the highest starting error (trajectory 07 block 0, E=0.5299) has negative total gain -0.00587 under the fixed added anchor. The true direction dispersion predicts current reconstruction difficulty much more consistently than marginal benefit. The sparse eight-point output-head dispersion correlates with true direction dispersion at pooled Spearman 0.703; its n=4 gain association is a moderate budget-specific signal, not evidence of a working allocation policy. A high-dispersion block can remain difficult while the fixed next anchor gives little improvement. Detailed protocol, per-track correlations, nonnew-point gains, and sensitivity checks: docs/results/v0-directional-marginal-gain.md. Raw output and .complete: outputs/train/v0-directional-marginal-gain/.
-
-## v0-gradient-variance-decomposition
-
-Completed 2026-11-08 using the 46 fixed 256-start blocks from v0-var-proxy-estimate, all cached full-gradient Gram matrices, and the same four-anchor linear reconstruction. The table reports pooled Spearman and controlled rank association after adjusting for mean gradient norm and track fixed effects. Reconstruction errors use 252 non-anchor positions per block.
-
-| Predictor and target | Pooled Spearman | Controlled rank association |
-|---|---:|---:|
-| Vector variance versus mean gradient norm | 0.970 | Mean norm is a control |
-| Vector variance versus amplitude variance | 0.569 | 0.663 |
-| Vector variance versus direction dispersion | -0.222 | 0.578 |
-| Vector variance versus magnitude reconstruction error | 0.638 | 0.286 |
-| Direction dispersion versus direction reconstruction error | 0.701 | 0.713 |
-| Relative vector variance versus direction reconstruction error | 0.639 | 0.605 |
-| Vector variance versus direction reconstruction error | -0.324 | 0.431 |
-
-The median amplitude-variance share of total vector variance is 0.176; only one of 46 blocks has a share over 0.5. This distinguishes the strong cross-block association with gradient scale from the within-block variance decomposition. The original pooled vector-variance versus reconstruction-cosine Spearman of +0.324 becomes -0.431 as a controlled rank association, whereas controlled Pearson is only -0.109. The eight-proxy variance versus cosine changes from +0.398 pooled Spearman to -0.202 controlled rank association, with controlled Pearson near zero (+0.001). These are descriptive results for the fixed ten-track sample.
-
-Excluding the four exact anchors raises mean magnitude error from 1.083 to 1.100 and mean direction error from 0.638 to 0.648. Correlations are unchanged because each block excludes the same four zero-error positions. Full definitions, Pearson and per-track results, leave-one-track-out checks, and limitations: docs/results/v0-gradient-variance-decomposition.md. Raw and controlled scatter plots are `outputs/train/v0-gradient-variance-decomposition/figures/scatter_all.png` and `scatter_nonanchor.png` (also SVG). Block data, correlation tables, and `.complete` are in `outputs/train/v0-gradient-variance-decomposition/`.
-
-## v0-grad-traj-level-norm-gap
-
-Completed 2026-11-08 for the same ten retained trajectories and 12,836 legal windows using saved full/head Gram matrices. The norm of each trajectory's mean gradient vector ranges 0.7780-1.5050 for full gradients (1.9345x) and 0.0607-0.1515 for output-head gradients (2.4960x). Full/head track ordering is strongly associated (Spearman 0.8788). Tracks 00 and 07 are relatively high in both; 03 and 04 are relatively low. Mean per-window norms vary less across tracks: 1.4057x full and 1.4433x head spans. Full/head vector magnitudes occupy different spaces and should not be directly compared. See docs/results/v0-grad-traj-level-norm-gap.md for per-track values, definitions, and limitations. Output: outputs/train/v0-grad-traj-level-norm-gap/.
-
-## v0-var-proxy-estimate
-
-Completed 2026-11-08 by replaying ten retained trajectories with 46 complete 256-start blocks. Eight evenly spaced output-head proxies per block produced a population vector variance; four evenly spaced full-gradient anchors reconstructed all 256 positions by linear interpolation. Pooled proxy-variance Spearman correlations were 0.8538 with mean L2 error, 0.3977 with mean directional cosine, and 0.4970 with mean absolute norm difference. The positive cosine association means this proxy did not predict worse directional reconstruction in this sample. A completed all-256 full-gradient variance supplement gives pooled Spearman 0.9463 with mean L2, 0.3240 with mean cosine, and 0.6381 with mean absolute norm difference; full variance versus eight-proxy variance is 0.9169. The full-variance baseline is an oracle descriptive comparison, not an eight-call estimate. Using the four full-anchor gradients as one constant vector mean, true-variance Spearman becomes 0.9873 with mean L2, 0.2670 with mean cosine, and 0.8078 with mean absolute norm difference; corresponding eight-proxy values are 0.9126, 0.3374, and 0.6444. Mean L2/cosine are 3.5273/0.2519 for the constant mean versus 3.5127/0.3618 for linear reconstruction. The true-variance versus constant-representative squared-error association is partly guaranteed by the variance decomposition identity. Full protocol, per-track results, and limitations: docs/results/v0-var-proxy-estimate.md. Raw values and .complete: outputs/train/v0-var-proxy-estimate/.
-
-## v0-crb-reconst-test (terminated; partial results)
-
-User-terminated on 2026-11-08 because the available results were broadly clear and container resources were constrained. The replay completed all eight q groups on trajectory batches 00-02, partially completed batches 03-04, and did not start batches 05-09. In total, 429 configuration attempts, 326 unique metric files, and 28 matched uniform baselines were recorded. Per-batch q coverage and matched-baseline outcomes are in [the CRB result report](results/v0-crb-reconst-test.md); raw batch outputs and the regenerated plots are archived under `archive/v0-crb-reconst-test/`. The ten BF16 full-gradient caches remain intact in `outputs/train/v0-crb-reconst-test/gradients/`. The partial search must not be interpreted as a complete ten-trajectory result.
-
-| Trajectory batch | Committed CRB attempts | Budget-group coverage |
-|---:|---:|---|
-| 00 | 128 | q=1,4,16,64,128,256,512,576: 16/16 each |
-| 01 | 128 | q=1,4,16,64,128,256,512,576: 16/16 each |
-| 02 | 128 | q=1,4,16,64,128,256,512,576: 16/16 each |
-| 03 | 29 | q=1: 16/16; q=4: 13/16 |
-| 04 | 16 | q=1: 16/16 |
-| 05-09 | 0 | Not started |
-
-Per-batch median-error comparisons against matched uniform baselines are in [the detailed report](results/v0-crb-reconst-test.md).
-
-## v0-grad-mech-l2-norm
-
-Completed 2026-11-08 as a ten-trajectory supplement to v0-grad-mech-test using retained BF16 full-gradient caches and their full-coordinate Gram matrices. Across 12,826 lag-1 pairs, relative L2 distance normalized by the mean gradient norm has pair-weighted mean 0.6372, median 0.7620, and p95 1.2411. The ten-trajectory mean of trajectory means is 0.6462. All 575 lags and 30 direct cache pair checks passed validation. The empirical local relative-smoothness hypothesis is contradicted in these ten trajectories: despite 99.83% lag-1 span overlap, the mean of the per-pair gradient-difference norms divided by each pair's mean gradient norm is 63.7%, and 55.0% of pairs have a relative distance at least 0.6. Same-ten lag-1 cosine mean is 0.7215; directional alignment around 0.7 does not establish a small full-vector L2 difference. This result is limited to the ten retained late-manifest trajectories and does not replace the original 1,000-trajectory summary or prove mathematical non-Lipschitzness. Full report: docs/results/v0-grad-mech-l2-norm.md. Result artifacts are archived at archive/v0-grad-mech-test/outputs/train/v0-grad-mech-l2-norm/; outputs/train/v0-grad-mech-l2-norm/ remains a symbolic link. The ten BF16 gradient caches remain unarchived at outputs/train/v0-crb-reconst-test/gradients/.
-
-## v0-grad-mech-test
-
-Completed: 2026-11-07. The probe processed all 1,000 selected M5 trajectories using the fixed warm-up checkpoint and FP32 gradients. Windows span 512 context and 64 prediction points, with stride 1. Statistics below are weighted by window-pair count; SD is the population standard deviation.
-
-| Lag | Pair count | Cosine mean | Cosine SD | Relative norm difference mean | Relative norm difference SD |
-|---:|---:|---:|---:|---:|---:|
-| 1 | 1143885 | 0.753878 | 0.253848 | 0.128111 | 0.135564 |
-| 8 | 1136885 | 0.464294 | 0.249467 | 0.231456 | 0.170033 |
-| 32 | 1112885 | 0.239849 | 0.268146 | 0.321463 | 0.213633 |
-| 64 | 1080885 | 0.088391 | 0.268003 | 0.366607 | 0.233860 |
-| 128 | 1016885 | 0.043590 | 0.237899 | 0.382731 | 0.242262 |
-| 288 | 858074 | 0.024572 | 0.214649 | 0.393459 | 0.247553 |
-| 575 | 581872 | 0.013485 | 0.195253 | 0.402461 | 0.253443 |
-
-Cosine similarity declines with lag in this dataset and approaches zero at lag 575. This describes the observed aggregate, not a claim that individual pairs have zero cosine or that the pattern generalizes to other datasets or models. Pair counts vary with lag and observations within a trajectory are dependent.
-
-Artifacts: archive/v0-grad-mech-test/outputs/train/v0-grad-mech-test/; the full visualization is under vis/snapshot_20261107_123811_utc_n1000/. Only the probe results and visualization are archived; their original paths are symbolic links. Data, logs, configuration, scripts, checkpoint, input manifest, and CRB-owned gradient caches remain in their original locations.
-
-### Dataset, trajectory index, and result files
-
-- Dataset: autogluon/chronos_datasets, m5 configuration, revision eeecad0b82a8c237e212ce6f8d1abecb513e2cec. First 1,000 eligible finite nonconstant series of length at least 576 in source order; no random sampling.
-- Series IDs, zero-based source rows, lengths, and zero-based manifest ordinals: archive/v0-grad-mech-test/results/trajectory_index.csv. The full input_manifest.json is copied into the same directory.
-- Per-trajectory per-lag statistics: archive/v0-grad-mech-test/results/trajectory_lag_similarity.csv.gz, containing 575,000 rows. Columns give pair count, cosine mean, population SD, minimum and maximum, and relative norm difference mean and population SD. Empty metrics mean no pairs. Individual pair values were not retained.
-- Original per-trajectory summaries and histograms: archive/v0-grad-mech-test/outputs/train/v0-grad-mech-test/probe/trajectories/trajectory-NNNN.npz; NNNN is the zero-based manifest ordinal.
-- Pooled 575-lag CSV and JSON, and PNG, SVG and HTML figures: archive/v0-grad-mech-test/outputs/train/v0-grad-mech-test/vis/snapshot_20261107_123811_utc_n1000/. Pooled means weight trajectories by pair count.
-- Verified the exported table against pooled pair counts and cosine means at every lag.
-
-
-## v0-gradient-proxy-test
-
-Completed both parts on 2026-11-08 using the same ten retained M5 tail trajectories.
-
-- Local-Risk: Result category Other. The full-variance target has real within-track spread: after normalizing each track by its median, p90/p10 is 7.44, 5.25, 4.42, and 3.88 at block lengths 32, 64, 128, and 256. At 576 starts the ratio is 2.06 over only 19 blocks and is exploratory. Sparse output-head samples retain variance ranking better than direction ranking; details and the block distribution are in docs/results/v0-gradient-proxy-test.md. These are retrospective subsampling results, not runtime savings or a budgeted interval-selection test.
-- Cross-Rank: Result category Other (qualified positive ranking signal for output-head cosine on the fixed candidate pool; per-reference order remains moderate). Across 45,048 cross-track pairs, pooled Pearson/Spearman are 0.786/0.795. Per-reference mean Spearman/Kendall are 0.640/0.481; mean top-5 overlap is 0.487 versus 0.208 expected by chance. Head cosine MAE/bias are 0.071/-0.016. Embedding cosine is near-random or worse; CE loss difference is weak.
-
-These findings are descriptive, use overlapping reference queries and only two reference providers, and do not establish general M5 performance or a budgeted interval-selection gain. Detailed question-specific conclusions and artifacts: docs/results/v0-gradient-proxy-test.md.
-
-
-## v0-gradient-proxy-cost
-
-Completed 2026-11-08. On 80 windows from the ten fixed tracks, timed three repeats per method at batch size one. Median end-to-end latency: full BP 42.80 ms/window, output-head gradient 14.21 ms (2.93x paired speedup), mean decoder embedding 11.35 ms (3.72x), and forward loss 11.28 ms (3.71x). Timing includes window tokenization, GPU computation, CPU result transfer, and synchronization. Details: docs/results/v0-gradient-proxy-cost.md; raw repeats: outputs/train/v0-gradient-proxy-cost/per_window_timings.csv.
-
-## v0-vage Static
-
-Completed 2026-11-08 on ten retained trajectories using saved full/head Gram matrices derived from BF16 gradients. VAGE-Static accounts for 204 full-gradient and 204 output-head proxy calls; Uniform accounts for 204 full-gradient and zero proxy calls. Equal-trajectory mean L2 is 3.5437 versus 3.4824 and mean cosine is 0.3651 versus 0.3971, respectively. VAGE wins mean L2 on 2/10 tracks and mean cosine on 1/10. The fixed Static design does not improve the primary pointwise reconstruction metrics. Full protocol and limitations: docs/results/v0-vage.md.
-
-Last modified: 2026-11-08
-
-## v0-vage n_min=1 sensitivity
-
-Completed 2026-11-08 with unchanged budgets and proxy scores. Equal-track mean L2 is 3.8747 versus 3.5437 for n_min=2 and 3.4824 for Uniform; mean cosine is 0.3156 versus 0.3651 and 0.3971. Every n_min=1 track lacks the first global start among its final anchors, and four lack the last; uncovered ends use nearest-anchor extrapolation. This comparison does not isolate minimum-anchor count from endpoint coverage. Details: docs/results/v0-vage.md.
-
-Last modified: 2026-11-08
-
-## v0-vage additional n_min=1 methods
-
-Completed 2026-11-08 on the same ten trajectories. Equal-track mean L2: Uniform 3.4824, VAGE-Quota 3.5031, Residual diagnostic 3.5159, Static 3.8747, Fusion 3.8762, Oracle 3.8774. Mean cosine: 0.3971, 0.3675, 0.3801, 0.3156, 0.3163, and 0.3163 respectively. No VAGE variant improves both primary metrics. Residual is a proxy-stratified anchor diagnostic because Bg=Bp forces selection of every observed proxy candidate. Full protocol and limitations: docs/results/v0-vage.md.
-
-Last modified: 2026-11-08
-
-## v0-uni-reconst-scale
-
-Completed 2026-11-08 on the ten retained trajectories using true complete-gradient anchors and whole-trajectory linear interpolation. Equal-trajectory mean L2 for s={1,2,4,8,16,32,64,128} is {0.0000,0.9650,1.6969,2.2654,2.7382,3.1250,3.4824,3.8809}; mean cosine is {1.0000,0.8952,0.7941,0.6956,0.6002,0.5063,0.3971,0.2563}. The s=64 row matches the previous Uniform baseline. Full protocol, anchor totals, and limitations: docs/results/v0-uni-reconst-scale.md.
-
-Last modified: 2026-11-08
-
-## v0-uni-data-evaluation
-
-Completed 2026-11-08 with 100 seeded, nonadjacent full-gradient references sampled as ten per retained trajectory. Excluding those starts leaves 12,736 query windows. For within-trajectory query pairs one start apart and the same reference, equal-track mean absolute score difference is 0.0402 for cosine and 0.6100 for dot product; mean relative difference is 0.4856 and 0.5372 using the mean absolute score magnitude as denominator. Sign flips occur in 9.40% of lag-1 comparisons. Across 1,273,600 valid query-reference scores, pooled signed mean/population variance are 0.0284/0.0283 for cosine and 0.6101/9.1331 for dot product; pooled signed medians are 0.0284 and 0.1635; pooled mean absolute scores are 0.1378 and 1.8782, with absolute-value medians 0.1207 and 1.0334. At lag 64, mean relative differences rise to 1.1524 and 1.2668. The scores show local association but not near-constant adjacent values under this measure. Full report and 1-575 curves: docs/results/v0-uni-data-evaluation.md.
-
-Last modified: 2026-11-08
-
-## Pair-mean reconstruction supplements: v0-vage and v0-uni-reconst-scale
-
-Completed 2026-11-08 using the same ten trajectories, cached complete-gradient anchors, and exact budgets as the preceding linear-reconstruction runs. Each unobserved start in an anchor gap is represented by the mean of its two endpoint gradients; observed anchors return exact gradients. At 204 total anchors, Uniform equal-track mean L2/cosine change from 3.4824/0.3971 under linear interpolation to 3.5445/0.3498 under pair mean. VAGE-Static n_min=2 changes from 3.5437/0.3651 to 3.5880/0.3205. The pair-mean rule worsens both primary equal-track metrics across the tested VAGE allocations on average. In the Uniform scale sweep, s=1 stays exact and s=2 is nearly unchanged; s=4-128 have higher mean L2 and lower mean cosine. Full tables and limitations: docs/results/v0-vage.md and docs/results/v0-uni-reconst-scale.md.
-
-Last modified: 2026-11-08
-
-## v0-active-value-rank diagnostic extension
-
-Last modified: 2026-11-09
-
-Completed batches 3-proxy-coverage and 4-equal-budget-query on the same 100 references and cached candidate scores as the earlier active-value-rank study. Mean true top-k coverage is 0.4023, 0.6480, 0.7950, 0.8744, 0.9265, and 0.9754 at proxy pools k,2k,3k,4k,5k,7k. The mean number of true top-k windows in proxy rank bins k+1-2k, 2k+1-3k, and beyond 5k is 17.87, 10.70, and 5.33; 65/100 references have at least one true top-k window beyond 5k. The proxy misses are not confined to the immediate k boundary.
-
-At B=64, mean Recall@k is 0.5064 for pure boundary, 0.4776 for proxy high, 0.4295 for random (30 seeds), and 0.5415 for the existing complex method. The complex-minus-pure-boundary difference is -0.0431, +0.0078, +0.0282, and +0.0352 at B=8,16,32,64. This is cached-score replay on the same references used in the earlier study; no held-out claim or downstream training benefit follows. Per-reference tables, figures, methods, and limits: docs/results/v0-active-value-rank-diagnostics.md. Output: outputs/train/v0-active-value-rank/batch-3 and batch-4.
-
-
-## v0-crb-var
-
-Completed 2026-11-09. Across ten trajectories at matched budgets of ceil(window_count/64), CRB had lower mean relative within-block variance (0.6410 vs 0.6802) and mean direction dispersion (0.4051 vs 0.4402) than Uniform on every track. CRB block size showed a positive association with local dispersion on all ten tracks; larger CRB blocks retained greater dispersion, so its shorter intervals did not preferentially fall in the highest-dispersion regions. Absolute variance did not consistently improve. Details and limitations: docs/results/v0-crb-var.md.
-
-
-## v0-proxy-dp-segmentation
-
-Completed 2026-11-10 using cached BF16 gradients from the four longest tracks (ordinals 01, 05, 06, 09), with exactly 22 intervals per track for DP and uniform. Unweighted proxy-variance DP reduced equal-track true relative variance (0.5031 vs 0.6762), equal-interval direction dispersion (0.2995 vs 0.4298), and absolute variance (3.7787 vs 9.4982), but raised window-weighted direction dispersion (0.5844 vs 0.4297). The length-weighted proxy objective reduced relative variance (0.5717 vs 0.6762) and equal-interval direction dispersion (0.3572 vs 0.4298), but raised window-weighted direction dispersion (0.4923 vs 0.4297) and absolute variance (12.5689 vs 9.4982). These are descriptive equal-track means over four selected long tracks; neither objective dominates all metrics. Full definitions and per-track results: docs/results/v0-proxy-dp-segmentation.md. Both output trees have .complete markers. The raw BF16 full-gradient source caches were deleted after validation at the user's direction on 2026-11-10; derived outputs and proxy caches remain.
-
-## v1-rage-trev TimerXL seed 0
-
-Last modified: 2026-11-10
-
-MASE is the sole metric used for inspection, comparison, and reporting across the Chronos, TimerXL, and TimesFM Trev batches. All Chronos, TimerXL, and TimesFM Trev rand/full phases use LoRA with frozen base weights; `full` refers to the full eligible data pool, not full-parameter training. TimerXL 84M seed 0 random and full phases completed 4,000 updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6672/2.0354/13.4942/5.7754 for random and 0.6675/2.0330/12.5499/5.2563 for full. Source CSVs, task coverage, and limits: docs/results/v1-rage-trev-timerxl-seed0.md.
-
-## v1-rage-trev TimesFM seed 0
-
-Last modified: 2026-11-10
-
-TimesFM 2.5 seed 0 random and full phases completed 4,000 BF16 LoRA updates and all eight FEV/TIME checkpoint evaluations. At step 4000, FEV MASE for hospital admissions, M_DENSE, US consumption, and world CO2 was 0.6547/1.3943/8.8224/3.9751 for random and 0.6646/1.4042/8.8852/3.9794 for full. This is one seed; details and source files: docs/results/v1-rage-trev-timesfm-seed0.md.
-
-## v1-rage-trev seed 0 final scope
-
-Last modified: 2026-11-10
-
-The study was closed at one seed by user request. All six Chronos, TimerXL, and TimesFM seed 0 rand/full LoRA phases completed 4,000 updates and eight FEV/TIME checkpoint evaluations. Only MASE is used in the final comparison. The incomplete Chronos seed 1 run was stopped and its partial outputs removed; no seed 1-3 results are reported. Final FEV and TIME MASE tables and source paths: docs/results/v1-rage-trev-seed0-final.md.
+# 实验结果总览
+
+最后修改日期：2026-11-13
+
+本文件逐行记录全部实验与批次的工作、状态和实际结果，绝不编造或替换指标；
+数值以实际生成的产物、完成标记和日志为依据。逐实验完整报告见 `docs/results/<实验代号>.md`。
+
+## 结果报告索引
+
+| 实验代号 | 报告 |
+|---|---|
+| `64-large-var-k-error-composition` | [results/64-large-var-k-error-composition.md](results/64-large-var-k-error-composition.md) |
+| `64-large-var-k-error-composition-full-tables` | [results/64-large-var-k-error-composition-full-tables.md](results/64-large-var-k-error-composition-full-tables.md) |
+| `src-8192-source-coverage` | [results/src-8192-source-coverage.md](results/src-8192-source-coverage.md) |
+| `src-96-q4-output-head-estimate` | [results/src-96-q4-output-head-estimate.md](results/src-96-q4-output-head-estimate.md) |
+| `v0-active-value-rank` | [results/v0-active-value-rank.md](results/v0-active-value-rank.md) |
+| `v0-active-value-rank-diagnostics` | [results/v0-active-value-rank-diagnostics.md](results/v0-active-value-rank-diagnostics.md) |
+| `v0-chronostiny-timerxl-20261112` | [results/v0-chronostiny-timerxl-20261112.md](results/v0-chronostiny-timerxl-20261112.md) |
+| `v0-consolidated-summary-20261112` | [results/v0-consolidated-summary-20261112.md](results/v0-consolidated-summary-20261112.md) |
+| `v0-crb-cos-var` | [results/v0-crb-cos-var.md](results/v0-crb-cos-var.md) |
+| `v0-crb-final-test-timerXL-64tr` | [results/v0-crb-final-test-timerXL-64tr.md](results/v0-crb-final-test-timerXL-64tr.md) |
+| `v0-crb-final-test-timerXL-64tr-spacing-q-dir` | [results/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md](results/v0-crb-final-test-timerXL-64tr-spacing-q-dir.md) |
+| `v0-crb-mech-test` | [results/v0-crb-mech-test.md](results/v0-crb-mech-test.md) |
+| `v0-crb-reconst-fine` | [results/v0-crb-reconst-fine.md](results/v0-crb-reconst-fine.md) |
+| `v0-crb-reconst-test` | [results/v0-crb-reconst-test.md](results/v0-crb-reconst-test.md) |
+| `v0-crb-var` | [results/v0-crb-var.md](results/v0-crb-var.md) |
+| `v0-directional-marginal-gain` | [results/v0-directional-marginal-gain.md](results/v0-directional-marginal-gain.md) |
+| `v0-grad-mech-l2-norm` | [results/v0-grad-mech-l2-norm.md](results/v0-grad-mech-l2-norm.md) |
+| `v0-grad-mech-test` | [results/v0-grad-mech-test.md](results/v0-grad-mech-test.md) |
+| `v0-grad-prepare-src-96tr-q16-4096d` | [results/v0-grad-prepare-src-96tr-q16-4096d.md](results/v0-grad-prepare-src-96tr-q16-4096d.md) |
+| `v0-grad-traj-level-norm-gap` | [results/v0-grad-traj-level-norm-gap.md](results/v0-grad-traj-level-norm-gap.md) |
+| `v0-gradient-proxy-cost` | [results/v0-gradient-proxy-cost.md](results/v0-gradient-proxy-cost.md) |
+| `v0-gradient-proxy-test` | [results/v0-gradient-proxy-test.md](results/v0-gradient-proxy-test.md) |
+| `v0-gradient-variance-decomposition` | [results/v0-gradient-variance-decomposition.md](results/v0-gradient-variance-decomposition.md) |
+| `v0-proxy-dp-segmentation` | [results/v0-proxy-dp-segmentation.md](results/v0-proxy-dp-segmentation.md) |
+| `v0-timer-XL-grad-4-change-velocity` | [results/v0-timer-XL-grad-4-change-velocity.md](results/v0-timer-XL-grad-4-change-velocity.md) |
+| `v0-timer-XL-grad-4-curvature` | [results/v0-timer-XL-grad-4-curvature.md](results/v0-timer-XL-grad-4-curvature.md) |
+| `v0-timer-XL-grad-4-two-random-16-blocks` | [results/v0-timer-XL-grad-4-two-random-16-blocks.md](results/v0-timer-XL-grad-4-two-random-16-blocks.md) |
+| `v0-timer-XL-grad-64-change-velocity` | [results/v0-timer-XL-grad-64-change-velocity.md](results/v0-timer-XL-grad-64-change-velocity.md) |
+| `v0-timerXL-grad-4-lm-head` | [results/v0-timerXL-grad-4-lm-head.md](results/v0-timerXL-grad-4-lm-head.md) |
+| `v0-timerXL-grad-4-lm-head-change-velocity` | [results/v0-timerXL-grad-4-lm-head-change-velocity.md](results/v0-timerXL-grad-4-lm-head-change-velocity.md) |
+| `v0-timerxl-grad64-pca` | [results/v0-timerxl-grad64-pca.md](results/v0-timerxl-grad64-pca.md) |
+| `v0-uni-data-evaluation` | [results/v0-uni-data-evaluation.md](results/v0-uni-data-evaluation.md) |
+| `v0-uni-reconst-scale` | [results/v0-uni-reconst-scale.md](results/v0-uni-reconst-scale.md) |
+| `v0-vage` | [results/v0-vage.md](results/v0-vage.md) |
+| `v0-var-proxy-estimate` | [results/v0-var-proxy-estimate.md](results/v0-var-proxy-estimate.md) |
+| `v1-computational-effort-estimate` | [results/v1-computational-effort-estimate.md](results/v1-computational-effort-estimate.md) |
+| `v1-crb-redo` | [results/v1-crb-redo.md](results/v1-crb-redo.md) |
+| `v1-crb-redo-timerxl-baselines` | [results/v1-crb-redo-timerxl-baselines.md](results/v1-crb-redo-timerxl-baselines.md) |
+| `v1-rage-trev-seed0-final` | [results/v1-rage-trev-seed0-final.md](results/v1-rage-trev-seed0-final.md) |
+| `v1-rage-trev-timerxl-seed0` | [results/v1-rage-trev-timerxl-seed0.md](results/v1-rage-trev-timerxl-seed0.md) |
+| `v1-rage-trev-timesfm-seed0` | [results/v1-rage-trev-timesfm-seed0.md](results/v1-rage-trev-timesfm-seed0.md) |
+| `v2-foundation-expansion` | [results/v2-foundation-expansion.md](results/v2-foundation-expansion.md) |
+
+## 批次结果总表
+
+| 实验代号 | 批次 | 工作 | 状态 | 实际结果 |
+|---|---|---|---|---|
+| v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
+| v1-crb-redo | 12tasks-ref-grad-prepare | 12 项安全历史资格检查，8 项准备 CRB/Uniform 梯度 | 完成；4 项放弃 | 8 项每方法各 9079 个名义锚点，4 项因无法支持筛选不再使用 |
+| v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |
+| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/results/v1-crb-redo-timerxl-baselines.md |
+| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/results/v1-crb-redo-timerxl-baselines.md |
+| v1-crb-redo | timerXL-base-uni-01-traj-rr | 双侧 Uniform 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.601606；选样 55分42秒；索引文件每任务 2.03 MiB |
+| v1-crb-redo | timerXL-base-uni-01-block-rr | 双侧 Uniform 块 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.527675；选样 53分30秒；索引文件每任务 2.03 MiB |
+| v1-crb-redo | timerXL-ours-rage101-01-traj-rr | 双侧 CRB 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.590119；选样 56分12秒；索引文件每任务 2.03 MiB |
+| v1-crb-redo | timerXL-ours-rage101-01-block-rr | 双侧 CRB 块 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.516385；选样 59分30秒；索引文件每任务 2.03 MiB |
+| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR，8 项单任务训练评估 | win 选择中 | 待评估 |
+| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR，8 项单任务训练评估 | win 选择中 | 待评估 |
+| v0-timerxl-src96-first4-full-grad-4096d-bf16 | 前四条完整轨迹 | 逐窗口计算 TimerXL LoRA 梯度并投影 4096 维、BF16 保存 | 完成 | 484,907 个合法窗口；八个 worker 与批次完成标记已核验 |
+| v0-chronostiny-timerxl-lora-track0 | ordinal 0全量梯度与相关性 | 原始ChronosTiny LoRA 4096D投影，完整230,161窗口；同轨TimerXL关系比较 | 完成 | 非临近窗口对余弦Spearman 0.076；相邻窗口余弦Spearman −0.138；只代表单轨 |
+| v0-chronostiny-timerxl-lora-full-64 | 64轨全窗口梯度与相关性 | 使用原始ChronosTiny权重计算前64轨全部合法窗口的LoRA 4096D BF16投影；与同窗口TimerXL比较梯度关系 | 用户调整后停止，保留部分缓存 | 8个worker曾启动；未完成全轨，结果不用于分析 |
+| v0-timer-XL-grad-64-change-velocity | 梯度准备 | src-96前64轨逐窗口准备TimerXL LoRA与lm_heads的4096D BF16投影梯度；复用前四轨LoRA | 完成 | 64轨两类4096D BF16投影梯度已核验；前四轨LoRA复用；共1,980,371窗口 |
+| v0-crb-final-test-timerXL-64tr | CRB-1:0:1 | 按平均间距q作64轨BF16 LoRA梯度同预算CRB/Uniform方向代表误差比较；K=max(2,ceil(N/q)) | 完成 | 64轨、9个q、5,053,578块/臂，结果见RESULTS |
+| v0-crb-final-test-timerXL-64tr | CRB-1:1:0 | 同预算coverage:error CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；Uniform在全部q的窗口加权误差更低 |
+| v0-crb-final-test-timerXL-64tr | CRB-1:0:0 | 同预算coverage-only CRB/Uniform，q为平均锚点间距 | 完成 | 64轨×9个q；CRB仅q=64的窗口加权误差更低 |
+| v0-timer-XL-grad-64-change-velocity | 自动分析 | 轨迹内与轨迹间速度差异、头梯度代理、两段均匀16窗口代理 | 完成 | 轨迹内/间差异、头代理与两段16窗口估计均完成；详见独立报告 |
+| v0-timer-XL-grad-64-change-velocity | per-track-pca | 64轨真实4096维LoRA投影的逐轨PC1解释率与方向差异 | 完成 | PC1解释率中位数12.1%；PC1两两夹角中位数87.3°；rank80均值174、中位数137；v/L均值4.07%、中位数1.63%，L为每轨完整合法起点缓存行数；稳定性和限制见docs/results/v0-timerxl-grad64-pca.md |
+| v0-timer-XL-grad-64-change-velocity | two-head-16-blocks | 每轨两段均匀16窗口的lm-head梯度代理，评估LoRA数值与排序恢复 | 完成 | 排序rho 0.868/0.829/0.294，前16重合11/11/5 |
+| v0-timerXL-grad-4-lm-head | 四轨同窗口输出头梯度及代表性 | 每轨均匀取128个窗口，比较非临近窗口对的输出头与LoRA方向相似性 | 完成 | 三条可评估轨迹 Spearman 0.249–0.303；详见独立报告 |
+| v0-timerXL-grad-4-lm-head | change-velocity-comparison | 在匹配连续窗口段上比较输出头与LoRA三项滞后曲线 | 完成 | 4761个头梯度窗口；模长变化系统性低估，见独立报告 |
+| v0-timer-XL-grad-4-curvature | 四轨完整梯度曲率 | 对全部LoRA梯度作二阶时间差分，分析方向与幅度稳定性 | 完成 | 四轨中心化二阶差RMS/原RMS约1；详见独立报告 |
+| v0-timer-XL-grad-4-change-velocity | 四轨LoRA梯度随时间间隔变化 | 对k=1..512逐点计算方向余弦、相对L2差和相对模长差，并分轨迹绘图 | 完成 | 2048行滞后指标、四张三面板图；详见独立报告 |
+| v0-timer-XL-grad-4-change-velocity | stride-16-rank | 每16窗口采一个梯度的旧方案 | 用户撤回；不作为现行结论 | 已生成的旧产物保留作历史，不用于当前分析 |
+| v0-timer-XL-grad-4-change-velocity | two-random-16-blocks | 每轨随机两个连续16窗口区间，估计k=1..15的变化速度与排序 | 完成 | 三项均把轨迹0和3顺序排反；详见独立报告 |
+| v0-crb-mech-test | 64-smooth-anchor-reconstruction | 原始 64 条平滑 mock；CRB/Uniform 线性重建，q={4,8,16,32} | 完成 | 512 条方法级记录；Uniform 平均误差更低 |
+| v0-crb-mech-test | 64-smooth-uniform-reconstructors | 同一数据和 Uniform anchors；比较多种重建器 | 完成 | 2880 条方法-轨迹记录；细节见结果报告 |
+| v0-crb-mech-test | 64-smooth-ces-pilot | 均匀 pilot + 曲率自适应 CES | 完成 | 768 条重建记录；CES 误差接近 Uniform 并低于 CRB |
+| v0-crb-mech-test | 64-smooth-ces-oracle | 使用生成器解析曲率的 CES-Oracle | 完成 | 1024 条四方法指标记录；Oracle 未优于 Uniform 或估计版 CES |
+| v0-crb-mech-test | 64-smooth-block-internal-variance | 原 64 条轨迹，块内方差诊断 | 完成 | 向量、相对向量、方向、模长方差；详见结果报告 |
+| v0-crb-mech-test | 64-smooth-ces-block-variance | CES、Uniform、CRB 的块内方差比较 | 完成 | 详见 results/v0-crb-mech-test.md |
+| v0-crb-mech-test | 64-smooth-ces-oracle-block-variance | CES-Oracle 块内方差比较 | 完成 | 详见 results/v0-crb-mech-test.md |
+| v0-crb-mech-test | ultra-smooth-single-reconstruction | 单条极平缓轨迹；q={4,8,16,32} | 完成 | Uniform 的 L2 较低；单轨迹只作补充 |
+| v0-crb-mech-test | ultra-smooth-block-variance | 极平缓轨迹块内方差诊断 | 完成 | 详见 results/v0-crb-mech-test.md |
+| v0-crb-mech-test | 64-smooth-cancellation-split-diagnostic | cancellation 阈值、切分位置与 real-real oracle 诊断 | 完成 | real-real 只作为 oracle 描述，不作估计能力结论 |
+| v0-crb-mech-test | 64-smooth-cancellation-six-methods-real-real | 六种分块方式和 matched-K 随机切分；real-real 诊断 | 完成 | 7,680 条轨迹级、107,520 条区间级记录 |
+| v0-crb-mech-test | 64-smooth-cancellation-six-methods-est-real | 同一切分，线性重建块均值作代表，真实值评估 | 完成 | 7,680 条轨迹级、130,912 条块级记录 |
+| v0-crb-mech-test | 64-smooth-virtual-split-selection-k-error | Random/Cancellation/Endpoint/Predicted/Oracle；K=0..q-1 | 完成 | 64 条轨迹、8 张主图、100 次 Random 重复、5000 次 paired bootstrap |
+| v0-crb-mech-test | 64-smooth-virtual-split-mse-decomposition | Representation/Estimation MSE 分解和恒等式验证 | 完成 | 最大恒等残差 8.99e-15；12 张 MSE 图 |
+| v0-crb-mech-test | 64-large-var-k-error-composition | 新建 64 条 4096D×4000 mock；相邻点完整向量差比 0.50005，lag-16 余弦均值 0.0000375；q={4,8,16,32,64,128} | 完成 | 12 张 K-error 图、18 张 MSE 分解图；MSE 恒等式残差 7.55e-15；详见批次报告 |
+| v0-grad-prepare-src-96tr-q16-4096d | src-96；三模型；仅 Uniform | 96 条轨迹、35 配置，q=16、4096 维 BF16 LoRA 梯度 | TimerXL、TimesFM 的 Uniform 已完成；Chronos 未完成，当前无运行进程，部分缓存保留 | 每模型 Uniform 预算 166,659 锚点；CRB 产物已删除 |
+| v0-grad-prepare-src-4096tr-q32-4096d | 旧批次 | src-4096、q=32 的梯度准备 | 失败并终止：计算负担过大 | 结果及梯度缓存已删除；仅保留本失败记录 |
+| v1-computational-effort-estimate | 9 个计时批次；目标清单及正式实验 | 三种模型的计算与存储估算 | 计时完成；正式实验未开始 | 旧候选池估算见[独立报告](results/v1-computational-effort-estimate.md) |
+| v1-rage-crb-vs-uniform-timerXL-84m | single-task optimization timing | optimize TimerXL LoRA gradient computation and measure one task | Deprecated | single worker 575-597 points/s; 8-worker same-GPU pilot 1,159 points/s aggregate (~2.0x); source gradients tentatively ~2.70 days with 8 workers; source selection invalid; retained for reference only |
+| v0-crb-var | 1-ten-trajectory-replay | 按原定批次执行 v0-crb-var 的实验 | 完成 | 10/10、0.6410、0.6802、0.4051、0.4402；详情见历史原文与结果文档 |
+| v0-proxy-dp-segmentation | longest4-unweighted | 按原定批次执行 v0-proxy-dp-segmentation 的实验 | 完成 | 4/4、0.5031、0.6762、0.2995、0.4298；详情见历史原文与结果文档 |
+| v0-proxy-dp-segmentation | longest4-window-weighted | 按原定批次执行 v0-proxy-dp-segmentation 的实验 | 完成 | 4/4、0.5717、0.6762、0.3572、0.4298；详情见历史原文与结果文档 |
+| v1-rage-chronosT5-trev-base-rand | 1-random-10pct | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | 已核实 .complete；详细指标见评估产物; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-full | 1-full-pool | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | 已核实 .complete；详细指标见评估产物; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-rand | 1-random-10pct | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | 已核实 .complete；详细指标见评估产物; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-full | 1-full-pool | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | 已核实 .complete；详细指标见评估产物; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-rand | 1-random-10pct | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | 已核实 .complete；详细指标见评估产物; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-full | 1-full-pool | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | 4,000 updates; all eight FEV/TIME checkpoints; .complete verified; source selection invalid; retained for reference only |
+| v0-active-value-rank | 1-expanded-cross-rank | 按原定批次执行 v0-active-value-rank 的实验 | 完成 | 100、714、766、0.7104；详情见历史原文与结果文档 |
+| v0-active-value-rank | 2-active-correction | 按原定批次执行 v0-active-value-rank 的实验 | 完成 | 10%、64,、0.04192、0.05148；详情见历史原文与结果文档 |
+| v0-active-value-rank | 3-proxy-coverage | 按原定批次执行 v0-active-value-rank 的实验 | 完成 | 2、3、0.4023/0、6480/0、7950、65、5；详情见历史原文与结果文档 |
+| v0-active-value-rank | 4-equal-budget-query | 按原定批次执行 v0-active-value-rank 的实验 | 完成 | 64,、0.5064、0.4776、0.4295、0.5415；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | 1 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 46；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | n=2 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 46、0.1072；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | n=4 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 46、0.0407；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | n=8 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 46、0.0144；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | n=16 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 46、0.0075；详情见历史原文与结果文档 |
+| v0-directional-marginal-gain | 6 | 按原定批次执行 v0-directional-marginal-gain 的实验 | 完成 | 64、160；详情见历史原文与结果文档 |
+| v0-gradient-variance-decomposition | 1 | 按原定批次执行 v0-gradient-variance-decomposition 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-gradient-variance-decomposition | 2 | 按原定批次执行 v0-gradient-variance-decomposition 的实验 | 完成 | 46；详情见历史原文与结果文档 |
+| v0-gradient-variance-decomposition | 3 | 按原定批次执行 v0-gradient-variance-decomposition 的实验 | 完成 | 30、252；详情见历史原文与结果文档 |
+| v0-gradient-variance-decomposition | 4 | 按原定批次执行 v0-gradient-variance-decomposition 的实验 | 完成 | 0.431；详情见历史原文与结果文档 |
+| v0-gradient-variance-decomposition | 5 | 按原定批次执行 v0-gradient-variance-decomposition 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-grad-traj-level-norm-gap | 1 | 按原定批次执行 v0-grad-traj-level-norm-gap 的实验 | 完成 | 12,836；详情见历史原文与结果文档 |
+| v0-grad-traj-level-norm-gap | 2 | 按原定批次执行 v0-grad-traj-level-norm-gap 的实验 | 完成 | 1.9345、2.4960；详情见历史原文与结果文档 |
+| v0-grad-traj-level-norm-gap | 3 | 按原定批次执行 v0-grad-traj-level-norm-gap 的实验 | 完成 | 0.8788；详情见历史原文与结果文档 |
+| v0-var-proxy-estimate | 1 | 按原定批次执行 v0-var-proxy-estimate 的实验 | 完成 | 46、256；详情见历史原文与结果文档 |
+| v0-var-proxy-estimate | 2 | 按原定批次执行 v0-var-proxy-estimate 的实验 | 完成 | 46；详情见历史原文与结果文档 |
+| v0-var-proxy-estimate | 3 | 按原定批次执行 v0-var-proxy-estimate 的实验 | 完成 | 2、0.8538、0.3977、0.4970；详情见历史原文与结果文档 |
+| v0-var-proxy-estimate | 4 | 按原定批次执行 v0-var-proxy-estimate 的实验 | 完成 | 2、0.9463、0.3240、0.6381；详情见历史原文与结果文档 |
+| v0-var-proxy-estimate | 5 | 按原定批次执行 v0-var-proxy-estimate 的实验 | 完成 | 2、0.9873、0.2670、0.8078；详情见历史原文与结果文档 |
+| v0-uni-data-evaluation | 1 | 按原定批次执行 v0-uni-data-evaluation 的实验 | 完成 | 100；详情见历史原文与结果文档 |
+| v0-uni-data-evaluation | 2 | 按原定批次执行 v0-uni-data-evaluation 的实验 | 完成 | 12,736、1,273,600；详情见历史原文与结果文档 |
+| v0-uni-data-evaluation | 3 | 按原定批次执行 v0-uni-data-evaluation 的实验 | 完成 | 11,500、1、0.4856/0、5372；详情见历史原文与结果文档 |
+| v0-uni-data-evaluation | 4 | 按原定批次执行 v0-uni-data-evaluation 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=1 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 12,836、2、0.0000、1.0000；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=2 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 6,420、2、0.9650、0.8952；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=4 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 3,213、2、1.6969、0.7941；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=8 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 1,609、2、2.2654、0.6956；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=16 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 808、2、2.7382、0.6002；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=32 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 406、2、3.1250、0.5063；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=64 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 204、2、3.4824、0.3971；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | s=128 | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 103、2、3.8809、0.2563；详情见历史原文与结果文档 |
+| v0-uni-reconst-scale | pair-mean supplement | 按原定批次执行 v0-uni-reconst-scale 的实验 | 完成 | 64、2、3.5445、3.4824、0.3498、0.3971；详情见历史原文与结果文档 |
+| v0-vage | Static n_min=2 | 按原定批次执行 v0-vage 的实验 | 完成 | 2、3.5437、3.4824、0.3651、0.3971；详情见历史原文与结果文档 |
+| v0-vage | Static n_min=1 | 按原定批次执行 v0-vage 的实验 | 完成 | 2、3.8747、0.3156；详情见历史原文与结果文档 |
+| v0-vage | n_min=1 method comparison | 按原定批次执行 v0-vage 的实验 | 完成 | 2、3.5031、3.4824；详情见历史原文与结果文档 |
+| v0-vage | pair-mean supplement | 按原定批次执行 v0-vage 的实验 | 完成 | 2、3.5445、2、2、3.5880；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Local-Risk core | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 0.9476；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Local-Risk sparse 32 | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 0.867、4；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Local-Risk sparse 64 | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 0.837、4；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Local-Risk long blocks | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 0.809、8/128、0.867、16/256、576；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Local-Risk target spread | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 90、10、7.44、5.25、4.42、3.88、32,、64,；详情见历史原文与结果文档 |
+| v0-gradient-proxy-test | Cross-Rank | 按原定批次执行 v0-gradient-proxy-test 的实验 | 完成 | 0.640、5、0.487；详情见历史原文与结果文档 |
+| v0-gradient-proxy-cost | Direct cost benchmark | 按原定批次执行 v0-gradient-proxy-cost 的实验 | 完成 | 42.80、14.21；详情见历史原文与结果文档 |
+| v0-grad-mech-l2-norm | 1 | 按原定批次执行 v0-grad-mech-l2-norm 的实验 | 完成 | 30；详情见历史原文与结果文档 |
+| v0-grad-mech-l2-norm | 2 | 按原定批次执行 v0-grad-mech-l2-norm 的实验 | 完成 | 5,750、1、0.6372；详情见历史原文与结果文档 |
+| v0-grad-mech-l2-norm | 3 | 按原定批次执行 v0-grad-mech-l2-norm 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | 1 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | 2 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | 3 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 00 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 01 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 02 | 按原定批次执行 v0-crb-reconst-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 03 | 按原定批次执行 v0-crb-reconst-test 的实验 | 部分完成后终止 | 1、4、13/16；详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 04 | 按原定批次执行 v0-crb-reconst-test 的实验 | 部分完成后终止 | 1；详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 05 | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 06 | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 07 | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 08 | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | trajectory 09 | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-crb-reconst-test | extreme-track extension | 按原定批次执行 v0-crb-reconst-test 的实验 | 未开始；用户已终止 | 详情见历史原文与结果文档 |
+| v0-grad-mech-test | 1 | 按原定批次执行 v0-grad-mech-test 的实验 | 完成 | 8,394,496；详情见历史原文与结果文档 |
+| v0-grad-mech-test | 2 | 按原定批次执行 v0-grad-mech-test 的实验 | 完成 | 30,490、1,000；详情见历史原文与结果文档 |
+| v0-grad-mech-test | 3 | 按原定批次执行 v0-grad-mech-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v0-grad-mech-test | 4 | 按原定批次执行 v0-grad-mech-test 的实验 | 完成 | 1,000/1、000、16；详情见历史原文与结果文档 |
+| v0-grad-mech-test | 5 | 按原定批次执行 v0-grad-mech-test 的实验 | 完成 | 详情见历史原文与结果文档 |
+| rage-smoke-static-cycle | 1 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 详情见历史原文与结果文档 |
+| rage-smoke-static-cycle | 2 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 详情见历史原文与结果文档 |
+| rage-smoke-static-cycle | 3 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 784、3；详情见历史原文与结果文档 |
+| rage-smoke-static-cycle | 4 | 按原定批次执行 rage-smoke-static-cycle 的实验 | 完成 | 详情见历史原文与结果文档 |
+| v1-rage-chronosT5-trev-base-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Stopped before step 4000; latest logged step 2445; partial outputs removed; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-rand-seed1 | 1-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-full-seed1 | 1-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-rand-seed2 | 2-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-full-seed2 | 2-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-chronosT5-trev-base-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timerXL-trev-84m-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+| v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |

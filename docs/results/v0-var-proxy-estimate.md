@@ -1,65 +1,69 @@
-# v0-var-proxy-estimate
+# v0-var-proxy-estimate：方差 proxy 估计
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Question and protocol
+## 问题与协议
 
-For each of ten retained continuous trajectories, divide the legal window-start sequence into consecutive nonoverlapping complete 256-start blocks. The ten terminal fragments are excluded from correlation analysis. In each complete block, use eight evenly spaced output-head gradient proxies at local positions 0, 36, 73, 109, 146, 182, 219, and 255. The proxy statistic is the population vector variance, mean squared norm minus squared norm of the mean, computed from the saved head-gradient Gram matrix.
+对十条保留的连续轨迹中的每一条，将合法窗口起点序列划分为连续不重叠的完整 256 起点 block。十个末端片段被排除在相关性分析之外。在每个完整 block 中，使用局部位置 0、36、73、109、146、182、219 和 255 处的八个等间距输出 head 梯度 proxy。该 proxy 统计量为总体向量方差，即均方范数减去均值范数的平方，由已保存的 head 梯度 Gram 矩阵计算。
 
-Use four evenly spaced full-gradient anchors at positions 0, 85, 170, and 255. Reconstruct every one of the 256 full gradients by linear interpolation between neighboring anchors; anchor gradients are exact. For each block, average over all 256 positions: (1) L2 norm of reconstructed minus true gradient, (2) directional cosine, and (3) absolute difference between reconstructed and true gradient norms. Also record mean 1-cosine as a direction-error reading of the same cosine measure. The cached all-coordinate full-gradient Gram matrices provide exact inner products for this retrospective replay of BF16 gradient copies; no new model or gradient calls were made. Both proxy and full-gradient values were originally computed for all legal starts, so the replay measures association under the stated sparse budgets, not measured runtime savings.
+在位置 0、85、170 和 255 处使用四个等间距全梯度锚点。通过相邻锚点之间的线性插值重建全部 256 个全梯度；锚点梯度是精确的。对每个 block 在全部 256 个位置上求平均：(1) 重建梯度减去真实梯度的 L2 范数，(2) 方向余弦，(3) 重建梯度与真实梯度范数之差的绝对值。另记录平均 1-cosine 作为同一余弦度量的方向误差读数。已缓存的全坐标全梯度 Gram 矩阵为这次对 BF16 梯度副本的回顾式重放提供精确内积；没有进行新的模型或梯度调用。proxy 与全梯度数值原本都是对全部合法起点计算的，因此该重放衡量的是在所述稀疏预算下的关联，而不是实测的运行时节省。
 
-Compute Pearson and Spearman correlations across 46 complete blocks and separately within each trajectory. The equal-track mean averages defined within-track correlations; trajectory 00 has only two complete blocks, so its within-track correlations are undefined and excluded from that mean. No pair-independent significance test is used.
+跨 46 个完整 block 计算 Pearson 和 Spearman 相关性，并在每条轨迹内部分别计算。等 track 均值对已定义的 track 内相关性求平均；轨迹 00 只有两个完整 block，故其 track 内相关性未定义并被排除在该均值之外。不使用成对独立显著性检验。
 
-Config: `configs/rage/v0-var-proxy-estimate.json`. Entry: `scripts/v0_var_proxy_estimate.py`. Output: `outputs/train/v0-var-proxy-estimate/`. Log: `logs/v0-var-proxy-estimate/`. Environment: `rage` Conda. Run command: `OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_var_proxy_estimate --config configs/rage/v0-var-proxy-estimate.json`.
+配置：`configs/rage/v0-var-proxy-estimate.json`。入口：`scripts/v0_var_proxy_estimate.py`。输出：`outputs/train/v0-var-proxy-estimate/`。日志：`logs/v0-var-proxy-estimate/`。环境：`rage` Conda。运行命令：`OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_var_proxy_estimate --config configs/rage/v0-var-proxy-estimate.json`。
 
-## Observed associations
+## 观测到的关联
 
-| Block target | Pooled Pearson | Pooled Spearman | Equal-track Pearson | Equal-track Spearman |
+| Block 目标 | 合并 Pearson | 合并 Spearman | 等 track Pearson | 等 track Spearman |
 |---|---:|---:|---:|---:|
-| Mean L2 error | 0.8568 | 0.8538 | 0.9170 | 0.8444 |
-| Mean directional cosine | 0.1767 | 0.3977 | 0.3443 | 0.3444 |
-| Mean 1-cosine | -0.1767 | -0.3977 | -0.3443 | -0.3444 |
-| Mean absolute norm difference | 0.5905 | 0.4970 | 0.5900 | 0.5111 |
+| 平均 L2 误差 | 0.8568 | 0.8538 | 0.9170 | 0.8444 |
+| 平均方向余弦 | 0.1767 | 0.3977 | 0.3443 | 0.3444 |
+| 平均 1-cosine | -0.1767 | -0.3977 | -0.3443 | -0.3444 |
+| 平均绝对范数差 | 0.5905 | 0.4970 | 0.5900 | 0.5111 |
 
-The sampled head-gradient variance strongly ranks mean full-vector L2 reconstruction error in these blocks. It has a moderate positive association with absolute norm difference. Directional cosine instead has a weak-to-moderate positive association, opposite to the prediction that larger proxy variance always implies worse directional reconstruction. L2 combines magnitude and direction, so the strong L2 association does not establish directional error prediction. Within-track estimates use only four or five blocks for nine tracks and are unstable; the pooled result can also reflect between-track differences. These ten selected M5 tail trajectories do not establish generalization to other trajectories, models, or datasets.
+在这些 block 中，采样的 head 梯度方差能有力地排序平均全向量 L2 重建误差。它与绝对范数差呈中等正相关。方向余弦则只有弱到中等正相关，这与"较大 proxy 方差总是意味着更差的方向重建"的预测相反。L2 结合了幅度和方向，因此 L2 的强关联并不能确立对方向误差的预测。九个轨迹的 track 内估计各只用四或五个 block，因而不稳定；合并结果也可能反映 track 之间的差异。这十条选定的 M5 尾段轨迹不能确立对其他轨迹、模型或数据集的泛化性。
 
-Raw block-level values, per-track correlations, exact positions, and excluded terminal lengths are in `outputs/train/v0-var-proxy-estimate/`. The output `.complete` marker is present.
+原始 block 级数值、逐 track 相关性、精确位置和被排除的末段长度位于 `outputs/train/v0-var-proxy-estimate/`。输出 `.complete` 标记存在。
 
-## Complete full-gradient variance supplement
+## 完整全梯度方差补充
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-For the identical 46 complete blocks, calculate the population vector variance from all 256 cached full gradients: mean squared norm minus squared norm of the block mean. Reuse the original three reconstruction metrics without recalculating or changing the four anchor positions. This is an oracle descriptive comparison because the variance requires all 256 true gradients. The 46 values matched the prior 256-point full-variance rows in `outputs/train/v0-gradient-proxy-test/local_risk_sparse_long/sampled_block_statistics.csv` exactly.
+对同样的 46 个完整 block，由全部 256 个缓存全梯度计算总体向量方差：均方范数减去 block 均值的范数平方。复用原始三项重建指标，不重算也不改变四个锚点位置。这是一个 oracle 式的描述性比较，因为该方差需要全部 256 个真实梯度。这 46 个数值与 `outputs/train/v0-gradient-proxy-test/local_risk_sparse_long/sampled_block_statistics.csv` 中此前 256 点全方差行的数值完全一致。
 
-| Target correlated with full variance | Pooled Pearson | Pooled Spearman | Equal-track Pearson | Equal-track Spearman |
+| 与全方差相关的目标 | 合并 Pearson | 合并 Spearman | 等 track Pearson | 等 track Spearman |
 |---|---:|---:|---:|---:|
-| Mean L2 error | 0.9291 | 0.9463 | 0.9596 | 0.9111 |
-| Mean directional cosine | 0.1216 | 0.3240 | 0.3726 | 0.4444 |
-| Mean 1-cosine | -0.1216 | -0.3240 | -0.3726 | -0.4444 |
-| Mean absolute norm difference | 0.7015 | 0.6381 | 0.7145 | 0.6222 |
-| Eight-proxy variance | 0.9191 | 0.9169 | 0.9288 | 0.8556 |
+| 平均 L2 误差 | 0.9291 | 0.9463 | 0.9596 | 0.9111 |
+| 平均方向余弦 | 0.1216 | 0.3240 | 0.3726 | 0.4444 |
+| 平均 1-cosine | -0.1216 | -0.3240 | -0.3726 | -0.4444 |
+| 平均绝对范数差 | 0.7015 | 0.6381 | 0.7145 | 0.6222 |
+| 八 proxy 方差 | 0.9191 | 0.9169 | 0.9288 | 0.8556 |
 
-Full variance has a stronger association than eight-proxy variance with mean L2 error and absolute norm difference. It also has a positive association with directional cosine, so even true vector variance does not imply worse directional reconstruction here. The L2 and variance statistics both depend on full-gradient scale and share the same 256 target vectors, which may contribute to their association. The oracle full variance is unavailable at the sparse cost of eight proxies. Within-track estimates still have only four or five blocks for nine trajectories; trajectory 00 has two and is excluded from the equal-track mean.
+在与平均 L2 误差和绝对范数差的关联上，全方差强于八 proxy 方差。它也与方向余弦呈正相关，因此即便真实向量方差在此也不意味着方向重建更差。L2 和方差统计量都依赖全梯度尺度，并共享同样的 256 个目标向量，这可能促成了它们的关联。oracle 全方差无法在八 proxy 的稀疏成本下获得。track 内估计对九个轨迹仍只有四或五个 block；轨迹 00 有两个，并被排除在等 track 均值之外。
 
-Entry: `scripts/v0_true_var_reconstruction.py`. Output: `outputs/train/v0-var-proxy-estimate/true_variance/`, containing block metrics, correlations, input manifest, and `.complete`.
+入口：`scripts/v0_true_var_reconstruction.py`。输出：`outputs/train/v0-var-proxy-estimate/true_variance/`，包含 block 指标、相关性、输入清单和 `.complete`。
 
-## Four-anchor mean as one constant block representative
+## 作为单一常量 block 代表的四锚点均值
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-Use the same four full-gradient anchors at local positions 0, 85, 170, and 255, but take their arithmetic vector mean and apply that single vector to all 256 starts in the block. The four anchor starts are evaluated against the mean as well; they are no longer exact reconstruction points. Keep the same 46 blocks, eight-proxy variance, and all-256 true variance. Average each of the same three metrics within each block, then correlate them with both variance predictors. This is a cached full-gradient Gram replay, with no new model gradient calls.
+使用同样位于局部位置 0、85、170 和 255 的四个全梯度锚点，但取其算术向量均值，并将该单一向量应用于 block 中全部 256 个起点。四个锚点起点也同样对照该均值进行评估；它们不再是精确的重建点。保持同样的 46 个 block、八 proxy 方差以及全 256 真实方差。在每个 block 内对同样的三项指标各求平均，然后与两个方差预测子做相关。这是一个缓存全梯度 Gram 重放，没有新的模型梯度调用。
 
-| Variance predictor | Target | Pooled Pearson | Pooled Spearman |
+| 方差预测子 | 目标 | 合并 Pearson | 合并 Spearman |
 |---|---|---:|---:|
-| Eight-proxy variance | Mean L2 error | 0.8946 | 0.9126 |
-| Eight-proxy variance | Mean directional cosine | 0.3097 | 0.3374 |
-| Eight-proxy variance | Mean absolute norm difference | 0.6899 | 0.6444 |
-| All-256 true variance | Mean L2 error | 0.9623 | 0.9873 |
-| All-256 true variance | Mean directional cosine | 0.2344 | 0.2670 |
-| All-256 true variance | Mean absolute norm difference | 0.8125 | 0.8078 |
+| 八 proxy 方差 | 平均 L2 误差 | 0.8946 | 0.9126 |
+| 八 proxy 方差 | 平均方向余弦 | 0.3097 | 0.3374 |
+| 八 proxy 方差 | 平均绝对范数差 | 0.6899 | 0.6444 |
+| 全 256 真实方差 | 平均 L2 误差 | 0.9623 | 0.9873 |
+| 全 256 真实方差 | 平均方向余弦 | 0.2344 | 0.2670 |
+| 全 256 真实方差 | 平均绝对范数差 | 0.8125 | 0.8078 |
 
-Equal-block mean L2 is 3.5273 for the constant four-anchor mean versus 3.5127 for the prior linear reconstruction. Mean directional cosine is 0.2519 versus 0.3618, and mean absolute norm difference is 1.6817 versus 1.0832. These aggregate values describe the same 46 blocks; the four sampled anchors are scored as approximations in the constant-mean method, whereas linear reconstruction keeps them exact.
+常量四锚点均值下的等 block 平均 L2 为 3.5273，而此前线性重建为 3.5127。平均方向余弦为 0.2519 对 0.3618，平均绝对范数差为 1.6817 对 1.0832。这些聚合数值描述的是同样的 46 个 block；在常量均值方法中四个采样锚点被作为近似值评估，而线性重建则使其保持精确。
 
-The very high association between true variance and L2 error is partly structural. For any fixed block representative `m`, the average squared L2 error equals the true population vector variance plus the squared distance between `m` and the true block mean. The reported L2 target is the average unsquared norm, so this identity does not make its correlation exactly one, but it explains why a strong association is expected. Directional cosine remains weakly positively associated with both variance predictors. Variance does not by itself isolate directional variation. Per-track correlations use only four or five blocks for nine tracks and are unstable; trajectory 00 has two blocks and is omitted from the equal-track mean.
+真实方差与 L2 误差之间的极高关联部分源于结构。对任意固定的 block 代表 `m`，平均平方 L2 误差等于真实总体向量方差加上 `m` 与真实 block 均值之间距离的平方。所报告的 L2 目标是未平方范数的平均值，因此这一恒等式并不使其相关性恰好为一，但它解释了为何预期会有强关联。方向余弦与两个方差预测子仍呈弱正相关。方差本身并不能分离出方向变化。逐 track 相关性对九个轨迹只用四或五个 block，因而不稳定；轨迹 00 有两个 block，被从等 track 均值中省略。
 
-Entry: `scripts/v0_four_anchor_mean.py`. Output: `outputs/train/v0-var-proxy-estimate/four_anchor_mean/`, containing block metrics, per-track and pooled correlations, summary, input manifest, and `.complete`.
+入口：`scripts/v0_four_anchor_mean.py`。输出：`outputs/train/v0-var-proxy-estimate/four_anchor_mean/`，包含 block 指标、逐 track 与合并相关性、摘要、输入清单和 `.complete`。
+
+## v0-var-proxy-estimate：方差 proxy 估计
+
+于 2026-11-08 完成，重放十条保留轨迹的 46 个完整 256 起点 block。每个 block 中八个等间距输出 head proxy 产生一个总体向量方差；四个等间距全梯度锚点通过线性插值重建全部 256 个位置。proxy 方差的合并 Spearman 相关为：与平均 L2 误差 0.8538，与平均方向余弦 0.3977，与平均绝对范数差 0.4970。余弦的正相关意味着该 proxy 在本样本中并未预测出更差的方向重建。一个已完成的全部 256 全梯度方差补充给出：与平均 L2 合并 Spearman 0.9463，与平均余弦 0.3240，与平均绝对范数差 0.6381；全方差与八 proxy 方差的相关为 0.9169。该全方差基线是 oracle 式的描述性比较，而不是八次调用的估计。将四个全锚点梯度作为一个常量向量均值使用时，真实方差 Spearman 变为：与平均 L2 0.9873，与平均余弦 0.2670，与平均绝对范数差 0.8078；对应的八 proxy 数值为 0.9126、0.3374 和 0.6444。常量均值下的平均 L2/余弦为 3.5273/0.2519，线性重建为 3.5127/0.3618。真实方差与常量代表平方误差之间的关联部分由方差分解恒等式保证。完整协议、逐 track 结果和局限性：docs/results/v0-var-proxy-estimate.md。原始数值和 .complete：outputs/train/v0-var-proxy-estimate/。

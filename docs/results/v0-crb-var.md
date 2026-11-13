@@ -1,20 +1,20 @@
-# v0-crb-var results
+# v0-crb-var 结果
 
-Last modified: 2026-11-09
+最后修改日期：2026-11-09
 
-Status: completed. Ten fixed trajectories were replayed from the retained BF16 full-gradient caches. No new gradients were computed.
+状态：已完成。十条固定轨迹从保留的 BF16 full-gradient 缓存中重放。未计算新的梯度。
 
-## Protocol
+## 协议
 
-For each trajectory, the gradient budget was ceil(number of legal starts / 64). Native CRB and Uniform used the same anchor count, including both endpoints. The CRB allocation used two endpoint probes and distributed discretionary probes as evenly as possible across coverage, interpolation-risk, and recursive minimum-kappa stages. All block metrics use every cached full-gradient vector. Relative variance is within-block vector variance divided by mean squared gradient norm. Direction dispersion is the mean of 1 minus cosine similarity to the block mean direction.
+对每条轨迹，梯度预算为 ceil(合法起点数 / 64)。Native CRB 和 Uniform 使用相同的锚点数，包括两个端点。CRB 分配使用两个端点探针，并将可自由分配的探针尽可能均匀地分配到 coverage、interpolation-risk 和 recursive minimum-kappa 三个阶段。所有块指标都使用每个已缓存的 full-gradient 向量。相对方差为块内向量方差除以平均平方梯度范数。方向离散度为块均值方向 1 减余弦相似度的均值。
 
-## Results
+## 结果
 
-The ten-trajectory equal-track mean relative variance was 0.6410 for CRB and 0.6802 for Uniform; CRB was lower on 10/10 tracks. Mean direction dispersion was 0.4051 for CRB and 0.4402 for Uniform; CRB was lower on 10/10 tracks. Window-weighted direction dispersion was 0.3944 versus 0.4135, lower for CRB on 9/10 tracks. Absolute mean block variance was 10.1357 for CRB versus 9.8196 for Uniform, with CRB lower on 7/10 tracks; this scale-dependent measure did not consistently favor CRB.
+十条轨迹等轨迹平均相对方差 CRB 为 0.6410，Uniform 为 0.6802；CRB 在 10/10 条轨迹上更低。平均方向离散度 CRB 为 0.4051，Uniform 为 0.4402；CRB 在 10/10 条轨迹上更低。按窗口加权的方向离散度为 0.3944 对 0.4135，CRB 在 9/10 条轨迹上更低。绝对平均块方差 CRB 为 10.1357，Uniform 为 9.8196，CRB 在 7/10 条轨迹上更低；该尺度相关度量并未一致地有利于 CRB。
 
-Block size was positively associated with local relative variance and direction dispersion under CRB (Spearman rho 0.6027 and 0.5830). Under Uniform, the corresponding correlations were 0.0876 and 0.0602. The positive association means larger CRB blocks tend to retain greater within-block dispersion. Thus CRB did not preferentially place its shorter intervals in the regions with the highest measured raw local dispersion; the observed size-dispersion relationship is opposite to that proposed. This coexists with lower average relative variance and direction dispersion across the CRB blocks. Within each track, block-size Spearman rho averaged 0.5413 for relative variance and 0.5286 for direction dispersion, positive on all 10 tracks. Uniform within-track means were 0.0371 and 0.0114. Blocks within trajectories are dependent, so these correlations are descriptive and no inferential claim is made.
+在 CRB 下，块大小与局部相对方差和方向离散度呈正相关（Spearman rho 0.6027 和 0.5830）。在 Uniform 下，相应相关系数为 0.0876 和 0.0602。正相关意味着较大的 CRB 块倾向于保留更大的块内离散度。因此 CRB 并未优先将其较短的区间放在测得原始局部离散度最高的区域；观测到的块大小-离散度关系与提议的相反。这与 CRB 各块上更低的平均相对方差和方向离散度并存。在每条轨迹内，相对方差的块大小 Spearman rho 平均为 0.5413，方向离散度为 0.5286，在全部 10 条轨迹上为正。Uniform 的轨迹内均值分别为 0.0371 和 0.0114。轨迹内的块相互依赖，因此这些相关是描述性的，不作推断性声明。
 
-| Trajectory | Starts | Budget | CRB relative variance | Uniform relative variance | CRB direction dispersion | Uniform direction dispersion |
+| 轨迹 | 起点数 | 预算 | CRB 相对方差 | Uniform 相对方差 | CRB 方向离散度 | Uniform 方向离散度 |
 |---:|---:|---:|---:|---:|---:|---:|
 | 00 | 607 | 10 | 0.7047 | 0.7163 | 0.4513 | 0.4689 |
 | 01 | 1388 | 22 | 0.6301 | 0.7280 | 0.4110 | 0.4761 |
@@ -27,10 +27,14 @@ Block size was positively associated with local relative variance and direction 
 | 08 | 1378 | 22 | 0.6407 | 0.7038 | 0.3995 | 0.4507 |
 | 09 | 1394 | 22 | 0.6846 | 0.7137 | 0.4478 | 0.4925 |
 
-## Artifacts
+## 产物
 
-- Per-block metrics: outputs/train/v0-crb-var/block_metrics.csv
-- Per-trajectory summaries: outputs/train/v0-crb-var/trajectory_summary.json
-- Completion marker: outputs/train/v0-crb-var/.complete
-- Config: configs/rage/v0-crb-var.json
-- Replay entry point: scripts/temp/v0_crb_var.py
+- 逐块指标：outputs/train/v0-crb-var/block_metrics.csv
+- 逐轨迹摘要：outputs/train/v0-crb-var/trajectory_summary.json
+- 完成标记：outputs/train/v0-crb-var/.complete
+- 配置：configs/rage/v0-crb-var.json
+- 重放入口：scripts/temp/v0_crb_var.py
+
+## v0-crb-var
+
+于 2026-11-09 完成。在十条轨迹上，以 ceil(window_count/64) 的匹配预算，CRB 在每条轨迹上的平均相对块内方差（0.6410 对 0.6802）和平均方向离散度（0.4051 对 0.4402）均低于 Uniform。CRB 块大小在全部十条轨迹上显示与局部离散度正相关；较大的 CRB 块保留更大的离散度，因此其较短的区间并未优先落在离散度最高的区域。绝对方差未一致改善。详情和限制：docs/results/v0-crb-var.md。

@@ -1,52 +1,56 @@
-# v0-active-value-rank: expanded ranking and active correction
+# v0-active-value-rank：扩展排名与主动修正
 
-Last modified: 2026-11-09
+最后修改日期：2026-11-09
 
-Status: Both requested batches complete. This is a retrospective replay on ten selected M5 trajectories at one warmed Chronos-T5 Tiny checkpoint. It does not measure downstream model performance.
+状态：两个请求的批次均已完成。这是在单个已预热的 Chronos-T5 Tiny checkpoint 上对十条选定 M5 轨迹进行的回溯性重放。它不衡量下游模型性能。
 
-## Protocol
+## 实验方案
 
-Batch 1-expanded-cross-rank used the 100 existing reference windows, ten per trajectory. Each reference was scored against every 16th legal start in each of the other nine trajectories, excluding starts reserved as references. Candidate counts ranged from 714 to 766 (mean 721.8), versus 24 in the earlier Cross-Rank test. The full-gradient cosine targets came from the existing 100-reference score arrays; output-head cosine was computed from the saved head-gradient vectors. Embedding cosine and absolute loss difference were retained as candidate features for batch 2. Source windows 16 starts apart still overlap in raw observations.
+批次 1-expanded-cross-rank 使用了现有的 100 个参考窗口，每条轨迹十个。每个参考都针对其余九条轨迹中每个第 16 个合法起点进行评分，并排除被保留为参考的起点。候选数量范围为 714 到 766（平均 721.8），而早先的 Cross-Rank 测试中为 24。全梯度余弦目标来自现有的 100 个参考评分数组；输出头余弦由保存的头梯度向量计算得出。嵌入余弦和绝对损失差作为批次 2 的候选特征保留。相隔 16 个起点的源窗口在原始观测中仍然重叠。
 
-Batch 2-active-correction hid all full scores except queried candidate labels. Every method began with the same eight proxy-quantile labels, then selected up to 64 labels by random, highest proxy score, predictive uncertainty, or boundary uncertainty. A six-feature per-reference ridge model predicted full-minus-head score. Queried candidates used exact full scores; unqueried candidates used model-corrected scores. The boundary policy targeted the predicted top-10-percent cutoff. Budgets were 8, 16, 32, and 64 total candidate labels. Final top fractions were 5, 10, and 20 percent. No full labels from one reference were used to train another reference's model.
+批次 2-active-correction 隐藏了除被查询候选标签之外的所有全量分数。每种方法都以相同的八个 proxy 分位数标签开始，然后按随机、最高 proxy 分数、预测不确定性或边界不确定性选择最多 64 个标签。一个六特征的逐参考 ridge 模型预测 full-minus-head 分数。被查询的候选使用精确全量分数；未被查询的候选使用模型修正后的分数。边界策略针对预测的 top-10-percent 截断点。预算为总共 8、16、32 和 64 个候选标签。最终 top 比例分别为 5、10 和 20 个百分点。来自一个参考的全量标签未被用于训练另一个参考的模型。
 
-The primary selection metrics are true top-k recall and oracle regret. Oracle regret is the mean true full-gradient cosine of the oracle top-k set minus that of the selected top-k set. All means below average the 100 reference results equally (ten per reference track). Because windows and references within a track are dependent, these are descriptive summaries, not independent-sample significance tests.
+主要选择指标是 true top-k recall 和 oracle regret。Oracle regret 是 oracle top-k 集合的真实全梯度余弦均值减去所选 top-k 集合的真实全梯度余弦均值。下文所有均值对 100 个参考结果等权平均（每个参考轨迹十个）。由于轨迹内的窗口和参考之间存在依赖关系，这些是描述性汇总，而非独立样本显著性检验。
 
-## Batch 1 results
+## 批次 1 结果
 
-The mean per-reference Spearman correlation between full and head cosine is 0.7104. Per-reference-track mean rho ranges from 0.6133 to 0.7768. Direct proxy selection gives:
+全量余弦与头部余弦之间的逐参考 Spearman 相关均值是 0.7104。逐参考轨迹的平均 rho 范围为 0.6133 到 0.7768。直接 proxy 选择给出：
 
-| Top fraction | Mean top-k recall | Mean oracle regret |
+| Top 比例 | 平均 top-k recall | 平均 oracle regret |
 |---:|---:|---:|
 | 5% | 0.3050 | 0.09509 |
 | 10% | 0.4023 | 0.07525 |
 | 20% | 0.5565 | 0.05126 |
 
-These values describe the expanded, stride-16 pool and cannot be directly compared as a matched improvement over the prior 24-candidate pool.
+这些值描述的是扩展后的、步长为 16 的候选池，不能作为相对于先前 24 候选池的匹配改进而直接比较。
 
-## Batch 2 results
+## 批次 2 结果
 
-At the pre-registered 10-percent decision fraction:
+在预先注册的 10 个百分点决策比例下：
 
-| Candidate full-label budget | Random regret | Highest-proxy regret | Uncertainty regret | Boundary regret | Boundary recall |
+| 候选全量标签预算 | Random regret | Highest-proxy regret | Uncertainty regret | Boundary regret | Boundary recall |
 |---:|---:|---:|---:|---:|---:|
 | 8 | 0.08775 | 0.08775 | 0.08775 | 0.08775 | 0.3617 |
 | 16 | 0.07996 | 0.07337 | 0.07387 | 0.06536 | 0.4293 |
 | 32 | 0.06965 | 0.06244 | 0.06981 | 0.05454 | 0.4764 |
 | 64 | 0.06249 | 0.05148 | 0.06441 | 0.04192 | 0.5415 |
 
-The direct proxy (zero candidate full labels) has regret 0.07525 and recall 0.4023. At budget 8, the common calibration model worsens the direct-proxy result; all policies are identical because no policy-specific queries have yet been made. At budgets 16, 32, and 64, the boundary policy lowers mean regret relative to direct proxy by 0.00989, 0.02071, and 0.03333. The corresponding improvements occur in 9, 10, and 10 of the ten reference-track means, respectively; 70, 92, and 99 of 100 individual references improve.
+直接 proxy（零个候选全量标签）的 regret 为 0.07525，recall 为 0.4023。在预算 8 时，共同的校准模型使直接 proxy 结果变差；所有策略完全相同，因为此时尚未进行任何策略特定的查询。在预算 16、32 和 64 时，边界策略相对于直接 proxy 分别将平均 regret 降低 0.00989、0.02071 和 0.03333。相应的改进分别出现在十个参考轨迹均值中的 9、10 和 10 个；100 个单独参考中分别有 70、92 和 99 个得到改进。
 
-At 5-percent selection, highest-proxy querying is better than boundary querying at budget 64 (regret 0.04801 versus 0.05138). The boundary policy was designed around a 10-percent cutoff, so this is an important objective-specific limitation. At 20-percent selection, boundary querying has lower mean regret than highest-proxy querying at all three post-initial budgets.
+在 5 个百分点选择下，预算 64 时最高 proxy 查询优于边界查询（regret 0.04801 对 0.05138）。边界策略是围绕 10 个百分点截断点设计的，因此这是一个重要的目标特定限制。在 20 个百分点选择下，边界查询在所有三个初始之后的预算下均比最高 proxy 查询具有更低的平均 regret。
 
-## Call-cost interpretation
+## 调用成本解释
 
-The prior matched batch-size-one cost benchmark measured medians of 14.21 ms for one head-gradient proxy and 42.80 ms for one full gradient. The modeled per-reference cost includes a proxy for every candidate, one reference proxy, the budgeted candidate full calls, and one shared reference full call. It averages about 10.66, 11.00, 11.68, and 13.05 seconds at budgets 8, 16, 32, and 64. The direct-proxy row includes the same shared full-reference setup for comparison, although direct proxy alone would not require that call. These are per-reference cost estimates from separate calls with no sharing across references, not a measured online pipeline. The cached embedding and loss features may be reusable from the proxy forward pass, but their incremental fused cost was not benchmarked. The measured CPU replay model time is recorded separately in summary.csv and is small here.
+先前匹配的 batch-size-one 成本基准测得单个头梯度 proxy 的中位数为 14.21 ms，单个全梯度为 42.80 ms。建模的逐参考成本包括对每个候选的一次 proxy、一次参考 proxy、预算内的候选全量调用，以及一次共享的参考全量调用。在预算 8、16、32 和 64 时，平均值约为 10.66、11.00、11.68 和 13.05 秒。直接 proxy 行包含相同的共享全参考设置以便比较，尽管仅直接 proxy 本身并不需要该调用。这些是来自独立调用、跨参考无共享的逐参考成本估计，而非实测在线流水线。缓存的嵌入和损失特征可能可从 proxy 前向传播中复用，但其增量融合成本未被基准测试。实测的 CPU 重放模型时间单独记录在 summary.csv 中，此处很小。
 
-## Validation and limits
+## 验证与局限
 
-Both batch .complete markers are present. The new track-01/start-0 versus reference track-00/start-36 pair agrees with the earlier independently generated Cross-Rank values to float rounding for full cosine, head cosine, embedding cosine, and loss difference. All cross-track full scores and all proxy features in the selected pools were finite. The input manifests record reference identities, candidate stride, source manifests, budgets, and fixed parameters. Query order for each reference and policy is preserved.
+两个批次的 .complete 标记均存在。新的 track-01/start-0 与参考 track-00/start-36 配对与先前独立生成的 Cross-Rank 值在全量余弦、头部余弦、嵌入余弦和损失差上一致到浮点舍入范围。所有跨轨迹全量分数以及所选池中的所有 proxy 特征均为有限值。输入 manifest 记录了参考身份、候选步长、源 manifest、预算和固定参数。每个参考和策略的查询顺序均被保留。
 
-The ten trajectories are a selected late-manifest sample from one dataset and one checkpoint. The 100 references are dependent within tracks. The target is cosine to a reference gradient, not an observed training benefit. The present result supports further testing of boundary-aware querying for this target and 10-percent selection, but does not establish downstream training improvement, cross-dataset generalization, or measured end-to-end cost savings. The initial eight-label degradation and 5-percent exception are reasons to test calibration stability and cutoff-specific policies next.
+这十条轨迹是来自一个数据集和一个 checkpoint 的选定 late-manifest 样本。这 100 个参考在轨迹内存在依赖。目标是相对于参考梯度的余弦，而非观测到的训练收益。当前结果支持针对该目标和 10 个百分点选择进一步测试边界感知查询，但并未确立下游训练改进、跨数据集泛化或实测端到端成本节省。初始八标签退化以及 5 个百分点例外，都是接下来测试校准稳定性和截断点特定策略的理由。
 
-Outputs: outputs/train/v0-active-value-rank/batch-1/ and batch-2/. Logs: logs/v0-active-value-rank/. Entry: scripts/v0_active_value_rank.py.
+输出：outputs/train/v0-active-value-rank/batch-1/ 和 batch-2/。日志：logs/v0-active-value-rank/。入口：scripts/v0_active_value_rank.py。
+
+## v0-active-value-rank
+
+于 2026-11-09 在十条缓存轨迹和 100 个参考上完成。批次 1 将跨轨迹池扩展到每个参考 714-766 个候选（平均 721.8），并发现逐参考头部/全量余弦的 Spearman 均值为 0.7104。直接头部 proxy 的 top-10-percent recall 为 0.4023，oracle regret 为 0.07525。在批次 2 中，逐参考 ridge 残差模型和边界不确定性查询策略在候选全梯度预算 16、32 和 64 时将平均 10 个百分点 regret 降至 0.06536、0.05454 和 0.04192。在这些预算下，最高 proxy 查询的 regret 分别为 0.07337、0.06244 和 0.05148。仅八个共享初始标签就使直接 proxy 变差。在 5 个百分点选择和 B=64 时，最高 proxy 查询优于边界策略，后者针对 10 个百分点截断点。该结果是缓存分数重放，而非下游训练或实测在线节省。详细方案、轨迹敏感性、成本核算和局限：docs/results/v0-active-value-rank.md。产物和 .complete 标记：outputs/train/v0-active-value-rank/batch-1/ 和 batch-2/。

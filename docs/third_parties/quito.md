@@ -1,5 +1,6 @@
 # QuitoBench 与 TIME 接入
 
+最后修改日期：2026-11-07
 QuitoBench 接入两条现有路径：`evaluate.run` 对已有检查点评测；
 `rage.experiments.main_table --benchmark quito` 执行 FEV 风格的选集、后训练和评测。
 首个适配器复用 TIME 的 Chronos-T5 分位数预测接口，不是 Chronos-2/TimesFM 适配器。

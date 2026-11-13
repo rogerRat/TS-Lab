@@ -1,20 +1,20 @@
-# v0-vage: VAGE-Static reconstruction replay
+# v0-vage：VAGE-Static 重建重放
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Protocol
+## 协议
 
-Ten retained M5 trajectories contain 12,836 legal starts at the fixed warmed Chronos-T5 Tiny checkpoint. Each window spans 576 observations (512 context plus 64 prediction), so the legal start count is N=T-575. The replay uses retained BF16 full-gradient caches and their full-coordinate and output-head Gram matrices. Each trajectory is independent.
+十条保留的 M5 轨迹在固定的已预热 Chronos-T5 Tiny checkpoint 下包含 12,836 个合法起点。每个窗口跨越 576 个观测（512 上下文加 64 预测），因此合法起点数为 N=T-575。重放使用保留的 BF16 完整梯度缓存及其全坐标与输出头 Gram 矩阵。每条轨迹相互独立。
 
-Both full-gradient and output-head proxy budgets are ceil(N/64). Nonoverlapping blocks contain at most 512 consecutive starts; terminal partial blocks remain. The proxy budget is allocated approximately by block length with at least two points per block. Proxy points are geometrically spaced and unique. The proxy score is unbiased sample trace variance from the output-head Gram submatrix. The prior is the length-weighted average proxy variance of all blocks in the trajectory. For p proxy points, the final score is w times the block variance plus (1-w) times the prior, with w=min(1,(p-1)/7). This shrinks blocks with fewer than eight proxy points. Scores remain fixed during full-gradient allocation.
+完整梯度与输出头代理预算均为 ceil(N/64)。不重叠 block 至多包含 512 个连续起点；终止部分 block 保留。代理预算按 block 长度近似分配，每个 block 至少两个点。代理点为几何间隔且唯一。代理分数为来自输出头 Gram 子矩阵的无偏样本迹方差。先验为该轨迹中所有 block 的长度加权平均代理方差。对于 p 个代理点，最终分数为 w 乘以 block 方差加上 (1-w) 乘以先验，其中 w=min(1,(p-1)/7)。这会收缩少于八个代理点的 block。分数在完整梯度分配期间保持不变。
 
-The configurable n_min is two in this run, so initial full-gradient anchors are both endpoints of each block. Remaining anchors go to the non-full block maximizing L_h V_h/[n_h(n_h+1)]. Ties go to the lower block index. Within that block, the midpoint of the largest uncovered anchor gap is chosen; ties go to the leftmost gap. The exact full-gradient budget is used. Uniform uses the same number of anchors evenly spaced over the complete trajectory, including its endpoints. Both methods use linear interpolation between anchors and reconstruct all legal starts. Primary metrics are mean L2 and mean cosine; secondary metrics include relative RMSE, tails, and non-anchor means.
+本运行中可配置的 n_min 为二，因此初始完整梯度锚点为每个 block 的两个端点。剩余锚点分配给使 L_h V_h/[n_h(n_h+1)] 最大化的非完整 block。平局归入较低 block 索引。在该 block 内，选择最大未覆盖锚点间隙的中点；平局归入最左侧间隙。使用精确的完整梯度预算。Uniform 在完整轨迹上（包括其端点）使用相同数量的均匀间隔锚点。两种方法均在锚点之间使用线性插值并重建所有合法起点。主指标为平均 L2 与平均 cosine；次指标包括相对 RMSE、尾部与非锚点均值。
 
-Selection reads only sampled proxy Gram entries. Full-gradient Gram entries are accessed only for evaluation. This is retrospective replay: the call counts are prospective costs, while no new model forward or backward calls occurred. Uniform pays no proxy calls, so this is not a matched wall-clock comparison. The ten selected late-manifest trajectories and overlapping windows limit generalization.
+选择仅读取采样的代理 Gram 条目。完整梯度 Gram 条目仅在评估时访问。这是回顾性重放：调用计数为预期成本，而未发生新的模型前向或反向调用。Uniform 不付出任何代理调用，因此这不是匹配的墙钟比较。所选十条晚清单轨迹与重叠窗口限制了泛化性。
 
-## Results
+## 结果
 
-| Equal-trajectory mean metric | VAGE-Static | Uniform | VAGE minus Uniform | VAGE wins / 10 |
+| 等权轨迹平均指标 | VAGE-Static | Uniform | VAGE 减 Uniform | VAGE 获胜 / 10 |
 |---|---:|---:|---:|---:|
 | Mean L2, lower better | 3.5437 | 3.4824 | +0.0613 | 2 |
 | Mean cosine, higher better | 0.3651 | 0.3971 | -0.0319 | 1 |
@@ -24,23 +24,23 @@ Selection reads only sampled proxy Gram entries. Full-gradient Gram entries are 
 | Non-anchor mean L2, lower better | 3.6011 | 3.5388 | +0.0623 | 2 |
 | Non-anchor mean cosine, higher better | 0.3549 | 0.3873 | -0.0324 | 1 |
 
-VAGE-Static accounts for 204 full-gradient and 204 output-head proxy calls. Uniform accounts for 204 full-gradient and zero proxy calls. Under this fixed configuration, VAGE-Static does not improve the primary pointwise reconstruction metrics. Its modest average P95 L2 advantage is inconsistent across tracks and accompanies worse mean error and lower-tail cosine. This tests the complete static allocation and longest-gap placement policy, not variance-guided methods generally.
+VAGE-Static 计 204 次完整梯度与 204 次输出头代理调用。Uniform 计 204 次完整梯度与零次代理调用。在此固定配置下，VAGE-Static 未改善主要逐点重建指标。其适度的平均 P95 L2 优势在轨迹间不一致，并伴有更差的平均误差与更低尾部 cosine。这测试的是完整的静态分配与最长间隙放置策略，而非一般意义上的方差引导方法。
 
-Proxy variance ranks block dispersion, but may not predict the improvement from one more interpolation anchor. Forced endpoints at 512-start boundaries also change spacing relative to whole-trajectory Uniform. These are hypotheses, not established causes.
+代理方差对 block 离散度进行排名，但可能无法预测增加一个插值锚点所带来的改进。在 512 起点边界强制端点也改变了相对整轨迹 Uniform 的间距。这些是假设，而非已确立的原因。
 
-## Validation and artifacts
+## 验证与产物
 
-Ten proxy markers, Gram shapes and finite values, full-gradient cache markers, and exact budgets were checked. Three direct BF16-cache interpolation errors on trajectory 00 were compared with Gram-based errors; absolute differences were 0.00239, 0.00295, and 0.00247 L2 on errors from 3.78 to 4.75. The Gram matrices derive from tiled products of BF16 vectors, so minor numerical differences from direct calculations are expected.
+检查了十个代理标记、Gram 形状与有限值、完整梯度缓存标记以及精确预算。轨迹 00 上三个直接 BF16 缓存插值误差与基于 Gram 的误差进行了比较；绝对差异为 0.00239、0.00295 和 0.00247 L2，误差范围为 3.78 至 4.75。Gram 矩阵源自 BF16 向量的分块乘积，因此与直接计算存在微小数值差异属预期之内。
 
-Config: configs/rage/v0-vage.json. Entry: scripts/v0_vage_static.py. Raw outputs: outputs/train/v0-vage/trajectory_metrics.csv, block_allocation.csv, anchors.json, summary.json, and .complete. Logs: logs/v0-vage/.
+配置：configs/rage/v0-vage.json。入口：scripts/v0_vage_static.py。原始输出：outputs/train/v0-vage/trajectory_metrics.csv、block_allocation.csv、anchors.json、summary.json 和 .complete。日志：logs/v0-vage/。
 
-## n_min=1 sensitivity replay
+## n_min=1 敏感性重放
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-A separate replay used configs/rage/v0-vage-nmin1.json and preserved the n_min=2 artifacts. Each block initially receives one center anchor. If a selected block still has only one anchor, the next point is the farther block endpoint, with the lower endpoint on a tie. Subsequent points split the largest internal gap. For starts outside the global anchor range, reconstruction uses the nearest observed anchor. All budgets, proxy scores, and the Uniform baseline are otherwise identical.
+一次单独重放使用 configs/rage/v0-vage-nmin1.json 并保留了 n_min=2 的产物。每个 block 初始获得一个中心锚点。如果某个被选 block 仍只有一个锚点，下一个点取较远的 block 端点，平局时取较低端点。后续点分割最大的内部间隙。对于全局锚点范围外的起点，重建使用最近的已观测锚点。所有预算、代理分数与 Uniform 基线在其他方面均相同。
 
-| Equal-trajectory mean metric | VAGE n_min=1 | VAGE n_min=2 | Uniform |
+| 等权轨迹平均指标 | VAGE n_min=1 | VAGE n_min=2 | Uniform |
 |---|---:|---:|---:|
 | Mean L2, lower better | 3.8747 | 3.5437 | 3.4824 |
 | Mean cosine, higher better | 0.3156 | 0.3651 | 0.3971 |
@@ -48,15 +48,15 @@ A separate replay used configs/rage/v0-vage-nmin1.json and preserved the n_min=2
 | P95 L2, lower better | 7.2953 | 6.3402 | 6.4168 |
 | P05 cosine, higher better | -0.1724 | -0.0754 | 0.0150 |
 
-All ten n_min=1 trajectories lack the first global start among final anchors; four also lack the last global start. This produces nearest-anchor extrapolation at uncovered ends and is a material difference from n_min=2. The result does not isolate the effect of reducing the per-block minimum from the effect of losing endpoint coverage. The n_min=1 design is worse than both n_min=2 and Uniform on the primary metrics. Raw outputs: outputs/train/v0-vage-nmin1/.
+全部十条 n_min=1 轨迹在最终锚点中缺少首个全局起点；其中四条还缺少最后一个全局起点。这导致在未覆盖末端使用最近锚点外推，是与 n_min=2 的实质性差异。该结果未将减少每 block 最小值的效应与失去端点覆盖的效应区分开。n_min=1 设计在主要指标上劣于 n_min=2 与 Uniform 两者。原始输出：outputs/train/v0-vage-nmin1/。
 
-## Additional n_min=1 methods
+## 额外的 n_min=1 方法
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-All methods use Bg=Bp=ceil(N/64), 512-start blocks, one initial anchor per block, and the same whole-trajectory linear interpolation evaluator. Proxy-based methods use the same sparse proxy samples and shrinkage rule as VAGE-Static. Quota allocates integer counts using weights L_h sqrt(V_h+1e-12) and places the resulting anchors evenly within each block. Fusion uses kappa=8 and a median true-to-proxy block-variance ratio fitted on the other nine trajectories for each held-out track; it updates the block sample variance using only selected full-gradient anchors. Oracle uses the population full-gradient block variance from all cached starts and is nondeployable. The unchanged Static and Uniform anchor sets match the preceding replay exactly.
+所有方法均使用 Bg=Bp=ceil(N/64)、512 起点 block、每 block 一个初始锚点，以及相同的整轨迹线性插值评估器。基于代理的方法使用与 VAGE-Static 相同的稀疏代理样本与收缩规则。Quota 使用权重 L_h sqrt(V_h+1e-12) 分配整数计数，并在每个 block 内均匀放置所得锚点。Fusion 使用 kappa=8，以及对每条留出轨迹在其他九条轨迹上拟合的真实-to-代理 block 方差比率中位数；它只使用选定的完整梯度锚点更新 block 样本方差。Oracle 使用来自所有已缓存起点的总体完整梯度 block 方差，不可部署。未改变的 Static 与 Uniform 锚点集与前述重放完全一致。
 
-| Method | Mean L2, lower better | Mean cosine, higher better | Relative RMSE |
+| 方法 | 平均 L2，越低越好 | 平均 cosine，越高越好 | 相对 RMSE |
 |---|---:|---:|---:|
 | Uniform | 3.4824 | 0.3971 | 0.9953 |
 | VAGE-Quota | 3.5031 | 0.3675 | 0.9967 |
@@ -65,19 +65,19 @@ All methods use Bg=Bp=ceil(N/64), 512-start blocks, one initial anchor per block
 | VAGE-Fusion | 3.8762 | 0.3163 | 1.1273 |
 | Oracle-VAGE | 3.8774 | 0.3163 | 1.1275 |
 
-No method exceeds Uniform on either primary equal-track mean. Quota is nearest on L2. Oracle uses true block variance but performs similarly to Static under the same one-anchor and gap-splitting policy. This shows that better block variance alone does not rescue this particular reconstruction policy, although missing endpoint coverage remains a confounder.
+没有任何方法在两个主要等权轨迹平均值上超过 Uniform。Quota 在 L2 上最接近。Oracle 使用真实 block 方差，但在相同的单锚点与间隙分割策略下表现与 Static 相似。这表明仅凭更好的 block 方差并不能挽救该特定重建策略，尽管缺失端点覆盖仍是一个混杂因素。
 
-Residual has an important protocol limitation. To avoid uncounted proxy calls, candidate anchors and initial anchors were restricted to the Bp observed proxy locations. Because Bp=Bg in every trajectory, all proxy locations necessarily become full-gradient anchors by the end. Its final anchor set therefore equals the sparse proxy sample set regardless of the residual acquisition order. The Residual row is a stratified-proxy-anchor diagnostic, not a valid test of adaptive residual selection. A meaningful Residual comparison needs a candidate proxy pool larger than Bg, a lower Bg, or a surrogate that scores unobserved candidate positions without extra proxy calls.
+Residual 有一个重要的协议局限。为避免未计数的代理调用，候选锚点与初始锚点被限制在 Bp 已观测代理位置。由于每条轨迹中 Bp=Bg，所有代理位置最终必然成为完整梯度锚点。因此，无论残差获取顺序如何，其最终锚点集都等于稀疏代理样本集。Residual 行是分层代理锚点诊断，而非对自适应残差选择的有效测试。有意义的 Residual 比较需要比 Bg 更大的候选代理池、更低的 Bg，或一个能在不额外代理调用的情况下对未观测候选位置打分的代理。
 
-All proxy-based methods account for 204 full-gradient and 204 proxy calls in total. Uniform accounts for 204 full-gradient and no proxy calls. Oracle reads all cached full gradients and has no deployable cost interpretation. Full-gradient truth in the Fusion calibration comes only from the other nine tracks for each held-out trajectory; the ten-track set was already used to develop these hypotheses, so this is exploratory rather than independent confirmation. Raw artifacts: outputs/train/v0-vage-methods-nmin1/. Entry: scripts/v0_vage_methods.py.
+所有基于代理的方法合计计 204 次完整梯度与 204 次代理调用。Uniform 计 204 次完整梯度与零次代理调用。Oracle 读取所有缓存完整梯度，不具可部署成本解释。Fusion 校准中的完整梯度真值仅来自每条留出轨迹的其他九条轨迹；十轨迹集已用于开发这些假设，因此这属于探索性而非独立确认。原始产物：outputs/train/v0-vage-methods-nmin1/。入口：scripts/v0_vage_methods.py。
 
-## Pair-mean reconstruction supplement
+## 成对均值重建补充
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-This supplement freezes every previously selected anchor set and every budget. It changes only the reconstruction rule. For an unobserved start strictly between adjacent full-gradient anchors a and b, predict (g_a+g_b)/2 at every start in that gap. Queried anchors return their observed true gradient exactly. Outside the global anchor range, as in the n_min=1 replay, use the nearest anchor. This is one constant representative per anchor gap, not one representative per fixed 512-start VAGE allocation block. The same full-coordinate BF16-derived Gram matrices evaluate both reconstruction rules. No model or proxy calls were added.
+本补充冻结此前每个选定锚点集与每个预算。它仅改变重建规则。对于严格位于相邻完整梯度锚点 a 与 b 之间的未观测起点，在该间隙内的每个起点预测 (g_a+g_b)/2。被查询的锚点精确返回其观测到的真实梯度。在全局锚点范围外，如 n_min=1 重放中那样，使用最近锚点。这是每个锚点间隙一个常量代表，而非每个固定 512 起点 VAGE 分配 block 一个代表。相同的全坐标 BF16 派生 Gram 矩阵评估两种重建规则。未增加任何模型或代理调用。
 
-| Fixed anchor selection | Pair-mean L2 | Linear L2 | Pair-mean cosine | Linear cosine |
+| 固定锚点选择 | 成对均值 L2 | 线性 L2 | 成对均值 cosine | 线性 cosine |
 |---|---:|---:|---:|---:|
 | Uniform, 204 anchors | 3.5445 | 3.4824 | 0.3498 | 0.3971 |
 | VAGE-Static n_min=2 | 3.5880 | 3.5437 | 0.3205 | 0.3651 |
@@ -87,6 +87,33 @@ This supplement freezes every previously selected anchor set and every budget. I
 | Oracle-VAGE n_min=1 | 3.9064 | 3.8774 | 0.2928 | 0.3163 |
 | VAGE-Residual diagnostic n_min=1 | 3.5699 | 3.5159 | 0.3338 | 0.3801 |
 
-Values are equal-trajectory means on the same ten retained trajectories. The duplicate Uniform and Static anchor sets from the earlier n_min=1 files produce identical rows and are deduplicated above. At this budget, the pair-mean rule worsens both primary metrics for every listed allocation on average. Quota remains closest to Uniform in L2 but does not exceed it. The original endpoint-coverage confound for n_min=1 and the Residual candidate-pool degeneracy remain.
+数值为相同十条保留轨迹上的等权轨迹平均值。来自先前 n_min=1 文件的重复 Uniform 与 Static 锚点集产生相同的行，已在上方去重。在此预算下，成对均值规则平均而言使所列每种分配的两个主要指标均变差。Quota 在 L2 上仍最接近 Uniform，但未超过它。n_min=1 的原始端点覆盖混杂与 Residual 候选池退化仍然存在。
 
-Raw per-trajectory and summary tables: outputs/train/v0-vage/pairmean/. Shared config: configs/rage/v0-pairmean-supplements.json. Entry: scripts/evaluate_pairmean_reconstruction.py. The pair-mean output has its own .complete marker.
+原始逐轨迹与汇总表：outputs/train/v0-vage/pairmean/。共享配置：configs/rage/v0-pairmean-supplements.json。入口：scripts/evaluate_pairmean_reconstruction.py。成对均值输出有自身的 .complete 标记。
+
+## v0-vage Static
+
+于 2026-11-08 在十条保留轨迹上完成，使用由 BF16 梯度派生的已保存完整/头 Gram 矩阵。VAGE-Static 计 204 次完整梯度与 204 次输出头代理调用；Uniform 计 204 次完整梯度与零次代理调用。等权轨迹平均 L2 分别为 3.5437 对 3.4824，平均 cosine 分别为 0.3651 对 0.3971。VAGE 在 2/10 条轨迹上赢得平均 L2，在 1/10 上赢得平均 cosine。固定的 Static 设计未改善主要逐点重建指标。完整协议与局限：docs/results/v0-vage.md。
+
+最后修改日期：2026-11-08
+
+
+## v0-vage n_min=1 敏感性
+
+于 2026-11-08 完成，预算与代理分数不变。等权轨迹平均 L2 为 3.8747，对 n_min=2 的 3.5437 与 Uniform 的 3.4824；平均 cosine 为 0.3156，对 0.3651 与 0.3971。每条 n_min=1 轨迹在其最终锚点中均缺少首个全局起点，其中四条缺少最后一个；未覆盖末端使用最近锚点外推。该比较未将最小锚点计数与端点覆盖区分开。详情：docs/results/v0-vage.md。
+
+最后修改日期：2026-11-08
+
+
+## v0-vage 额外的 n_min=1 方法
+
+于 2026-11-08 在相同十条轨迹上完成。等权轨迹平均 L2：Uniform 3.4824，VAGE-Quota 3.5031，Residual 诊断 3.5159，Static 3.8747，Fusion 3.8762，Oracle 3.8774。平均 cosine：分别为 0.3971、0.3675、0.3801、0.3156、0.3163 和 0.3163。没有 VAGE 变体同时改善两个主要指标。Residual 是代理分层锚点诊断，因为 Bg=Bp 强制选择每个已观测代理候选。完整协议与局限：docs/results/v0-vage.md。
+
+最后修改日期：2026-11-08
+
+
+## 成对均值重建补充：v0-vage 与 v0-uni-reconst-scale
+
+于 2026-11-08 完成，使用相同十条轨迹、缓存的完整梯度锚点，以及与前序线性重建运行相同的精确预算。锚点间隙中的每个未观测起点由两端点梯度的均值表示；已观测锚点返回精确梯度。在 204 个总锚点下，Uniform 等权轨迹平均 L2/cosine 从线性插值下的 3.4824/0.3971 变为成对均值下的 3.5445/0.3498。VAGE-Static n_min=2 从 3.5437/0.3651 变为 3.5880/0.3205。成对均值规则平均而言使所测试 VAGE 分配的两个主要等权轨迹指标均变差。在 Uniform 尺度扫描中，s=1 保持精确，s=2 几乎不变；s=4-128 具有更高的平均 L2 与更低的平均 cosine。完整表与局限：docs/results/v0-vage.md 和 docs/results/v0-uni-reconst-scale.md。
+
+最后修改日期：2026-11-08

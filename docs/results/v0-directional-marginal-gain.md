@@ -1,79 +1,92 @@
-# v0-directional-marginal-gain
+# v0-directional-marginal-gain：方向性边际增益
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Question and fixed replay
+## 问题与固定重放
 
-Can block direction dispersion predict the actual reduction in directional reconstruction error from one additional full-gradient anchor, beyond predicting the starting error? Reuse the same 46 complete, nonoverlapping 256-start blocks from ten retained trajectories. For each block, compute true full-gradient direction dispersion over all 256 unit gradients, complete-gradient vector variance, and relative vector variance from the completed v0-gradient-variance-decomposition metrics. Calculate a sparse output-head proxy direction dispersion from eight evenly spaced head gradients at local positions 0,36,73,109,146,182,219,255. The eight proxy vectors are in a different parameter space; this statistic is an estimate of directional heterogeneity, not the complete-gradient direction dispersion itself.
+block 方向离散度能否在预测起始误差之外，预测增加一个全梯度锚点所带来的方向重建误差的实际下降？复用来自十条保留轨迹的同样 46 个完整、不重叠的 256 起点 block。对每个 block，根据已完成的 v0-gradient-variance-decomposition 指标，计算全部 256 个单位梯度上的真实全梯度方向离散度、完整梯度向量方差以及相对向量方差。由局部位置 0,36,73,109,146,182,219,255 处八个等间距 head 梯度计算稀疏输出 head proxy 方向离散度。八个 proxy 向量处于不同的参数空间；该统计量是对方向异质性的估计，而不是完整梯度方向离散度本身。
 
-For each budget n in {2,4,8,16}, place n uniformly spaced true full-gradient anchors including endpoints, using the existing `spaced` rule. Add one anchor at the integer midpoint of the largest consecutive anchor gap, with the leftmost gap winning ties; the midpoint uses floor division. The added positions are 127, 42, 54, and 8 for n=2,4,8,16. The selection rule is fixed independently of both direction dispersions and the resulting gain. Reconstruct all 256 gradients by linear interpolation before and after insertion. Define directional error per position as `1-cos(true,reconstructed)`, force observed anchor error to zero, and average over all 256 starts for `E_h(n)` and `E_h(n+1)`. The actual gain is `Delta E_h(n)=E_h(n)-E_h(n+1)`. A negative gain means the new anchor worsened the block average. Also report gain excluding only the new anchor, averaged over the other 255 positions, and gain over positions unqueried both before and after insertion.
+对每个预算 n（取值 {2,4,8,16}），使用现有的 `spaced` 规则放置 n 个等间距的真实全梯度锚点（包含端点）。在最大连续锚点间隙的整数中点处增加一个锚点，平局时最左侧间隙胜出；中点使用向下取整除法。n=2,4,8,16 时新增位置分别为 127、42、54、8。该选择规则固定，独立于两个方向离散度和由此产生的增益。在插入前后通过线性插值重建全部 256 个梯度。将每个位置的方向误差定义为 `1-cos(true,reconstructed)`，强制已观测锚点误差为零，并对全部 256 个起点求平均得到 `E_h(n)` 和 `E_h(n+1)`。实际增益为 `Delta E_h(n)=E_h(n)-E_h(n+1)`。负增益意味着新锚点使 block 平均值变差。另外报告仅排除新锚点（在其他 255 个位置上平均）的增益，以及仅统计插入前后均未查询位置的增益。
 
-## Meaning of the direction error and gain
+## 方向误差与增益的含义
 
-For a start t between consecutive anchors a and b, linear reconstruction is `ghat_t=(1-alpha)g_a+alpha*g_b`, where `alpha=(t-a)/(b-a)`. At a queried anchor, `ghat_t=g_t`. The per-start direction error is
+对于两个连续锚点 a 和 b 之间的起点 t，线性重建为 `ghat_t=(1-alpha)g_a+alpha*g_b`，其中 `alpha=(t-a)/(b-a)`。在已查询锚点处，`ghat_t=g_t`。每个起点的方向误差为
 
-`e_t(n)=1-(g_t dot ghat_t)/(||g_t||_2 ||ghat_t||_2)`.
+`e_t(n)=1-(g_t dot ghat_t)/(||g_t||_2 ||ghat_t||_2)`。
 
-All cached true and reconstructed gradients have positive norms. The error is dimensionless and lies in [0,2]: zero means the two vectors point in the same direction, one means they are orthogonal, and two means they point in opposite directions. It measures directional alignment only; it does not measure the difference in gradient lengths or the full-vector L2 error. The block error is `E_h(n)=(1/256) sum_{t in h} e_t(n)` and includes the n queried anchors, each with zero error.
+所有缓存的真实和重建梯度范数均为正。该误差无量纲，位于 [0,2] 区间：零表示两个向量同向，一表示正交，二表示反向。它只测量方向一致性；不测量梯度长度的差异或完整向量的 L2 误差。block 误差为 `E_h(n)=(1/256) sum_{t in h} e_t(n)`，包含 n 个已查询锚点，每个误差为零。
 
-After adding one anchor at position c, the total marginal gain is `Delta E_h(n)=E_h(n)-E_h(n+1)`. Positive gain means the block-average direction error decreased, zero means no net change, and negative gain means it increased. This is an absolute reduction in the dimensionless error, not a percentage. The direct contribution of making c exact is `e_c(n)/256`. To separate that mechanical improvement from changes elsewhere, the nonnew-point gain is `(1/255) sum_{t in h, t != c} [e_t(n)-e_t(n+1)]`. A second diagnostic averages only positions that remain unqueried after insertion. A negative nonnew-point gain means the interpolation got worse on average away from the new anchor even if the total gain is positive.
+在位置 c 增加一个锚点后，总边际增益为 `Delta E_h(n)=E_h(n)-E_h(n+1)`。正增益表示 block 平均方向误差下降，零表示无净变化，负增益表示上升。这是无量纲误差的绝对下降，而不是百分比。使 c 精确的直接贡献为 `e_c(n)/256`。为将该机械性改进与其他位置的变化分开，非新点增益为 `(1/255) sum_{t in h, t != c} [e_t(n)-e_t(n+1)]`。第二项诊断仅对插入后仍未被查询的位置求平均。负的非新点增益意味着，即便总增益为正，远离新锚点处的插值平均而言变差了。
 
-Use the saved all-coordinate BF16 full-gradient and FP32 output-head Gram matrices; no model or gradient recomputation occurs. Compute pooled Pearson and Spearman correlations separately for each n across 46 blocks. Compute Spearman within each trajectory and average defined track values equally; track 00 has only two blocks and is excluded from that mean. Do not pool budgets for the primary correlations, since their gain scales differ. No independent-block p-values or causal claims are made.
+使用已保存的全坐标 BF16 全梯度和 FP32 输出 head Gram 矩阵；不进行任何模型或梯度重算。对每个 n 分别跨 46 个 block 计算合并 Pearson 和 Spearman 相关性。在每条轨迹内计算 Spearman，并对已定义的 track 值等权平均；track 00 只有两个 block，被排除在该均值之外。不要为主要的相关性合并预算，因为它们的增益尺度不同。不作独立 block p 值或因果性断言。
 
-Entry: `scripts/v0_directional_marginal_gain.py`. Environment: `rage` Conda. Command: `PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_directional_marginal_gain`. Output: `outputs/train/v0-directional-marginal-gain/`. Logs: `logs/v0-directional-marginal-gain/`.
+入口：`scripts/v0_directional_marginal_gain.py`。环境：`rage` Conda。命令：`PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_directional_marginal_gain`。输出：`outputs/train/v0-directional-marginal-gain/`。日志：`logs/v0-directional-marginal-gain/`。
 
-## Starting error and gain
+## 起始误差与增益
 
-| Initial anchors n | New position | Mean E(n) | Mean E(n+1) | Mean total gain | Mean gain excluding new point | Blocks with negative nonnew gain |
+| 初始锚点数 n | 新位置 | 平均 E(n) | 平均 E(n+1) | 平均总增益 | 平均排除新点后的增益 | 非新点增益为负的 block 数 |
 |---:|---:|---:|---:|---:|---:|---:|
 | 2 | 127 | 0.8176 | 0.7104 | 0.1072 | 0.1040 | 2/46 |
 | 4 | 42 | 0.6382 | 0.5976 | 0.0407 | 0.0378 | 1/46 |
 | 8 | 54 | 0.5066 | 0.4922 | 0.0144 | 0.0122 | 3/46 |
 | 16 | 8 | 0.4003 | 0.3928 | 0.0075 | 0.0055 | 5/46 |
 
-Mean total gain declines with larger starting budgets. The added point itself contributes mean `old_error[new]/256` of 0.0036, 0.0030, 0.0022, and 0.0020 in budget order. Most average improvement at n=2 and n=4 therefore occurs away from the newly queried point. Some individual blocks get worse even away from that point; at n=16 this occurs in five of 46 blocks. These are gains from one fixed largest-gap split, not optimized additions.
+平均总增益随起始预算增大而下降。新增点本身贡献的平均值为 `old_error[new]/256`，按预算顺序为 0.0036、0.0030、0.0022、0.0020。因此 n=2 和 n=4 时的大部分平均改进发生在远离新查询点的位置。一些单个 block 即便在远离该点的位置也会变差；n=16 时这种情况出现在 46 个 block 中的五个。这些是来自一次固定的最大间隙切分的增益，而非优化后的新增。
 
-## Does high starting error itself predict gain?
+## 高起始误差本身能否预测增益？
 
-| Initial anchors n | Pooled Spearman: E(n) versus total gain | Pooled Spearman: E(n) versus nonnew gain | Blocks with negative total gain | Blocks with negative nonnew gain |
+| 初始锚点数 n | 合并 Spearman：E(n) 对总增益 | 合并 Spearman：E(n) 对非新点增益 | 总增益为负的 block 数 | 非新点增益为负的 block 数 |
 |---:|---:|---:|---:|---:|
 | 2 | 0.461 | 0.448 | 1/46 | 2/46 |
 | 4 | 0.280 | 0.273 | 0/46 | 1/46 |
 | 8 | 0.254 | 0.234 | 1/46 | 3/46 |
 | 16 | 0.021 | -0.025 | 2/46 | 5/46 |
 
-Higher current error has at most moderate association with this fixed one-anchor gain, and almost none at n=16. In the n=16 replay, trajectory 07 block 0 has the highest starting error among all 46 blocks (`E=0.5299`), yet the fixed new anchor increases its average error: total gain -0.00587 and nonnew-point gain -0.00860. This directly demonstrates that even the currently hardest block in this budget need not benefit from this particular fixed anchor. It does not show that every possible anchor choice in the block would fail.
+较高当前误差至多与该固定单锚点增益呈中等关联，在 n=16 时几乎没有。在 n=16 的重放中，轨迹 07 的 block 0 在所有 46 个 block 中起始误差最高（`E=0.5299`），然而固定的新锚点却提高了其平均误差：总增益 -0.00587，非新点增益 -0.00860。这直接表明，即便该预算下当前最困难的 block 也未必能从这一特定固定锚点中受益。它并不表明该 block 中每一个可能的锚点选择都会失败。
 
-## Does dispersion predict difficulty or gain?
+## 离散度能否预测难度或增益？
 
-Values below are pooled Spearman coefficients across 46 blocks at each fixed budget. The final column is the coefficient for gain averaged over the 255 positions other than the new anchor.
+下表数值为每个固定预算下跨 46 个 block 的合并 Spearman 系数。最后一列为在新锚点以外 255 个位置上平均的增益所对应的系数。
 
-| Initial anchors n | Predictor | Starting error E(n) | Total marginal gain | Gain excluding new point |
+| 初始锚点数 n | 预测子 | 起始误差 E(n) | 总边际增益 | 排除新点后的增益 |
 |---:|---|---:|---:|---:|
-| 2 | Full vector variance | -0.298 | -0.075 | -0.079 |
-| 2 | Relative vector variance | 0.585 | -0.017 | -0.031 |
-| 2 | True direction dispersion | 0.616 | -0.074 | -0.088 |
-| 2 | Eight-head-proxy direction dispersion | 0.472 | -0.002 | -0.012 |
-| 4 | Full vector variance | -0.324 | -0.175 | -0.183 |
-| 4 | Relative vector variance | 0.639 | 0.147 | 0.148 |
-| 4 | True direction dispersion | 0.701 | 0.142 | 0.137 |
-| 4 | Eight-head-proxy direction dispersion | 0.489 | 0.380 | 0.370 |
-| 8 | Full vector variance | -0.073 | -0.271 | -0.286 |
-| 8 | Relative vector variance | 0.542 | 0.230 | 0.222 |
-| 8 | True direction dispersion | 0.547 | 0.256 | 0.232 |
-| 8 | Eight-head-proxy direction dispersion | 0.276 | 0.235 | 0.212 |
-| 16 | Full vector variance | 0.069 | -0.046 | -0.061 |
-| 16 | Relative vector variance | 0.392 | 0.050 | 0.022 |
-| 16 | True direction dispersion | 0.395 | 0.060 | 0.034 |
-| 16 | Eight-head-proxy direction dispersion | 0.131 | 0.056 | 0.032 |
+| 2 | 完整向量方差 | -0.298 | -0.075 | -0.079 |
+| 2 | 相对向量方差 | 0.585 | -0.017 | -0.031 |
+| 2 | 真实方向离散度 | 0.616 | -0.074 | -0.088 |
+| 2 | 八 head proxy 方向离散度 | 0.472 | -0.002 | -0.012 |
+| 4 | 完整向量方差 | -0.324 | -0.175 | -0.183 |
+| 4 | 相对向量方差 | 0.639 | 0.147 | 0.148 |
+| 4 | 真实方向离散度 | 0.701 | 0.142 | 0.137 |
+| 4 | 八 head proxy 方向离散度 | 0.489 | 0.380 | 0.370 |
+| 8 | 完整向量方差 | -0.073 | -0.271 | -0.286 |
+| 8 | 相对向量方差 | 0.542 | 0.230 | 0.222 |
+| 8 | 真实方向离散度 | 0.547 | 0.256 | 0.232 |
+| 8 | 八 head proxy 方向离散度 | 0.276 | 0.235 | 0.212 |
+| 16 | 完整向量方差 | 0.069 | -0.046 | -0.061 |
+| 16 | 相对向量方差 | 0.392 | 0.050 | 0.022 |
+| 16 | 真实方向离散度 | 0.395 | 0.060 | 0.034 |
+| 16 | 八 head proxy 方向离散度 | 0.131 | 0.056 | 0.032 |
 
-The true direction dispersion ranks starting difficulty substantially better than marginal benefit at all four budgets. At n=4, its starting-error rho is 0.701 but its total-gain rho is only 0.142; the corresponding equal-track rhos are 0.689 and 0.211. At n=2, both true and sparse proxy dispersion have nearly zero or negative association with gain. At n=8 the associations become weakly positive, and by n=16 they are near zero again. A high-dispersion block can remain hard to reconstruct while a fixed extra anchor offers little improvement.
+真实方向离散度在全部四个预算下对起始难度的排序能力都显著优于对边际收益的排序能力。在 n=4 时，其起始误差 rho 为 0.701，但总增益 rho 仅为 0.142；对应的等 track rho 分别为 0.689 和 0.211。在 n=2 时，真实和稀疏 proxy 离散度与增益的关联都接近零或为负。在 n=8 时关联变为弱正，到 n=16 时又接近零。高离散度的 block 可能仍然难以重建，而固定的额外锚点带来的改进很小。
 
-The sparse proxy direction dispersion correlates with true direction dispersion across the 46 blocks at Pearson 0.867 and Spearman 0.703. Its best observed total-gain association is at n=4 (rho 0.380, equal-track rho 0.344); for nonnew-point gain, rho is 0.370. Leave-one-track-out pooled nonnew-gain rho remains 0.303-0.447 at n=4. This is a budget-specific moderate signal, not consistent evidence across n=2,8,16. At n=8, sparse-proxy total-gain rho is 0.235 and equal-track rho 0.311; at n=16 it is 0.056 and 0.089. The preselected largest-gap insertion might interact with the proxy sampling positions, so the n=4 result should not be interpreted as proof that a proxy-guided allocation policy improves reconstruction.
+稀疏 proxy 方向离散度在 46 个 block 上与真实方向离散度的 Pearson 相关为 0.867、Spearman 为 0.703。其观测到的最佳总增益关联在 n=4（rho 0.380，等 track rho 0.344）；对于非新点增益，rho 为 0.370。留一 track 的合并非新增益 rho 在 n=4 时仍为 0.303-0.447。这是一个特定于预算的中等信号，并非在 n=2,8,16 上一致的证据。在 n=8 时，稀疏 proxy 总增益 rho 为 0.235，等 track rho 为 0.311；在 n=16 时分别为 0.056 和 0.089。预先选定的最大间隙插入可能与 proxy 采样位置相互作用，因此 n=4 的结果不应被解读为 proxy 引导的分配策略能改进重建的证明。
 
-## Interpretation and artifacts
+## 解释与产物
 
-For these fixed ten trajectories, direction dispersion describes current reconstruction difficulty better than the measured one-anchor gain. High current error also does not guarantee benefit: the n=16 block with the highest starting error had a negative total gain under the fixed insertion rule. The evidence does not yet justify allocating more anchors solely by direction dispersion. The n=4 sparse proxy result is a candidate for a separate fixed-budget selection test, with matched uniform controls and held-out evaluation; this replay does not test such a policy. The 46 blocks come from overlapping raw windows within a selected set of tracks, and nine within-track correlations have only four or five blocks each.
+对于这固定的十条轨迹，方向离散度对当前重建难度的描述优于所测得的单锚点增益。高当前误差同样不保证受益：在固定插入规则下，n=16 时起始误差最高的 block 总增益为负。现有证据尚不足以支持仅依据方向离散度来分配更多锚点。n=4 时的稀疏 proxy 结果可作为一个单独的固定预算选择测试的候选，并配以匹配的 Uniform 对照和留出评估；本次重放并未测试这样的策略。46 个 block 来自所选 track 集合内相互重叠的原始窗口，其中九个 track 内相关性各自只有四或五个 block。
 
-`block_budget_metrics.csv` has all 184 block-budget rows, exact anchor positions, E(n), post-error, direct new-point gain, nonnew gain, and unqueried-position gain. `correlations.csv` has 64 budget-predictor-target associations, including pooled Pearson, pooled Spearman, and equal-track Spearman. `budget_summary.csv`, `proxy_direction_dispersion.csv`, `proxy_association.json`, `leave_one_track_out.csv`, and `input_manifest.json` provide the remaining checks. The output `.complete` marker is present.
+`block_budget_metrics.csv` 包含全部 184 行 block-预算记录、精确锚点位置、E(n)、后误差、直接新点增益、非新增益以及未查询位置增益。`correlations.csv` 包含 64 个预算-预测子-目标关联，包括合并 Pearson、合并 Spearman 和等 track Spearman。`budget_summary.csv`、`proxy_direction_dispersion.csv`、`proxy_association.json`、`leave_one_track_out.csv` 和 `input_manifest.json` 提供其余检查。输出 `.complete` 标记存在。
 EOF'
+
+## v0-directional-marginal-gain：方向性边际增益
+
+于 2026-11-08 完成，基于 46 个固定的 256 起点 block 和四个全梯度锚点预算。固定的最左侧最大间隙中点增加一个锚点；n=2,4,8,16 时的平均方向误差增益分别为 0.1072、0.0407、0.0144、0.0075。n=2 和 n=4 时大部分平均增益发生在远离新锚点的位置。
+
+| 起始锚点数 | 真实离散度对起始误差 rho | 真实离散度对增益 rho | 稀疏 proxy 离散度对增益 rho | 稀疏 proxy 对非新增益 rho |
+|---:|---:|---:|---:|---:|
+| 2 | 0.616 | -0.074 | -0.002 | -0.012 |
+| 4 | 0.701 | 0.142 | 0.380 | 0.370 |
+| 8 | 0.547 | 0.256 | 0.235 | 0.212 |
+| 16 | 0.395 | 0.060 | 0.056 | 0.032 |
+
+方向误差是每个真实梯度与线性重建梯度之间 1-cosine 的平均值；零为同向，一为正交，二为反向。正的单锚点增益意味着该平均误差下降；负增益意味着上升。起始误差与总增益之间的合并 Spearman 在 n=2/4/8/16 时分别为 0.461/0.280/0.254/0.021。在 n=16 时，起始误差最高的 block（轨迹 07 block 0，E=0.5299）在固定新增锚点下总增益为负，为 -0.00587。真实方向离散度对当前重建难度的预测远比边际收益更为稳定一致。稀疏八点输出 head 离散度与真实方向离散度的合并 Spearman 为 0.703；其 n=4 时的增益关联是一个特定于预算的中等信号，并非某种分配策略有效的证据。高离散度的 block 可能依然困难，而固定的下一个锚点带来的改进很小。详细协议、逐 track 相关性、非新点增益和敏感性检查：docs/results/v0-directional-marginal-gain.md。原始输出和 .complete：outputs/train/v0-directional-marginal-gain/。

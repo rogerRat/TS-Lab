@@ -1,5 +1,6 @@
 # FEV 评测机制
 
+最后修改日期：2026-11-07
 本文说明项目当前集成的 FEV（Forecasting Evaluation）评测如何组织数据、生成评测窗口，以及 `id`、`target` 和 `num_windows` 之间的关系。
 
 ## 1. Task 与数据集

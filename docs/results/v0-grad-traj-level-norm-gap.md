@@ -1,18 +1,18 @@
 # v0-grad-traj-level-norm-gap
 
-Last modified: 2026-11-08
+最后修改日期：2026-11-08
 
-## Question and method
+## 问题与方法
 
-Across the same ten retained continuous M5 trajectories, do trajectory-level mean-gradient norms differ appreciably for complete backpropagation gradients and output-head proxy gradients? For each track and each gradient kind, the primary quantity is the Euclidean norm of the vector average over all legal windows, `||mean_i g_i||`. To distinguish this from a different common reading, also report the arithmetic mean of per-window norms, `mean_i ||g_i||`. The full and output-head vectors occupy different parameter spaces, so their raw magnitudes are not directly comparable; compare relative spreads and trajectory ranks within each kind.
+在同样的十条保留的连续 M5 轨迹上，完整反向传播梯度与输出头代理梯度的轨迹级平均梯度范数是否存在明显差异？对每条轨迹和每种梯度类型，主指标是所有合法窗口上向量平均的欧氏范数，即 `||mean_i g_i||`。为区分另一种常见读法，也报告逐窗口范数的算术平均，即 `mean_i ||g_i||`。完整梯度向量与输出头梯度向量占据不同的参数空间，因此其原始幅值不能直接比较；应在每种类型内部比较相对离散度和轨迹排名。
 
-Use the saved complete all-coordinate full-gradient and output-head Gram matrices, with no new model calls. For N windows with Gram matrix G, calculate the squared norm of the mean vector as `mean(G)`, the mean per-window norm as `mean(sqrt(diag(G)))`, and the population vector variance as `mean(diag(G))-mean(G)`. Validate each track marker, manifest window count, Gram shape, finite values, positive diagonal, and symmetry. Report ten-track minimum, maximum, maximum/minimum, median, mean, and population coefficient of variation. Correlate the two kinds across ten paired trajectories using Pearson and Spearman. These are descriptive values for a fixed selected sample, not independent-window significance tests.
+使用已保存的完整全坐标 full-gradient 和 output-head Gram 矩阵，不进行新的模型调用。对 N 个窗口及其 Gram 矩阵 G，计算平均向量平方范数为 `mean(G)`，平均逐窗口范数为 `mean(sqrt(diag(G)))`，总体向量方差为 `mean(diag(G))-mean(G)`。校验每条轨迹标记、清单窗口数、Gram 形状、有限值、正对角线以及对称性。报告十条轨迹的最小值、最大值、最大值/最小值、中位数、均值以及总体变异系数。对十对配对轨迹用 Pearson 和 Spearman 关联两种类型。这些是针对固定选定样本的描述性数值，不是独立窗口显著性检验。
 
-Entry: `scripts/v0_grad_traj_level_norm_gap.py`. Environment: `rage` Conda. Command: `PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_grad_traj_level_norm_gap`. Output: `outputs/train/v0-grad-traj-level-norm-gap/`. Log: `logs/v0-grad-traj-level-norm-gap/`.
+入口：`scripts/v0_grad_traj_level_norm_gap.py`。环境：`rage` Conda。命令：`PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=2 OMP_NUM_THREADS=2 PYTHONPATH=src /root/autodl-tmp/rage/envs/rage/bin/python -u -m scripts.v0_grad_traj_level_norm_gap`。输出：`outputs/train/v0-grad-traj-level-norm-gap/`。日志：`logs/v0-grad-traj-level-norm-gap/`。
 
-## Per-trajectory observations
+## 逐轨迹观测
 
-| Track | Windows | Full norm of mean | Head norm of mean | Full mean norm | Head mean norm |
+| Track | Windows | 平均向量的 full 范数 | 平均向量的 head 范数 | Full 平均范数 | Head 平均范数 |
 |---|---:|---:|---:|---:|---:|
 | 00 | 607 | 1.5050 | 0.1293 | 4.2293 | 0.5142 |
 | 01 | 1388 | 0.8950 | 0.0897 | 3.3427 | 0.4041 |
@@ -25,9 +25,13 @@ Entry: `scripts/v0_grad_traj_level_norm_gap.py`. Environment: `rage` Conda. Comm
 | 08 | 1378 | 0.9556 | 0.1047 | 3.2492 | 0.4033 |
 | 09 | 1394 | 0.8766 | 0.0791 | 3.3473 | 0.3829 |
 
-The primary norm of the mean gradient varies from 0.7780 (track 04) to 1.5050 (track 00) for full gradients, a 1.9345-fold span, with population CV 0.2291. For output-head gradients it varies from 0.0607 (track 03) to 0.1515 (track 07), a 2.4960-fold span, with CV 0.3040. Full and head primary-norm rankings across tracks have Pearson 0.8835 and Spearman 0.8788. Tracks 00 and 07 are high in both kinds; tracks 03 and 04 are relatively low in both. The exact maximum and minimum tracks differ by gradient kind.
+完整梯度的平均梯度主范数从 0.7780（track 04）变化到 1.5050（track 00），跨度为 1.9345 倍，总体 CV 为 0.2291。输出头梯度则从 0.0607（track 03）变化到 0.1515（track 07），跨度为 2.4960 倍，CV 为 0.3040。跨轨迹的 full 与 head 主范数排名 Pearson 为 0.8835，Spearman 为 0.8788。track 00 和 07 在两种类型中都较高；track 03 和 04 在两种类型中都相对较低。精确的最大值和最小值对应轨迹因梯度类型而异。
 
-The secondary mean of per-window norms has a narrower spread: full 3.0087-4.2293 (1.4057-fold, CV 0.1073), output-head 0.3563-0.5142 (1.4433-fold, CV 0.1202). Its across-track full/head association is Pearson 0.9764 and Spearman 0.8061. The norm of a trajectory mean is smaller than the mean of its window norms because gradient directions can cancel; the ratios range from 0.2466 to 0.3558 for full gradients and 0.1615 to 0.3081 for output-head gradients. Thus the larger spread of mean-vector norms reflects both gradient scale and directional cancellation.
+次级指标逐窗口范数的均值分布更窄：full 为 3.0087-4.2293（1.4057 倍，CV 0.1073），output-head 为 0.3563-0.5142（1.4433 倍，CV 0.1202）。其跨轨迹 full/head 关联 Pearson 为 0.9764，Spearman 为 0.8061。轨迹均值的范数小于其窗口范数的均值，因为梯度方向可能相互抵消；比值范围对 full 梯度为 0.2466 至 0.3558，对 output-head 梯度为 0.1615 至 0.3081。因此平均向量范数更大的离散度既反映梯度尺度，也反映方向抵消。
 
-These are appreciable descriptive differences among the ten selected tracks. The tracks are not a random sample of all M5 series, windows within a track overlap, and there are only ten track-level observations. No formal population-level statistical significance or generalization claim is made. Raw metrics, spread statistics, paired correlations, and `.complete` are in the output directory.
+在这十条选定轨迹之间存在可观的描述性差异。这些轨迹并非全部 M5 序列的随机样本，同一轨迹内的窗口相互重叠，且只有十条轨迹级观测。不对总体层面的统计显著性作声明，也不作泛化声明。原始指标、离散度统计、配对相关以及 `.complete` 均位于输出目录。
 EOF'
+
+## v0-grad-traj-level-norm-gap
+
+于 2026-11-08 完成，使用保存的 full/head Gram 矩阵，针对同样的十条保留轨迹和 12,836 个合法窗口。每条轨迹平均梯度向量的范数，full 梯度为 0.7780-1.5050（1.9345x），output-head 梯度为 0.0607-0.1515（2.4960x）。full/head 轨迹排序强相关（Spearman 0.8788）。track 00 和 07 在两种类型中都相对较高；03 和 04 相对较低。逐窗口范数均值在轨迹间的变化较小：full 跨度 1.4057x，head 跨度 1.4433x。full/head 向量幅值处于不同空间，不应直接比较。逐轨迹数值、定义和限制见 docs/results/v0-grad-traj-level-norm-gap.md。输出：outputs/train/v0-grad-traj-level-norm-gap/。
