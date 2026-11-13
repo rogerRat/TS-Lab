@@ -66,13 +66,14 @@ def native_v6_training_batch(windows, *, device, dtype):
 def v6_single_patch_loss(model, batch):
     """Compute exactly the 96-point next-patch loss without shifted patches."""
     import torch
-    hidden = model.model(input_ids=batch["input_ids"], use_cache=False,
-                         return_dict=True).last_hidden_state
+    base = model.get_base_model() if hasattr(model, "get_base_model") else model
+    hidden = base.model(input_ids=batch["input_ids"], use_cache=False,
+                        return_dict=True).last_hidden_state
     try:
-        head = model.lm_heads[model.output_token_len_map[96]]
+        head = base.lm_heads[base.output_token_len_map[96]]
     except (AttributeError, KeyError):
         heads = [(head, int(size)) for head, size in zip(
-            model.lm_heads, model.config.output_token_lens) if int(size) == 96]
+            base.lm_heads, base.config.output_token_lens) if int(size) == 96]
         if len(heads) != 1:
             raise ValueError("Timer V6 requires exactly one 96-point output head")
         head = heads[0][0]

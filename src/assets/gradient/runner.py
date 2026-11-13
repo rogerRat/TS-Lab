@@ -1,4 +1,4 @@
-"""Prepare per-window BF16 gradient assets for Chronos, TimesFM or TimeMoE."""
+"""Prepare per-window BF16 gradient assets for registered forecasting models."""
 from __future__ import annotations
 import argparse
 import json
@@ -9,7 +9,10 @@ from assets.gradient import GradientCache, WindowRequest
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", choices=("chronos-base", "timesfm-2.5", "timemoe-200m"), required=True)
+    parser.add_argument("--model", choices=("chronos-tiny", "chronos-small", "chronos-base",
+        "timesfm-2.5", "timerxl-84m", "timemoe-200m"), required=True)
+    parser.add_argument("--gradient-kind", choices=("full_model", "output_head"),
+                        default="full_model", help="full parameters or output-head proxy")
     parser.add_argument("--ckpt", "--model-path", dest="ckpt")
     parser.add_argument("--windows", type=Path, required=True,
                         help="NPZ with windows[N,C+H] and window_ids[N,2]")
@@ -29,6 +32,13 @@ def main(argv=None):
     _, probe, identity = build_model(args.model, model_path=args.ckpt, device=args.device)
     probe.execution = SelectionExecution(gradient_batch=args.gradient_batch_size,
                                          gradient_workers=args.gradient_workers)
+    if args.gradient_kind == "output_head":
+        from gradient.output_head import OutputHeadGradientProbe
+        family = ("chronos" if args.model.startswith("chronos-") else
+                  "timerxl" if args.model.startswith("timerxl-") else "timesfm")
+        probe = OutputHeadGradientProbe(probe, family)
+        probe.execution = SelectionExecution(gradient_batch=args.gradient_batch_size,
+                                             gradient_workers=1)
     cache = GradientCache(args.run_dir, probe, model_identity=identity,
         data_fields=dict(dataset=args.dataset, path=str(args.windows.resolve()), rows=len(windows)),
         context_length=probe.config.context_length, prediction_length=probe.config.prediction_length)

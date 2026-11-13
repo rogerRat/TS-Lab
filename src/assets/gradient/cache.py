@@ -106,15 +106,27 @@ class GradientCache:
         config = getattr(engine, "config", None)
         probe = {key: getattr(config, key, None) for key in
                  ("layer", "projection_dimension", "projection_seed", "projection_repeats")}
+        gradient_kind = getattr(engine, "gradient_kind", "full_model")
+        if gradient_kind == "output_head":
+            probe["gradient_kind"] = gradient_kind
+            probe["head_parameters"] = [name for name, _parameter in engine._head_named]
         self.manifest = json.loads(json.dumps(dict(
             format="window-gradients-bf16-v1", model=model, data=data_fields,
-            gradient_protocol="independent-native-loss-bf16-v2",
+            gradient_protocol=("output-head-proxy-v1" if gradient_kind == "output_head"
+                               else "independent-native-loss-bf16-v2"),
             context_length=context_length, prediction_length=prediction_length,
-            probe=probe, value_kind="projected_per_window_gradient",
+            probe=probe,
+            value_kind=("projected_output_head_gradient" if gradient_kind == "output_head"
+                        else "projected_per_window_gradient"),
             storage_dtype="bfloat16", storage_encoding="uint16-bits",
             index_columns=["fragment_id", "physical_start_1based"])))
         shared = os.environ.get("RAGE_GRADIENT_CACHE_ROOT")
         root = Path(shared) if shared else Path(run_dir) / "grad_cache"
+        from configs.paths import PROJECT_ROOT
+        root = root.resolve()
+        output_root = (PROJECT_ROOT / "outputs").resolve()
+        if root != output_root and output_root not in root.parents:
+            raise ValueError("gradient cache root must be below outputs/: %s" % root)
         root.mkdir(parents=True, exist_ok=True)
         name = readable(model["model_id"]) + "--" + readable(model.get("ckpt_revision"))
         self._lock = (root / (name + ".lock")).open("a+")
