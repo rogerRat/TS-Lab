@@ -1,6 +1,6 @@
 # v1-crb-redo
 
-最后修改日期：2026-11-13
+最后修改日期：2026-11-13 14:37 CST
 
 ## v1-crb-redo
 
@@ -21,7 +21,7 @@ EOF'
 
 #### timerXL-baseline-full
 
-批次首次提出：2026-11-12 21:59 CST；批次最后修改：2026-11-12 23:38 CST。状态：4,000 步训练、LoRA、训练清单、合并权重及 12 项评估均完成；结果见 `docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md`。首次 FEV 因数据缺失失败的记录保留于 LOG.md。目标：固定 src-96 全量窗口训练基线。
+批次首次提出：2026-11-12 21:59 CST；批次最后修改：2026-11-12 23:38 CST。状态：4,000 步训练、LoRA、训练清单、合并权重及 12 项评估均完成；结果见 `docs/exp/v1-crb-redo/results.md` 的 TimerXL 两基线小节。首次 FEV 因数据缺失失败的记录保留于 LOG.md。目标：固定 src-96 全量窗口训练基线。
 
 从 `/root/autodl-tmp/pretrained_models/timer-base-84m-84m` 的 TimerXL 84M 原始预训练权重和 seed 0 独立初始化，不加载 grad-prepare 热身检查点。基础权重冻结，仅训练 BF16 LoRA：目标 `q_proj`、`v_proj`，r=8、alpha=16、dropout=0。数据为 `configs/data/src-96.yaml` 与 `data/src/shard_dataset/src-96/` 的 96 条完整轨迹；每轨窗口起点步长 1、窗口长 576，共 2,666,312 个合法窗口，无额外预处理。训练每次更新从全部合法窗口全局等概率有放回抽样 32 个窗口，seed 0。TimerXL 原生 V6 损失：480 历史点、96 预测点。
 
@@ -31,7 +31,7 @@ EOF'
 
 #### timerXL-baseline-rand01
 
-批次首次提出：2026-11-12 21:59 CST；批次最后修改：2026-11-12 23:38 CST。状态：固定随机窗口、4,000 步训练及 12 项评估均完成；结果见 `docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md`。目标：与全量窗口基线对照。该批从同一原始预训练权重和 seed 0 独立初始化，不加载 full 或 grad-prepare 的训练权重。其模型、LoRA、数据原值、窗口定义、原生 V6 损失、优化器、学习率日程、批次大小、4,000 步、恢复间隔和 12 项评估均与 full 批次相同。
+批次首次提出：2026-11-12 21:59 CST；批次最后修改：2026-11-12 23:38 CST。状态：固定随机窗口、4,000 步训练及 12 项评估均完成；结果见 `docs/exp/v1-crb-redo/results.md` 的 TimerXL 两基线小节。目标：与全量窗口基线对照。该批从同一原始预训练权重和 seed 0 独立初始化，不加载 full 或 grad-prepare 的训练权重。其模型、LoRA、数据原值、窗口定义、原生 V6 损失、优化器、学习率日程、批次大小、4,000 步、恢复间隔和 12 项评估均与 full 批次相同。
 
 在 2,666,312 个全局合法窗口索引 `[0, 2666312)` 上，用 `numpy.random.default_rng(0).choice(N, size=N//10, replace=False)` 一次性等概率无放回抽取 266,631 个索引，升序保存到 `outputs/train/v1-crb-redo/timerXL-baseline-rand01/fixed_window_indices.npy`；重启读取这份索引，不重新抽样，并核验范围、数量与严格递增。之后每次更新仅从固定集合等概率有放回抽取 32 个窗口，训练采样 seed 0。较长轨迹因合法窗口更多而自然占更大比例。训练输出 `outputs/train/v1-crb-redo/timerXL-baseline-rand01/`；评估输出 `outputs/eval/v1-crb-redo/timerXL-baseline-rand01/`；日志 `logs/v1-crb-redo/`。训练及 12 项评估成功后才写批次 `.complete`。
 
@@ -65,7 +65,7 @@ FEV 锁定 `configs/eval/fev/v1-crb-redo-timerxl.yaml` 和 `configs/eval/fev/v1-
 
 #### TopK 聚合方案与 RR 实验批次
 
-首次提出：2026-11-13；最后修改：2026-11-13；新 RR 批次启动时间：2026-11-13 02:58 CST；最后记录状态：P1、窗口预算及 RR 单位粒度已确认，traj/Uniform/FEV 9 首组训练评估完成并清理检查点；traj/block 四批均已完成；Uniform win 正在选样，CRB win 在其后自动执行。
+首次提出：2026-11-13；最后修改：2026-11-13 14:00 CST；新 RR 批次启动时间：2026-11-13 02:58 CST；最后记录状态：traj/block 四批完成。旧版 FP32 Uniform win 进程于 12:29 CST 中断且未生成结果。修订后的 BF16 完整窗口矩阵流程已完成 Uniform win 选样 4/8 项；FEV 9、TIME 1、TIME 2 的训练评估完成，TIME 3 训练中（日志 100/4,000 步）；其余 Uniform win 任务继续排队，之后自动执行 CRB win。
 
 方法分类说明：max、linear、zeroclip、exp 会先把所有 ref 对每个 src 代表单位的意见聚合成一个全局分数，因此属于 TopK 排序方案。它们不能称为 RR：RR 需要保留每个 ref 的独立意见并按 ref 轮询。此前的四种聚合训练队列已停止，相关选样、训练、评估产物与运行记录已清除；四种聚合只作为 TopK 方法定义保留，不纳入本次 RR 执行。
 
@@ -82,7 +82,13 @@ FEV 锁定 `configs/eval/fev/v1-crb-redo-timerxl.yaml` 和 `configs/eval/fev/v1-
 
 方向及代表计算固定规则：全部方法均执行 P1 过滤。src/ref 两侧采用相同锚点方法和估计方式。对每个梯度求 FP64 L2 幅值和单位方向；分别在 src 全部锚点以及当前任务 ref 全部锚点上计算 P1 幅值阈值，幅值小于或等于阈值时方向严格置零；幅值保留审计，方向和幅值分别沿物理窗口起点线性插值，不跨轨迹。Uniform 与 CRB 均执行相同 P1 和方向重建。轨迹代表是轨迹全部合法窗口的插值方向等权平均后单位化。块代表是该块拥有的全部合法窗口插值方向等权平均后单位化。零代表与任何向量点积均记为 0。RR 只使用代表方向余弦，不使用幅值。
 
-RR 选择定义：每个 ref 代表单位按表中顺序进入轮询。其一轮从尚未选择的 src 代表单位中，选取该 ref 与 src 代表余弦分数最高的一个单位，选中单位不再参与后续轮次。traj/block 阶段只在代表单位间打分，不计算窗口对窗口分数；win 阶段才逐窗口打分。总预算固定为 266,631 个合法窗口。每个被选 src 代表单位的合法窗口数计入预算；若最后一个单位会超过剩余预算，仅取该单位全局窗口起点升序排列的前 N 个窗口以恰好达到预算。分数同分按 src 单位序号、再按窗口起点升序。ref 无剩余 src 单位可选时跳过。选择结果保存实际窗口起点，并记录对应代表单位。选定集合之后，训练每步从集合内均匀有放回采样有效批次 32 个窗口。六批使用相同选择预算、同一 RR 算法与同分规则，锚点估计方式及代表单位粒度按表变化；traj/block 四批已完成；Uniform win 选择完成后自动启动 CRB win。
+RR 选择定义：每个 ref 代表单位按表中顺序进入轮询。其一轮从尚未选择的 src 代表单位中，选取该 ref 与 src 代表余弦分数最高的一个单位，选中单位不再参与后续轮次。traj/block 阶段只在代表单位间打分，不计算窗口对窗口分数；win 阶段才逐窗口打分。总预算固定为 266,631 个合法窗口。每个被选 src 代表单位的合法窗口数计入预算；若最后一个单位会超过剩余预算，仅取该单位全局窗口起点升序排列的前 N 个窗口以恰好达到预算。分数同分按 src 单位序号、再按窗口起点升序。ref 无剩余 src 单位可选时跳过。选择结果保存实际窗口起点，并记录对应代表单位。选定集合之后，训练每步从集合内均匀有放回采样有效批次 32 个窗口。六批使用相同选择预算、同一 RR 算法与同分规则，锚点估计方式及代表单位粒度按表变化；traj/block 四批已完成；BF16 完整矩阵版 Uniform win 已选样 4/8 项，前三项训练评估完成、TIME 3 正在训练；其余 Uniform win 完成后自动启动 CRB win。
+
+新增分数精度与矩阵存储决策（用户确认：2026-11-13 12:26 CST）：此后所有匹配粒度的分数计算与分数持久化统一使用 BF16。参与评分的方向向量在评分时转为 BF16；分数以 BF16 计算输出并以 BF16 存储，不保留 FP32/FP64 分数矩阵或高精度副本。RR 排序和同分处理使用实际保存的 BF16 分数值。
+
+win 级 RR 允许并要求为每个任务一次性物化完整评分矩阵，矩阵行按固定顺序对应 ref 合法窗口，列按全局起点升序对应 src 合法窗口；随后直接从该矩阵执行 RR，不再对每个 ref 重复扫描并重算全部 src 分数。矩阵存放在 `outputs/selection/v1-crb-redo/<batch>/<task>/`，属于可再生成的中间评分产物；矩阵以无头 row-major BF16 原始数据存储；矩阵形状、dtype、ref/src 次序和实际文件大小写入 manifest。评分特征原文件不变，仅在点积入口转换为 BF16。矩阵完整写入后直接用于 RR 排序；只有在选中索引完成预算与唯一性核验、manifest 写入成功后才删除矩阵，随后写最终 `.complete`。若选样中断但矩阵已完整生成，重启时复用该矩阵，不重复计算分数。当前 Uniform win 的 FEV 9 任务矩阵形状为 4,766×2,666,312，BF16 数据体积为 25,415,285,984 bytes（约 23.67 GiB），文件系统元数据开销另计。目录通过项目 `outputs/` 软链接落在数据盘。
+
+旧版 FP32 分块 top-k 进程于 2026-11-13 12:29 CST 中断，未生成选择完成标记或启动训练。其替代实现已按 BF16 完整评分矩阵规则重新执行；旧版运行不作为实验结果。
 
 评估指标汇报规则：所有任务、所有方法都必须完整汇报评测配置实际产生的每一项指标；MASE 是主比较指标，但不得只报告 MASE 或省略辅助指标。FEV 逐任务报告 `fev_results.csv` 中的 MAE、MASE、MSE、SQL、WAPE、WQL；TIME 逐任务报告 `metrics.npz` 中的 MSE、MAE、RMSE、MAPE、sMAPE、MASE、ND、CRPS。严格沿用评测产物的定义和任务内汇总方式；跨任务宏平均仅报告预先指定的 MASE，其他不同尺度指标保留逐任务数值。若某配置未产生指标或产物值为 NaN，结果文档明确标记缺失并说明，不得静默省略。该规则适用于本实验全部已完成及待运行批次，也适用于后续实验的评测汇报。
 
@@ -98,3 +104,40 @@ TopK 方案记录（不属于 RR 队列、不在本轮执行）：
 | timerXL-ours-rage101-01-block-exp-topk | ref 加权前逐项 exp，指数温度 1，再求和 |
 
 前置梯度素材沿用已完成的 src-96 TimerXL CRB/Uniform 缓存及 12tasks-ref-grad-prepare 的 8 项安全历史 CRB/Uniform 缓存。ref 不作为训练数据。四项被放弃任务不会参与任何选择、训练或评估。核心脚本为 scripts/exp/v1-crb-redo/rr_features.py、rr_select.py、rr_selection.py、rr_train_eval.py、prepare_rr_eval.py、queue_rr.sh；输出分别落在 outputs/selection、outputs/train、outputs/eval，日志放 logs/v1-crb-redo/。仅在脚本通过选择算法数值核验、选中数量和唯一性核验、窗口所属单位核验后启动训练队列。
+
+## 新增统计指标与补算方案（2026-11-13）
+
+本次只对已具备安全历史梯度的八项任务统计：FEV 9（hospital_admissions_1D）及 TIME 1、2、3、4、6、7、8。FEV 11、18、19 与 TIME 5 因安全历史不足 576 点而已停止使用，不纳入这两项统计。指标均使用当前实验的 TimerXL 84M、step-1000 LoRA 检查点与 4096 维 Count-Sketch 梯度表示（projection seed=42）；不改变现有选择、训练或官方评测流程。
+
+### 指标一：全源数据集的任务平均方向评分
+
+对每个安全历史参考方法（CRB、Uniform）和下游任务 t，沿用 win 级评分所用的 P1 过滤、单位方向插值和 BF16 点积规则。源侧覆盖 src-96 的全部 2,666,312 个合法 480+96 窗口；参考侧覆盖任务 t 的安全历史片段所定义的全部合法参考窗口方向。按现有实现，评分矩阵行为参考窗口、列为源窗口，形状为 N_ref(t) × 2,666,312。令 S_t[i,j] 为 BF16 矩阵中的方向余弦，则任务分数为所有矩阵元素的算术平均：
+
+mean_source_alignment(t, method) = sum_i sum_j S_t[i,j] / (N_ref(t) × 2,666,312)。
+
+分别报告八项任务的 CRB 与 Uniform 值。该汇总只使用完整源池和对应任务的参考集合，不读取任何 RR 选样结果，也不以训练样本预算筛选源窗口。为控制存储，不持久化完整评分矩阵；按矩阵分块计算相同元素总和及元素数。
+
+### 指标二：安全历史对真实测试集的任务内方向代表性
+
+每个下游任务单独与其自身的安全历史配对，不跨任务配对。安全历史侧复用该任务已生成的 CRB、Uniform 锚点位置，并按各锚点对应窗口重新计算梯度。真实测试侧使用锁定评测配置实际输入/目标划分中的全部官方评测样本：FEV 使用任务声明的 20 个评测窗口；TIME 使用 single_window 模式下评测器实际遍历的测试序列样本。评测答案只用于这一独立诊断，不进入参考集合、RR 选样或训练。
+
+| 下游任务 | 预测长度 H |
+| --- | ---: |
+| FEV 9 hospital_admissions_1D | 28 |
+| TIME 1 CPHL/15T | 12 |
+| TIME 2 CPHL/30T | 12 |
+| TIME 3 CPHL/H | 24 |
+| TIME 4 ECDC_COVID/D | 30 |
+| TIME 6 epf_electricity_price/H | 24 |
+| TIME 7 Commodity_Import/M | 12 |
+| TIME 8 Commodity_Production/M | 12 |
+
+**指标二的损失口径（用户于 2026-11-13 确认）：**安全历史窗口与真实测试窗口均用 480 点历史上下文和表中对应的 H 点目标；TimerXL 仍取原有 96 点输出头，损失为前 H 个预测与 H 个目标之间的 MSE，归一化统计仅由历史上下文计算。对该损失关于 step-1000 LoRA 参数求梯度，并使用同一 4096 维 Count-Sketch、seed 42。此设置只定义本项诊断指标，不改变训练或官方 FEV/TIME 评测。
+
+对投影梯度逐行 L2 单位化；零范数梯度与任意方向的余弦记为 0。对任务 t、参考方法 m，计算其安全历史锚点梯度与该任务全部测试样本梯度之间的余弦矩阵，并取全部元素算术平均：
+
+history_test_alignment(t, m) = mean_{i,j} cosine(g_safe[t,m,i], g_test[t,j])。
+
+该值是同任务安全历史与真实测试样本之间的平均两两方向余弦，作为安全历史代表下游测试梯度的描述性近似。安全历史侧沿用现有 q=32 锚点样本；测试侧不另做随机抽样，使用官方评测器实际采用的全部样本。
+
+计算脚本：`scripts/exp/v1-crb-redo/metrics.py`。结果与清单：`outputs/selection/v1-crb-redo/diagnostic-metrics/`；日志：`logs/v1-crb-redo/`。成功完成后写入 `.complete`，并在本实验 results.md 及全局索引中登记实际数值、样本计数、输入路径和计算配置。

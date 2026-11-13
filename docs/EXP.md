@@ -83,14 +83,14 @@
 | v1-crb-redo | timerXL-base-uni-01-block-rr | 双侧 Uniform 块代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.527675；选样 53分30秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-traj-rr | 双侧 CRB 轨迹代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.590119；选样 56分12秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-block-rr | 双侧 CRB 块代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.516385；选样 59分30秒；索引文件每任务 2.03 MiB |
-| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口粒度 RR，自动排在 traj/block 批次之后 | 正在进行 window 级选样 | 暂无评估结果 |
-| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口粒度 RR，自动排在 traj/block 批次之后 | 等待 Uniform win 完成后执行 | 暂无评估结果 |
+| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR；BF16 完整评分矩阵；8 项单任务训练评估 | 部分完成：4/8 项选样，3/8 项训练评估完成，截至 13:57 CST，TIME CPHL/H 训练 100/4,000 步 | 已完成 FEV 9、TIME 1、2 的 MASE 为 0.670380、1.208172、1.025688；全指标见实验结果文档 |
+| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR；BF16 完整评分矩阵；8 项单任务训练评估 | 等待 Uniform win 队列完成 | 尚未开始，暂无评估结果 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-max-topk | ref 评分 max 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-linear-topk | ref 评分 linear 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-zeroclip-topk | ref 评分 zeroclip 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-exp-topk | ref 评分 exp 聚合的 TopK 方案 | 本轮不执行 | 无 |
-| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md |
-| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/v1-crb-redo-timerxl-baselines.md |
+| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/results.md |
+| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/results.md |
 | v0-timerxl-src96-first4-full-grad-4096d-bf16 | 前四条完整轨迹 | 逐窗口计算 TimerXL LoRA 梯度并投影 4096 维、BF16 保存 | 完成 | 484,907 个合法窗口；八个 worker 与批次完成标记已核验 |
 | v0-chronostiny-timerxl-lora-track0 | ordinal 0全量梯度与相关性 | 原始ChronosTiny LoRA 4096D投影，完整230,161窗口；同轨TimerXL关系比较 | 完成 | 非临近窗口对余弦Spearman 0.076；相邻窗口余弦Spearman −0.138；只代表单轨 |
 | v0-chronostiny-timerxl-lora-full-64 | 64轨全窗口梯度与相关性 | 使用原始ChronosTiny权重计算前64轨全部合法窗口的LoRA 4096D BF16投影；与同窗口TimerXL比较梯度关系 | 用户调整后停止，保留部分缓存 | 8个worker曾启动；未完成全轨，结果不用于分析 |
