@@ -305,7 +305,7 @@ def fine_tune(
             break
         # One frozen-sample draw of the effective batch per optimizer step;
         # micro-batching only partitions the forward/backward of that draw.
-        indices = (windows.sample_indices(rng, batch_size) if resampled else
+        indices = (windows.sample_indices(rng, batch_size) if hasattr(windows, "sample_indices") else
                    rng.integers(0, len(windows), size=batch_size) if sampling_probabilities is None
                    else rng.choice(len(windows), size=batch_size, replace=True, p=sampling_probabilities))
         if seen is not None:

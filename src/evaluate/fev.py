@@ -57,13 +57,14 @@ def _metric_name(value: Any) -> str:
     return name
 
 
-def load_task_declarations(path: Path) -> list[dict[str, Any]]:
+def load_task_declarations(path: Path, required_indices: Sequence[int] | None = None) -> list[dict[str, Any]]:
     """Load and validate the project-owned FEV task protocol.
 
     @input: path points directly to a YAML mapping with a tasks list.
     @output: Twenty task mappings, each declaring the six RQ3 metrics.
     @scenario: Make the complete evaluation protocol visible in one project file.
     @param path: Project benchmark task YAML.
+    @param required_indices: Task indices requiring local datasets; all by default.
     """
     if not path.is_file():
         raise FileNotFoundError("FEV task file not found: %s" % path)
@@ -76,16 +77,19 @@ def load_task_declarations(path: Path) -> list[dict[str, Any]]:
     if len(tasks) != RQ3_TASK_COUNT:
         raise ValueError("FEV RQ3 declaration must contain exactly %d tasks" % RQ3_TASK_COUNT)
     expected = set(RQ3_METRICS)
+    required = set(range(len(tasks))) if required_indices is None else set(required_indices)
+    if any(index < 0 or index >= len(tasks) for index in required):
+        raise ValueError("FEV required task index is out of range")
     for index, task in enumerate(tasks):
         dataset_path = task.get("dataset_path")
-        if isinstance(dataset_path, str) and not Path(dataset_path).is_file():
+        if index in required and isinstance(dataset_path, str) and not Path(dataset_path).is_file():
             dataset_config = task.get("dataset_config")
             if dataset_path == "autogluon/fev_datasets" and isinstance(dataset_config, str):
                 matches = sorted((PROJECT_ROOT / "data/bench/fev/datasets/autogluon___fev_datasets" /
                                   dataset_config / "0.0.0").glob("*/fev_datasets-train.arrow"))
                 if len(matches) == 1:
                     dataset_path = task["dataset_path"] = str(matches[0])
-        if (not isinstance(dataset_path, str) or dataset_path.startswith(("hf://", "http://", "https://"))
+        if index in required and (not isinstance(dataset_path, str) or dataset_path.startswith(("hf://", "http://", "https://"))
                 or Path(dataset_path).suffix not in {".parquet", ".arrow"}
                 or not Path(dataset_path).is_file()):
             raise ValueError("FEV task %d must use an existing local parquet/arrow dataset_path" % index)
@@ -213,7 +217,7 @@ def _run_fev_task_worker(
     task = benchmark.tasks[int(task_index)]
     # The project declaration is portable and names the upstream dataset;
     # resolve it to the immutable local materialization validated above.
-    task.dataset_path = load_task_declarations(task_file)[int(task_index)]["dataset_path"]
+    task.dataset_path = load_task_declarations(task_file, (int(task_index),))[int(task_index)]["dataset_path"]
     model = adapter_type.from_config(adapter_config, checkpoint=checkpoint, seed=derived_seed)
     model.model_name = model_id
     predictions = model.fit_predict(task)
@@ -265,7 +269,7 @@ def evaluate_with_fev(
     os.environ["HF_HUB_OFFLINE"] = "1"
     if not checkpoint.is_dir():
         raise FileNotFoundError("Checkpoint not found: %s" % checkpoint)
-    declarations = load_task_declarations(task_file)
+    declarations = load_task_declarations(task_file, task_indices)
     if task_indices is None:
         task_count = len(declarations) if num_tasks is None else int(num_tasks)
         if not 1 <= task_count <= len(declarations):
@@ -458,7 +462,7 @@ def run_fev(
     if not isinstance(adapter_config, Mapping):
         raise TypeError("FEV adapter parse_config must return a mapping")
     task_file, expected_tasks, task_indices = _parse_fev_bench_config(config.bench_config, config.source_path.parent)
-    declarations = load_task_declarations(task_file)
+    declarations = load_task_declarations(task_file, task_indices)
     if expected_tasks > len(declarations):
         raise ValueError("expected_tasks exceeds declared FEV tasks")
     selected_task_indices = tuple(range(expected_tasks)) if task_indices is None else task_indices
