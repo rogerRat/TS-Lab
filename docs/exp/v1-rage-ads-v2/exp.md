@@ -7,9 +7,9 @@
 | 实验代号 | v1-rage-ads-v2 |
 | 目标 | 在 v1 已完成的任务与模型评估协议上，比较 ADS-VIC、同预算均匀锚点、轨迹级均匀锚点、原始预训练模型和 reference-only 训练 |
 | 文档创建时间 | 2026-11-14 |
-| 最后修改时间 | 2026-11-14 |
+| 最后修改时间 | 2026-11-15 |
 | 实际实验启动时间 | 2026-11-14 16:41:56 CST（选择阶段；8 任务并行） |
-| 当前状态 | src-256 已物化；ADS-VIC 与基线选择实现已启动；选择完成后由 tmux 自动衔接 12-worker 训练和 rolling 评估 |
+| 当前状态 | src-256 已物化；选择 8/8 完成；40/40 个训练/评估单元完成，结果由 tmux 自动化流程写入 outputs |
 | 继承实验 | `v1-rage-ads`；旧批次和指标保持独立历史记录 |
 
 ## 继承设置
@@ -24,13 +24,19 @@
 
 | 方法 | 计算与采样 |
 |---|---|
-| `ads-vic` / ADS-VIC | 匹配所有 `cosine > 0.1` 的配对；精算区间取命中锚点形成的连续内包段，不向外延拓；默认 `q_0=32`、q 间隔每轮缩小 4 倍、`R=2`。 |
-| `uni` | ADS-VIC 完成后，按同任务 source/reference 实际使用的唯一锚点数分别精确配平，在完整轨迹池均匀布点；不做阈值驱动的后续精算，后续采样和评估流程一致。 |
-| `traj` / `uni-traj` | source/reference 每条轨迹用 `q_0=32` 均匀布点并平均梯度；轨迹级矩阵对全部 reference 取 max，按正分数比例抽 source 轨迹，再在轨迹内均匀抽合法窗口；不筛除轨迹或锚点。 |
+| `ads-vic` / ADS-VIC | 匹配所有 `cosine > 0.1` 的配对；精算区间取命中锚点形成的连续内包段，不向外延拓；默认 `q_0=32`、q 间隔每轮缩小 4 倍、`R=2`。窗口分数取每个 source 锚点对全部 reference 的最大余弦；负分截为 0，再以 `h=4` 有限邻域线性衰减、重叠取 max。非全零权重不做平滑，邻域外窗口可能概率为 0；全零总权重才均匀回退。 |
+| `uni` | ADS-VIC 完成后，按同任务 source/reference 实际使用的唯一锚点数分别精确配平，在完整轨迹池均匀布点；不做阈值驱动的后续精算。以 uni 自身锚点匹配分数生成窗口概率，采用与 ADS-VIC 相同的负分截零、`h=4` 有限邻域和全零回退规则。因此均匀布锚点不代表全源窗口等概率。 |
+| `traj` / `uni-traj` | source/reference 每条轨迹用 `q_0=32` 均匀布点并平均归一化后的梯度；source 轨迹分数为对全部 reference 均值梯度余弦的最大值，负值截为 0 后归一化。零分轨迹及其全部 source 窗口概率为 0；仅全轨迹权重总和为 0 时回退到轨迹均匀分布。正概率轨迹内对合法窗口均匀抽样，不加 epsilon 平滑。 |
 | `orig` | 不训练，直接评测原始预训练权重。 |
 | `reft` / ref-trained | 只用对应任务的 reference 集合训练，再执行相同 rolling 评测。 |
 
 ADS-VIC 沿用 v1 的 `eta=1`、`h=4`、锚点分数 max 聚合、重叠邻域 max 合并及其余模型/评估设置。v1 的 q=16 间隔参数、Top 20% `rho` 筛选和旧 R 语义不继承。
+
+## 采样概率支持与零概率处理
+
+ADS-VIC/uni 对锚点的负最大余弦分数截为 0，再只在距离锚点小于 h=4 的有限邻域分配线性衰减权重；多个邻域按 max 合并。某 source 窗口若没有任何正分锚点覆盖，则概率为 0，训练中不可抽中。均匀回退只在全任务总权重为 0 时触发；部分窗口为 0 时不添加下限或 epsilon 混合。uni 的均匀性只约束锚点布置，不约束最终窗口概率。
+
+traj 先对每条 source/reference 轨迹的锚点梯度分别归一化后求均值，再计算轨迹余弦。source 分数取所有 reference 轨迹的最大值并截到非负；零分轨迹概率为 0，其所有窗口不可抽中。只有全部 source 轨迹权重均为 0 才使用等概率回退。orig 不训练，基线评测不使用源窗口抽样；reft 在 reference 合法窗口上均匀有放回抽样，因此不进入 source 窗口零概率统计。
 
 ## 轮次、阈值与布点
 
@@ -60,7 +66,7 @@ ADS-VIC 先按 q 和实际命中区间自然运行，不限制为预设总预算
 | 批次 | 内容 | 状态 | 输出 |
 |---|---|---|---|
 | `baseline-design-v2` | ADS-VIC 阈值迭代、q 间隔布点、事后同预算 uni、uni-traj、orig、reft 方法定义 | 设计已冻结 | 仅方法定义；无模型指标 |
-| `rolling-baseline-v2` | src-256 上的 ADS-VIC、同预算 uni、uni-traj、orig 与 reference-only 训练；八项 rolling 任务 | 选择阶段运行中；40 个训练/评估单元排队由 tmux 自动执行 | `outputs/selection/v1-rage-ads-v2/`、`outputs/train/v1-rage-ads-v2/`、`outputs/eval/v1-rage-ads-v2/`；指标尚无 |
+| `rolling-baseline-v2` | src-256 上的 ADS-VIC、同预算 uni、uni-traj、orig 与 reference-only 训练；八项 rolling 任务 | 选择 8/8 完成；训练和评估 40/40 单元完成；采样支持审计 40/40 行完成 | `outputs/selection/v1-rage-ads-v2/`、`outputs/train/v1-rage-ads-v2/`、`outputs/eval/v1-rage-ads-v2/`；各单元指标在对应评估目录，零概率统计见结果文档 |
 
 ## Source pool（v2）
 
@@ -97,3 +103,14 @@ ADS-VIC 先按 q 和实际命中区间自然运行，不限制为预设总预算
 
 
 - 2026-11-15 01:46：选择全部完成；训练评估恢复为 12-worker tmux runner，完成 13/40 单元、0 个当前失败；概率支持审计 40/40 行完成。修复 reference 窗口 owner 索引与 FEV orig manifest 入口，runner 改为错误单元后继续剩余队列。相似度匹配增加 CUDA 分块路径、显存保护及 CPU fallback，CUDA parity 测试通过。见 docs/logs/2026-11-15-0146-v1-rage-ads-v2-status.md。
+
+
+## 运行器维护调整（2026-11-15）
+
+- 将任务与方法清单集中到 scripts/exp/v1-rage-ads-v2/experiment_config.py，选择、训练、审计、监控及 shell 启动脚本共用同一份清单；当前任务和方法取值未变。
+- 训练运行器的完成数现在以启动时已有的完整单元数为基数，并按全部 40 个任务/方法单元显示；运行 manifest 同时记录启动时已完成数与本次新完成数。
+- 监控仍每 10 分钟向 logs/v1-rage-ads-v2/progress-poll.jsonl 追加状态；后续启动的监控仅在选择任务或训练/评估根状态变化时新增文档记录。
+- 本次编辑没有重启、停止或改变已运行进程。已运行的监控进程仍持有旧版脚本，会继续按原方式轮询和写巡检文档直至退出；训练、审计进程继续当前批次。
+- 训练输入校验、完成标记、采样支持审计和现有 manifest 保持不变，避免在进行中的批次改变数据判定或结果记录格式。
+
+- 2026-11-15 02:00 CST：选择 8/8、训练/评估 40/40 均完成；根 complete 标记及 parallel-run-manifest.json 已生成。GPU 峰值显存 12,130 MiB，平均利用率约 96.4%；容器 memory.events 未见 OOM。采样支持审计表和方法的零概率规则已补齐，详见 ALGO.md 与 results.md。

@@ -11,10 +11,10 @@
 
 ## 批次：rolling-baseline-v2
 
-- 状态：选择阶段运行中；后续训练和 rolling 评估已在 tmux 中排队，等待选择完成事件。
+- 状态：选择 8/8 完成；训练与 rolling 评估 40/40 单元完成；概率支持审计 40/40 行完成。
 - Source pool：256 条、35 个配置、6,529,220 个点；包含原 src-96 全部轨迹。配置明细见 `configs/data/src-256.yaml` 与 `data/src/shard_dataset/src-256/manifest.json`。
 - 选择配置：ADS-VIC `q0=32`、`q1=8`、严格 `cosine > 0.1`；source/reference 两侧按实际唯一锚点数配平 uni；traj 使用轨迹级均匀锚点。
-- 并行状态：第二轮八个任务 worker 已重启。第一轮因发现稀疏锚点连续分组及 uni 梯度复用错误而主动中断；第一轮没有写出任何选择结果。详见 `docs/logs/2026-11-14-v1-rage-ads-v2-correction.md`。当前尚无完整 selection manifest、训练结果或评估指标，故不记录推测值。
+- 并行状态：八个选择任务均已生成完整 manifest；训练/评估完成标记覆盖全部 40 个 task-arm 单元。过程中的恢复修复和审计见后续带时间戳记录。
 - 产物路径：`outputs/selection/v1-rage-ads-v2/`、`outputs/train/v1-rage-ads-v2/`、`outputs/eval/v1-rage-ads-v2/`；运行日志位于 `logs/v1-rage-ads-v2/`。
 
 - 17:44 巡检：time-08 已完成选择；fev-09 与 time-02 未完成退出；五个任务仍在 q1 细算。容器内存限制 66.6 GB，发现五个 worker 当前合计约 52 GB；暂停 time-01 与 time-03，保留三个 worker，并增加最多两个 worker 的恢复队列。详见 `docs/logs/2026-11-14-v1-rage-ads-v2-memory-capacity.md`。选择结果目前为 1/8，训练和评估尚未开始。
@@ -70,3 +70,29 @@
 - 训练恢复修复：FEV orig 使用输出目录内的只读预训练 checkpoint 软链接视图并写入 FEV provenance manifest；reference 窗口读取按每个采样行的 owner 取对应轨迹；并行调度器在单元报错后继续调度其余待处理单元。上一轮 3 个失败单元尚无完成标记，已由恢复队列重试；当前恢复批次失败数为 0。
 - 相似度 CUDA 优化已写入选择脚本，保持 float32 阈值与最大分数语义，采用显存预算保护和 CPU fallback。CUDA/CPU 小规模一致性测试 1 项通过；未对本批已经完成的选择任务重跑。
 - 详情见 docs/logs/2026-11-15-0146-v1-rage-ads-v2-status.md。
+
+
+## 采样支持审计结果：2026-11-15
+
+审计对每个任务的 6,382,020 个合法 src-256 窗口逐项计数，没有抽样估计。ADS-VIC/uni 的零概率来自有限锚点邻域及负分截零；traj 的零概率来自 source 轨迹分数截零；orig 全窗口均匀；reft 使用 reference 窗口，故 source 口径不适用。
+
+| 任务 | ADS-VIC 零概率窗口 | uni 零概率窗口 | traj 零概率轨迹 / 窗口比例 | orig 零概率窗口 |
+|---|---:|---:|---:|---:|
+| FEV09 | 1,766,823 (27.68%) | 897,208 (14.06%) | 11/256; 258,856 (4.06%) | 0 (0%) |
+| TIME01 | 1,492,847 (23.39%) | 569,489 (8.92%) | 3/256; 11,320 (0.18%) | 0 (0%) |
+| TIME02 | 1,150,629 (18.03%) | 126,572 (1.98%) | 0/256; 0 (0%) | 0 (0%) |
+| TIME03 | 714,714 (11.20%) | 0 (0%) | 4/256; 129,148 (2.02%) | 0 (0%) |
+| TIME04 | 2,122,106 (33.25%) | 1,365,963 (21.40%) | 16/256; 423,404 (6.63%) | 0 (0%) |
+| TIME06 | 620,074 (9.72%) | 0 (0%) | 59/256; 2,336,296 (36.61%) | 0 (0%) |
+| TIME07 | 2,432,221 (38.11%) | 1,736,592 (27.21%) | 25/256; 1,170,911 (18.35%) | 0 (0%) |
+| TIME08 | 5,172,733 (81.05%) | 5,368,209 (84.11%) | 124/256; 4,653,912 (72.92%) | 0 (0%) |
+| 八任务合计 | 15,472,147 / 51,056,160 (30.30%) | 10,064,033 / 51,056,160 (19.71%) | 8,983,847 / 51,056,160 (17.60%) | 0 / 51,056,160 (0%) |
+
+traj 的各任务零概率轨迹数直接来自 trajectory scores；窗口数按对应轨迹合法窗口数求和。uni/ADS-VIC 窗口零概率比例不是选中锚点预算比例，也不是预测质量。各方法的逐行审计结果位于 outputs/selection/v1-rage-ads-v2/audit/probability-support/probability-support.jsonl，汇总位于 outputs/selection/v1-rage-ads-v2/audit/probability-support/summary.json。审计程序及统计定义见 scripts/exp/v1-rage-ads-v2/audit_probability_support.py。
+
+## 阶段完成：2026-11-15 02:00 CST
+
+- 选择：8/8 任务完成。TIME07 于 01:10:20 完成，source/reference 锚点预算 663,852/222，耗时 35.1 分钟。
+- 训练与 rolling 评估：40/40 task-arm 单元完成，outputs/train/v1-rage-ads-v2/.complete 与 outputs/eval/v1-rage-ads-v2/.complete 已生成；outputs/train/v1-rage-ads-v2/parallel-run-manifest.json 记录并行资源摘要。各任务、方法的原始预测和指标文件保存在对应 outputs/eval/v1-rage-ads-v2/<task>/<arm>/ 目录。
+- 采样支持审计：40/40 行完成。零概率截断定义及逐任务计数见本文件的“采样支持审计结果”表；这些数值描述样本支持范围，不代表预测质量。
+- 完成日志：logs/v1-rage-ads-v2/pipeline.log；训练并行日志位于 logs/v1-rage-ads-v2/parallel-train-eval_20261115014047.log。
