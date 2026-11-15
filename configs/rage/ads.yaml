@@ -15,12 +15,11 @@ projection_dimension: 1024
 selection_only: true
 with_baselines: []
 
-ads_q_coarse: 32
-ads_q_fine: 8
+ads_q: 16
 ads_eta: 1.0
-ads_top_k: 64
+ads_top_ratio: 0.2
 ads_rounds: 1
 ads_decay_distance: 4
 ads_aggregation: max
 ads_sampling_replacement: true
-ads_selection_seed: 101
+ads_selection_seed: 0

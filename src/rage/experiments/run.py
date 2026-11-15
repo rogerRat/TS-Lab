@@ -79,7 +79,7 @@ SHARED_KEYS = (
     "n_values", "total_budget_seconds",
     "densities", "b_values", "m_values", "rescan", "scan_dir", "density",
     "cancel_ratio",
-    "selector", "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+    "selector", "ads_q", "ads_eta", "ads_top_k",
     "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
     "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
     "ads_selection_seed",
@@ -98,8 +98,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="root directory that receives <run_id>/")
     parser.add_argument("--selector", choices=["rage", "ads"], default=None,
                         help="override the focal selection method in the config")
-    parser.add_argument("--ads-q-coarse", type=float, default=None)
-    parser.add_argument("--ads-q-fine", type=float, default=None)
+    parser.add_argument("--ads-q", type=float, default=None)
     parser.add_argument("--ads-eta", type=float, default=None)
     budget_group = parser.add_mutually_exclusive_group()
     budget_group.add_argument("--ads-top-k", type=int, default=None)
@@ -342,15 +341,19 @@ def freeze_run_doc(run_id: str, config: dict, steps: list[str],
         elif config.get("ads_target_fine_density") is not None:
             top_mode = "target_fine_density=%s" % config["ads_target_fine_density"]
         else:
-            top_mode = "K=64 (default)"
+            top_mode = "rho=0.2 (default)"
         lines.append("## ADS Configuration")
         lines.append("")
         lines.append("| Parameter | Value | Definition |")
         lines.append("|---|---|---|")
-        lines.append("| q_coarse / q_fine | %s / %s | Source target spacing; reference spacing is divided by eta |" % (
-            config.get("ads_q_coarse", 32), config.get("ads_q_fine", 8)))
-        lines.append("| eta | %s | Reference-to-source target anchor density ratio |" % (
-            config.get("ads_eta", 1)))
+        q = config.get("ads_q", 16)
+        eta = config.get("ads_eta")
+        if eta is None:
+            raise ValueError("ADS configuration requires ads_eta")
+        lines.append("| q | %s | Total source-plus-reference target anchor density; both stages share the derived spacings |" % q)
+        lines.append("| eta | %s | Reference/source anchor density ratio |" % eta)
+        lines.append("| Derived spacing | source=%s, reference=%s | q(1+eta), q(1+eta)/eta |" % (
+            q * (1.0 + eta), q * (1.0 + eta) / eta))
         lines.append("| Top-K mode | %s | Global similarity-pair retention rule |" % top_mode)
         lines.append("| Rounds | %s | Fine computation and rematching rounds |" % config.get("ads_rounds", 1))
         lines.append("| Decay distance | %s | One-sided linear anchor-score decay distance |" % (
@@ -447,7 +450,7 @@ def apply_cli_overrides(config: dict, args: argparse.Namespace) -> dict:
     """Apply explicit CLI values on top of the selected YAML or JSON config."""
     merged = dict(config)
     keys = (
-        "selector", "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+        "selector", "ads_q", "ads_eta", "ads_top_k",
         "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
         "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
         "ads_selection_seed",
@@ -471,6 +474,8 @@ def main(argv: list[str] | None = None) -> int:
     config = (json.loads(config_path.read_text()) if config_path.suffix==".json"
               else yaml.safe_load(config_path.read_text())) or {}
     config = apply_cli_overrides(config, args)
+    if config.get("selector") == "ads" and config.get("ads_eta") is None:
+        raise ValueError("ADS configuration requires ads_eta")
     if "resampling_revision" in config:
         from .full_pool_run import run_suite
         if args.steps and args.steps != ["main"]:

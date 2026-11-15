@@ -7,7 +7,7 @@ import heapq
 from bisect import bisect_left, bisect_right
 import math
 import time
-from typing import Callable, MutableMapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 import numpy as np
 
@@ -26,10 +26,9 @@ class ADSConfig:
     positions to compute as new fine gradients in each round.
     """
 
-    q_coarse: float = 32.0
-    q_fine: float = 8.0
-    eta: float = 1.0
-    top_k: int | None = 64
+    eta: float
+    q: float = 16.0
+    top_k: int | None = None
     top_ratio: float | None = None
     target_fine_density: float | None = None
     rounds: int = 1
@@ -37,13 +36,15 @@ class ADSConfig:
     aggregation: str = "max"
 
     def __post_init__(self) -> None:
-        for name in ("q_coarse", "q_fine", "eta"):
+        for name in ("q", "eta"):
             value = getattr(self, name)
             if not np.isfinite(value) or value <= 0:
                 raise ValueError("%s must be finite and positive" % name)
         active = sum(value is not None for value in (
             self.top_k, self.top_ratio, self.target_fine_density))
-        if active != 1:
+        if active == 0:
+            object.__setattr__(self, "top_ratio", 0.2)
+        elif active != 1:
             raise ValueError("exactly one of top_k, top_ratio, and target_fine_density is required")
         if self.top_k is not None and (
                 isinstance(self.top_k, bool) or int(self.top_k) != self.top_k
@@ -56,14 +57,22 @@ class ADSConfig:
                 not np.isfinite(self.target_fine_density)
                 or not 0 < self.target_fine_density <= 1):
             raise ValueError("target_fine_density must be in (0, 1]")
-        if isinstance(self.rounds, bool) or int(self.rounds) != self.rounds or self.rounds <= 0:
-            raise ValueError("rounds must be a positive integer")
+        if isinstance(self.rounds, bool) or int(self.rounds) != self.rounds or self.rounds < 0:
+            raise ValueError("rounds must be a non-negative integer")
         if (isinstance(self.decay_distance, bool)
                 or int(self.decay_distance) != self.decay_distance
                 or self.decay_distance <= 0):
             raise ValueError("decay_distance must be a positive integer")
         if self.aggregation not in ("linear", "max", "exp", "relu"):
             raise ValueError("aggregation must be linear, max, exp, or relu")
+
+    @property
+    def source_spacing(self) -> float:
+        return self.q * (1.0 + self.eta)
+
+    @property
+    def reference_spacing(self) -> float:
+        return self.q * (1.0 + self.eta) / self.eta
 
 
 @dataclass(frozen=True)
@@ -73,6 +82,17 @@ class ADSMatch:
     source_fragment_id: int
     source_start: int
     similarity: float
+
+
+@dataclass(frozen=True)
+class ADSMatchSummary:
+    pair_count: int
+    reference_anchor_hits: int
+    source_anchor_hits: int
+    threshold: float
+
+    def __len__(self) -> int:
+        return self.pair_count
 
 
 @dataclass
@@ -93,7 +113,8 @@ class ADSTrajectoryResult:
 class ADSRunReport:
     reference_results: list[ADSTrajectoryResult]
     source_results: list[ADSTrajectoryResult]
-    matches_by_round: list[list[ADSMatch]]
+    matches_by_round: list[ADSMatchSummary]
+    score_matrix_summaries: list[dict]
     actual_gradient_counts: dict[str, dict[str, int]]
     nominal_gradient_counts: dict
     cached_gradient_counts: dict[str, int]
@@ -103,6 +124,7 @@ class ADSRunReport:
     target_fine_density: float | None = None
     achieved_fine_density: float | None = None
     selected_top_k: list[int] = field(default_factory=list)
+    decay_distance: int = 4
 
     @property
     def source_probabilities(self) -> dict[int, np.ndarray]:
@@ -149,20 +171,21 @@ def uniform_anchor_positions(length: int, target_spacing: float) -> list[int]:
     wanted = min(interior_count, int(math.ceil(interior_count / target_spacing)))
     if wanted == 0:
         return [0, length - 1]
-    candidates = list(range(1, length - 1))
-    if wanted == 1:
-        targets = [(length - 1) / 2.0]
-    else:
-        targets = [
-            1.0 + index * (interior_count - 1) / (wanted - 1)
-            for index in range(wanted)
-        ]
     chosen: list[int] = []
-    available = set(candidates)
-    for target in targets:
-        position = min(available, key=lambda candidate: (abs(candidate - target), candidate))
+    if wanted == 1:
+        numerator, denominator = length - 1, 2
+        position, remainder = divmod(numerator, denominator)
+        if 2 * remainder > denominator:
+            position += 1
         chosen.append(position)
-        available.remove(position)
+    else:
+        denominator = wanted - 1
+        for index in range(wanted):
+            numerator = denominator + index * (interior_count - 1)
+            position, remainder = divmod(numerator, denominator)
+            if 2 * remainder > denominator:
+                position += 1
+            chosen.append(position)
     return sorted({0, length - 1, *chosen})
 
 
@@ -183,15 +206,53 @@ def cosine_similarity_matrix(reference_gradients: np.ndarray,
     source_norms = np.linalg.norm(source, axis=1)
     reference_nonzero = reference_norms > 0
     source_nonzero = source_norms > 0
-    normalized_reference = np.zeros_like(reference)
-    normalized_source = np.zeros_like(source)
-    normalized_reference[reference_nonzero] = (
-        reference[reference_nonzero] / reference_norms[reference_nonzero, None])
-    normalized_source[source_nonzero] = (
-        source[source_nonzero] / source_norms[source_nonzero, None])
-    matrix = normalized_reference @ normalized_source.T
     zero_pairs = int((~reference_nonzero).sum() * len(source)
                      + reference_nonzero.sum() * (~source_nonzero).sum())
+    pair_count = int(len(reference) * len(source))
+    use_cuda = pair_count >= 10_000_000
+    if use_cuda:
+        try:
+            import torch
+            use_cuda = torch.cuda.is_available()
+        except ImportError:
+            use_cuda = False
+    if use_cuda:
+        import torch
+        matrix = np.empty((len(reference), len(source)), dtype=np.float32)
+        device = torch.device("cuda")
+        previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+        torch.backends.cuda.matmul.allow_tf32 = False
+        try:
+            with torch.inference_mode():
+                source_tensor = torch.as_tensor(source, device=device)
+                source_norm = torch.linalg.vector_norm(source_tensor, dim=1, keepdim=True)
+                source_tensor = torch.where(
+                    source_norm > 0, source_tensor / source_norm.clamp_min(1e-30),
+                    torch.zeros_like(source_tensor))
+                row_chunk = 128
+                for begin in range(0, len(reference), row_chunk):
+                    end = min(begin + row_chunk, len(reference))
+                    reference_tensor = torch.as_tensor(reference[begin:end], device=device)
+                    reference_norm = torch.linalg.vector_norm(reference_tensor, dim=1, keepdim=True)
+                    reference_tensor = torch.where(
+                        reference_norm > 0,
+                        reference_tensor / reference_norm.clamp_min(1e-30),
+                        torch.zeros_like(reference_tensor))
+                    scores = torch.matmul(reference_tensor, source_tensor.T)
+                    matrix[begin:end] = scores.cpu().numpy()
+                    del reference_tensor, reference_norm, scores
+                del source_tensor, source_norm
+        finally:
+            torch.backends.cuda.matmul.allow_tf32 = previous_tf32
+            torch.cuda.empty_cache()
+    else:
+        normalized_reference = np.zeros_like(reference)
+        normalized_source = np.zeros_like(source)
+        normalized_reference[reference_nonzero] = (
+            reference[reference_nonzero] / reference_norms[reference_nonzero, None])
+        normalized_source[source_nonzero] = (
+            source[source_nonzero] / source_norms[source_nonzero, None])
+        matrix = normalized_reference @ normalized_source.T
     return matrix.astype(np.float32, copy=False), zero_pairs
 
 
@@ -241,6 +302,115 @@ def global_top_k(similarities: np.ndarray, top_k: int, *,
     return greater_pairs + equal_pairs
 
 
+def global_top_k_hit_masks(similarities: np.ndarray, top_k: int, *,
+                           reference_keys: Sequence[tuple] | None = None,
+                           source_keys: Sequence[tuple] | None = None
+                           ) -> tuple[np.ndarray, np.ndarray, float]:
+    """Return endpoints touched by deterministic global Top-K pairs."""
+    matrix = np.asarray(similarities)
+    if matrix.ndim != 2 or matrix.shape[0] == 0 or matrix.shape[1] == 0:
+        raise ValueError("similarity matrix must be nonempty and two dimensional")
+    total = int(matrix.size)
+    if top_k < 1 or top_k > total:
+        raise ValueError("top_k must be between 1 and the number of pairs")
+    ref_keys = list(reference_keys or [(row,) for row in range(matrix.shape[0])])
+    src_keys = list(source_keys or [(column,) for column in range(matrix.shape[1])])
+    if len(ref_keys) != matrix.shape[0] or len(src_keys) != matrix.shape[1]:
+        raise ValueError("tie-break keys must match the similarity matrix")
+    if not np.isfinite(matrix).all():
+        raise ValueError("similarity matrix must be finite")
+    flat = matrix.reshape(-1)
+    threshold = float(np.partition(flat, total - top_k)[total - top_k])
+    needed_equal = top_k - int(np.count_nonzero(flat > threshold))
+    reference_hits = np.zeros(matrix.shape[0], dtype=bool)
+    source_hits = np.zeros(matrix.shape[1], dtype=bool)
+    for row in range(matrix.shape[0]):
+        columns = np.flatnonzero(matrix[row] > threshold)
+        if len(columns):
+            reference_hits[row] = True
+            source_hits[columns] = True
+    if needed_equal:
+        reference_order = sorted(range(matrix.shape[0]), key=ref_keys.__getitem__)
+        source_rank = np.empty(matrix.shape[1], dtype=np.int64)
+        for rank, column in enumerate(sorted(range(matrix.shape[1]), key=src_keys.__getitem__)):
+            source_rank[column] = rank
+        for row in reference_order:
+            columns = np.flatnonzero(matrix[row] == threshold)
+            if not len(columns):
+                continue
+            columns = columns[np.argsort(source_rank[columns], kind="stable")]
+            take = min(needed_equal, len(columns))
+            source_hits[columns[:take]] = True
+            reference_hits[row] = True
+            needed_equal -= take
+            if needed_equal == 0:
+                break
+    if needed_equal != 0:
+        raise RuntimeError("Top-K tie selection did not reach its requested pair count")
+    return reference_hits, source_hits, threshold
+
+
+def summarize_similarity_matrix(similarities: np.ndarray, top_k: int, *,
+                                threshold: float, sample_size: int = 2_000_000,
+                                seed: int = 42) -> dict:
+    """Summarize exact sparsity and sampled score quantiles for a dense matrix."""
+    matrix = np.asarray(similarities, dtype=np.float32)
+    if matrix.ndim != 2 or matrix.size == 0 or not np.isfinite(matrix).all():
+        raise ValueError("similarity matrix must be finite, nonempty, and two dimensional")
+    flat = matrix.reshape(-1)
+    total = int(flat.size)
+    zero_count = near_1_count = near_3_count = positive_count = negative_count = 0
+    total_sum = total_sq = 0.0
+    minimum, maximum = float("inf"), -float("inf")
+    scan_chunk = 5_000_000
+    for begin in range(0, total, scan_chunk):
+        block = flat[begin:begin + scan_chunk]
+        absolute = np.abs(block)
+        zero_count += int(np.count_nonzero(block == 0.0))
+        near_1_count += int(np.count_nonzero(absolute <= 1e-8))
+        near_3_count += int(np.count_nonzero(absolute <= 1e-3))
+        positive_count += int(np.count_nonzero(block > 0.0))
+        negative_count += int(np.count_nonzero(block < 0.0))
+        total_sum += float(np.sum(block, dtype=np.float64))
+        total_sq += float(np.sum(block * block, dtype=np.float64))
+        minimum = min(minimum, float(block.min()))
+        maximum = max(maximum, float(block.max()))
+    mean = total_sum / total
+    variance = max(total_sq / total - mean * mean, 0.0)
+    rng = np.random.default_rng(seed)
+    take = min(total, int(sample_size))
+    sample_indices = (np.arange(total, dtype=np.int64) if take == total else
+                      rng.integers(0, total, size=take, dtype=np.int64))
+    sample = flat[sample_indices]
+    levels = [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99]
+    quantiles = np.quantile(sample, levels)
+    return {
+        "matrix_shape": [int(matrix.shape[0]), int(matrix.shape[1])],
+        "pair_count": total,
+        "raw_exact_zero_count": zero_count,
+        "raw_exact_zero_fraction": float(zero_count / total),
+        "raw_abs_le_1e-8_count": near_1_count,
+        "raw_abs_le_1e-8_fraction": float(near_1_count / total),
+        "raw_abs_le_1e-3_count": near_3_count,
+        "raw_abs_le_1e-3_fraction": float(near_3_count / total),
+        "raw_positive_fraction": float(positive_count / total),
+        "raw_negative_fraction": float(negative_count / total),
+        "raw_mean": mean,
+        "raw_std": float(math.sqrt(variance)),
+        "raw_min": minimum,
+        "raw_max": maximum,
+        "quantile_sample_count": take,
+        "quantile_sampling": "uniform_with_replacement",
+        "quantiles": {"p%02d" % int(level * 100): float(value)
+                      for level, value in zip(levels, quantiles)},
+        "top_k_pairs": int(top_k),
+        "top_k_threshold": float(threshold),
+        "top_k_fraction": float(top_k / total),
+        "matching_mask_zero_fraction": float(1.0 - top_k / total),
+        "quantile_seed": int(seed),
+    }
+
+
 def aggregate_source_scores(similarities: np.ndarray, mode: str = "max") -> np.ndarray:
     """Aggregate reference rows for each source column."""
     matrix = np.asarray(similarities, dtype=np.float32)
@@ -259,7 +429,7 @@ def aggregate_source_scores(similarities: np.ndarray, mode: str = "max") -> np.n
 
 def spread_anchor_scores(length: int, anchor_scores: dict[int, float],
                          decay_distance: int) -> np.ndarray:
-    """Apply finite one-sided linear decay and max-overlap aggregation."""
+    """Apply finite linear decay and max-merge overlapping anchor neighborhoods."""
     if length < 0 or decay_distance <= 0:
         raise ValueError("length must be non-negative and decay_distance positive")
     weights = np.zeros(length, dtype=np.float64)
@@ -407,8 +577,10 @@ def _matrix_inputs(states: list[_TrajectoryState]) -> tuple[np.ndarray, list[tup
 class ADSPipeline:
     """Compute ADS anchors and probabilities.
 
-    Optional cache keys are (side, fragment_id, physical_start). The caller
-    must only reuse vectors from the same model and projection coordinates.
+    Optional cache keys are (side, fragment_id, physical_start). The cache is
+    read-only and may include off-grid rows for later fine-anchor requests.
+    Supplied coarse positions map (side, fragment_id) to zero-based legal-start
+    indices and must include both endpoints when a trajectory has multiple starts.
     """
 
     def __init__(self, config: ADSConfig, gradient_computer: BatchGradientComputer, *,
@@ -416,7 +588,8 @@ class ADSPipeline:
                  window_stride: int = 1, gradient_batch_size: int = 128,
                  progress_callback: Callable[[dict], None] | None = None,
                  heartbeat_seconds: float = 30.0,
-                 gradient_cache: MutableMapping[tuple[str, int, int], np.ndarray] | None = None):
+                 gradient_cache: Mapping[tuple[str, int, int], np.ndarray] | None = None,
+                 coarse_anchor_positions: Mapping[tuple[str, int], Sequence[int]] | None = None):
         if context_length <= 0 or prediction_length <= 0 or window_stride <= 0:
             raise ValueError("window lengths and stride must be positive")
         if gradient_batch_size <= 0:
@@ -433,7 +606,23 @@ class ADSPipeline:
         self.heartbeat_seconds = heartbeat_seconds
         self._last_heartbeat = 0.0
         self.gradient_cache = gradient_cache
+        self.coarse_anchor_positions = coarse_anchor_positions
         self.cached_gradient_counts = {"reference": 0, "source": 0}
+
+    def _planned_coarse_positions(self, state: _TrajectoryState, side: str) -> set[int]:
+        key = (side, state.fragment_id)
+        supplied = None if self.coarse_anchor_positions is None else self.coarse_anchor_positions.get(key)
+        if supplied is None:
+            spacing = (self.config.reference_spacing if side == "reference"
+                       else self.config.source_spacing)
+            positions = set(uniform_anchor_positions(len(state.valid_starts), spacing))
+        else:
+            positions = {int(position) for position in supplied}
+        if not positions or min(positions) < 0 or max(positions) >= len(state.valid_starts):
+            raise ValueError("coarse anchor positions must be nonempty and within the legal range")
+        if len(state.valid_starts) > 1 and not {0, len(state.valid_starts) - 1}.issubset(positions):
+            raise ValueError("coarse anchor positions must include both endpoints")
+        return positions
 
     def _emit(self, stage: str, event: str, **details) -> None:
         if self.progress_callback is None:
@@ -454,15 +643,16 @@ class ADSPipeline:
                 self.context_length, self.prediction_length,
                 self.window_stride).astype(np.int64, copy=False)
             state = _TrajectoryState(fragment=fragment, valid_starts=starts)
-            if self.gradient_cache is not None:
-                for position, start in enumerate(starts):
-                    key = (side, int(fragment.fragment_id), int(start))
+            if self.gradient_cache is not None and len(starts):
+                for position in self._planned_coarse_positions(state, side):
+                    start = int(starts[position])
+                    key = (side, int(fragment.fragment_id), start)
                     if key not in self.gradient_cache:
                         continue
                     gradient = np.asarray(self.gradient_cache[key], dtype=np.float32)
                     if gradient.ndim != 1 or len(gradient) == 0 or not np.isfinite(gradient).all():
                         raise ValueError("cached gradients must be nonempty finite vectors")
-                    state.anchors[position] = gradient.copy()
+                    state.anchors[int(position)] = gradient.copy()
                     self.cached_gradient_counts[side] += 1
             states.append(state)
         states = [state for state in states if len(state.valid_starts)]
@@ -474,15 +664,32 @@ class ADSPipeline:
                  *, coarse: bool, side: str) -> int:
         computed = 0
         phase = "coarse" if coarse else "fine"
-        total_requested = sum(
-            len(positions_by_state.get(id(state), set()) - set(state.anchors))
-            for state in states)
+        requested_by_state = {
+            id(state): sorted(positions_by_state.get(id(state), set()) - set(state.anchors))
+            for state in states
+        }
+        total_requested = sum(len(values) for values in requested_by_state.values())
         completed = 0
         started = time.monotonic()
         for state in states:
-            requested = sorted(positions_by_state.get(id(state), set()) - set(state.anchors))
-            for offset in range(0, len(requested), self.gradient_batch_size):
-                chunk = requested[offset:offset + self.gradient_batch_size]
+            requested = requested_by_state[id(state)]
+            compute_positions = []
+            for position in requested:
+                cache_key = (side, state.fragment_id, int(state.valid_starts[position]))
+                if self.gradient_cache is None or cache_key not in self.gradient_cache:
+                    compute_positions.append(position)
+                    continue
+                gradient = np.asarray(self.gradient_cache[cache_key], dtype=np.float32)
+                if gradient.ndim != 1 or len(gradient) == 0 or not np.isfinite(gradient).all():
+                    raise ValueError("cached gradients must be nonempty finite vectors")
+                dimensions = {len(value) for value in state.anchors.values()}
+                if dimensions and len(gradient) not in dimensions:
+                    raise ValueError("cached gradient dimensions changed within a trajectory")
+                state.anchors[position] = gradient.copy()
+                self.cached_gradient_counts[side] += 1
+                completed += 1
+            for offset in range(0, len(compute_positions), self.gradient_batch_size):
+                chunk = compute_positions[offset:offset + self.gradient_batch_size]
                 starts = state.valid_starts[np.asarray(chunk, dtype=np.int64)]
                 gradients = np.asarray(self.gradient_computer(state.fragment, starts),
                                        dtype=np.float32)
@@ -496,11 +703,6 @@ class ADSPipeline:
                     raise ValueError("gradient dimensions changed within a trajectory")
                 for position, gradient in zip(chunk, gradients):
                     state.anchors[int(position)] = gradient.copy()
-                    if self.gradient_cache is not None:
-                        cache_key = (
-                            side, state.fragment_id,
-                            int(state.valid_starts[int(position)]))
-                        self.gradient_cache[cache_key] = gradient.copy()
                 count = len(chunk)
                 if coarse:
                     state.coarse_gradients += count
@@ -570,8 +772,8 @@ class ADSPipeline:
             if not changed and rank != 1:
                 continue
             reference_plan = _fine_anchor_plan(
-                reference, reference_hits, self.config.q_fine / self.config.eta)
-            source_plan = _fine_anchor_plan(source, source_hits, self.config.q_fine)
+                reference, reference_hits, self.config.reference_spacing)
+            source_plan = _fine_anchor_plan(source, source_hits, self.config.source_spacing)
             count = sum(map(len, reference_plan.values())) + sum(map(len, source_plan.values()))
             difference = abs(count - target_count)
             if difference < best_difference:
@@ -581,31 +783,31 @@ class ADSPipeline:
         return best_k, best_count
 
     @staticmethod
-    def _mark_matches(reference: list[_TrajectoryState], source: list[_TrajectoryState],
-                      reference_locations, source_locations,
-                      pairs: list[tuple[int, int, float]]) -> list[ADSMatch]:
+    def _mark_top_k_matches(reference: list[_TrajectoryState], source: list[_TrajectoryState],
+                            reference_locations, source_locations, matrix: np.ndarray,
+                            top_k: int, reference_keys, source_keys) -> ADSMatchSummary:
+        reference_mask, source_mask, threshold = global_top_k_hit_masks(
+            matrix, top_k, reference_keys=reference_keys, source_keys=source_keys)
         reference_hits = {id(state): set() for state in reference}
         source_hits = {id(state): set() for state in source}
-        matches: list[ADSMatch] = []
-        for row, column, score in pairs:
-            reference_state_index, reference_position = reference_locations[row]
-            source_state_index, source_position = source_locations[column]
-            reference_state = reference[reference_state_index]
-            source_state = source[source_state_index]
-            reference_hits[id(reference_state)].add(reference_position)
-            source_hits[id(source_state)].add(source_position)
-            matches.append(ADSMatch(
-                reference_fragment_id=reference_state.fragment_id,
-                reference_start=int(reference_state.valid_starts[reference_position]),
-                source_fragment_id=source_state.fragment_id,
-                source_start=int(source_state.valid_starts[source_position]),
-                similarity=float(score),
-            ))
+        for row, hit in enumerate(reference_mask):
+            if hit:
+                state_index, position = reference_locations[row]
+                reference_hits[id(reference[state_index])].add(position)
+        for column, hit in enumerate(source_mask):
+            if hit:
+                state_index, position = source_locations[column]
+                source_hits[id(source[state_index])].add(position)
         for state in reference:
             state.matched = reference_hits[id(state)]
         for state in source:
             state.matched = source_hits[id(state)]
-        return matches
+        return ADSMatchSummary(
+            pair_count=int(top_k),
+            reference_anchor_hits=int(reference_mask.sum()),
+            source_anchor_hits=int(source_mask.sum()),
+            threshold=threshold,
+        )
 
     def run(self, reference_fragments: list[TimeSeriesFragment],
             source_fragments: list[TimeSeriesFragment]) -> ADSRunReport:
@@ -613,25 +815,23 @@ class ADSPipeline:
         reference = self._states(reference_fragments, "reference")
         source = self._states(source_fragments, "source")
         coarse_reference = {
-            id(state): set(uniform_anchor_positions(
-                len(state.valid_starts), self.config.q_coarse / self.config.eta))
+            id(state): self._planned_coarse_positions(state, "reference")
             for state in reference
         }
         coarse_source = {
-            id(state): set(uniform_anchor_positions(
-                len(state.valid_starts), self.config.q_coarse))
+            id(state): self._planned_coarse_positions(state, "source")
             for state in source
         }
         coarse_nominal_internal = {
             "reference": sum(
                 min(max(len(state.valid_starts) - 2, 0),
                     int(math.ceil(max(len(state.valid_starts) - 2, 0)
-                                  / (self.config.q_coarse / self.config.eta))))
+                                  / (self.config.reference_spacing))))
                 for state in reference),
             "source": sum(
                 min(max(len(state.valid_starts) - 2, 0),
                     int(math.ceil(max(len(state.valid_starts) - 2, 0)
-                                  / self.config.q_coarse)))
+                                  / self.config.source_spacing)))
                 for state in source),
         }
         coarse_target_total = {
@@ -647,7 +847,8 @@ class ADSPipeline:
             self._compute(states, positions, coarse=True, side=side)
             self._emit("coarse", "end", side=side)
 
-        matches_by_round: list[list[ADSMatch]] = []
+        matches_by_round: list[ADSMatchSummary] = []
+        score_matrix_summaries: list[dict] = []
         selected_top_k: list[int] = []
         achieved_density = None
         for _round in range(self.config.rounds):
@@ -666,27 +867,32 @@ class ADSPipeline:
                 top_k = self.config.top_k
             else:
                 top_k = int(math.ceil(float(matrix.size) * float(self.config.top_ratio)))
-            pairs = global_top_k(
-                matrix, top_k, reference_keys=reference_keys, source_keys=source_keys)
+            match = self._mark_top_k_matches(
+                reference_sorted, source_sorted, reference_locations, source_locations,
+                matrix, top_k, reference_keys, source_keys)
+            score_matrix_summaries.append(dict(
+                stage="coarse_round_%d" % (_round + 1),
+                **summarize_similarity_matrix(matrix, top_k, threshold=match.threshold)))
             selected_top_k.append(top_k)
-            matches_by_round.append(self._mark_matches(
-                reference_sorted, source_sorted, reference_locations, source_locations, pairs))
+            matches_by_round.append(match)
             reference_hits = {id(state): state.matched for state in reference_sorted}
             source_hits = {id(state): state.matched for state in source_sorted}
             fine_reference = _fine_anchor_plan(
-                reference_sorted, reference_hits, self.config.q_fine / self.config.eta)
+                reference_sorted, reference_hits, self.config.reference_spacing)
             fine_source = _fine_anchor_plan(
-                source_sorted, source_hits, self.config.q_fine)
+                source_sorted, source_hits, self.config.source_spacing)
             self._emit("matching", "end", round=len(matches_by_round),
-                       top_k=top_k, pairs=len(pairs))
+                       top_k=top_k, pairs=len(match),
+                       reference_anchor_hits=match.reference_anchor_hits,
+                       source_anchor_hits=match.source_anchor_hits)
             fine_nominal_by_round.append({
                 "reference": sum(
                     int(math.ceil(sum(right - left + 1 for left, right in state.regions)
-                                  / (self.config.q_fine / self.config.eta)))
+                                  / (self.config.reference_spacing)))
                     for state in reference_sorted if state.regions),
                 "source": sum(
                     int(math.ceil(sum(right - left + 1 for left, right in state.regions)
-                                  / self.config.q_fine))
+                                  / self.config.source_spacing))
                     for state in source_sorted if state.regions),
             })
             self._emit("fine", "start", round=len(matches_by_round))
@@ -715,15 +921,18 @@ class ADSPipeline:
         else:
             final_top_k = int(math.ceil(
                 float(matrix.size) * float(self.config.top_ratio)))
-        final_pairs = global_top_k(
-            matrix, final_top_k, reference_keys=reference_keys,
-            source_keys=source_keys)
+        final_match = self._mark_top_k_matches(
+            reference_sorted, source_sorted, reference_locations, source_locations,
+            matrix, final_top_k, reference_keys, source_keys)
+        score_matrix_summaries.append(dict(
+            stage="final", **summarize_similarity_matrix(
+                matrix, final_top_k, threshold=final_match.threshold)))
         selected_top_k.append(final_top_k)
-        matches_by_round.append(self._mark_matches(
-            reference_sorted, source_sorted, reference_locations,
-            source_locations, final_pairs))
+        matches_by_round.append(final_match)
         self._emit("matching", "end", round=len(matches_by_round),
-                   top_k=final_top_k, pairs=len(final_pairs))
+                   top_k=final_top_k, pairs=len(final_match),
+                   reference_anchor_hits=final_match.reference_anchor_hits,
+                   source_anchor_hits=final_match.source_anchor_hits)
         self._emit("scoring", "start", source_anchors=len(source_locations))
         source_scores = aggregate_source_scores(matrix, self.config.aggregation)
         for state in reference + source:
@@ -819,6 +1028,7 @@ class ADSPipeline:
             reference_results=reference_results,
             source_results=source_results,
             matches_by_round=matches_by_round,
+            score_matrix_summaries=score_matrix_summaries,
             actual_gradient_counts=actual_counts,
             nominal_gradient_counts=nominal_counts,
             cached_gradient_counts=dict(self.cached_gradient_counts),
@@ -828,18 +1038,141 @@ class ADSPipeline:
             target_fine_density=self.config.target_fine_density,
             achieved_fine_density=achieved_density,
             selected_top_k=selected_top_k,
+            decay_distance=self.config.decay_distance,
         )
+
+
+def source_probability_descriptor(report: ADSRunReport) -> dict:
+    """Return a compact, JSON-safe source distribution based on real anchors."""
+    trajectories = []
+    total_weight = float(sum(result.weights.sum() for result in report.source_results))
+    for result in report.source_results:
+        starts = np.asarray(result.valid_starts, dtype=np.int64)
+        if len(starts) == 0:
+            raise ValueError("source probability descriptor requires legal starts")
+        stride = int(starts[1] - starts[0]) if len(starts) > 1 else 1
+        if stride <= 0 or not np.array_equal(
+                starts, starts[0] + np.arange(len(starts), dtype=np.int64) * stride):
+            raise ValueError("source candidate starts must form a regular stride")
+        trajectories.append({
+            "fragment_id": int(result.fragment_id),
+            "first_start": int(starts[0]),
+            "stride": stride,
+            "candidate_count": int(len(starts)),
+            "anchor_positions": [
+                int((position - int(starts[0])) // stride)
+                for position in result.anchor_scores
+            ],
+            "anchor_scores": [float(score) for score in result.anchor_scores.values()],
+        })
+    return {
+        "schema": 1,
+        "mode": "uniform" if report.probability_fallback else "anchor_neighbor_max_linear",
+        "decay_distance": int(report.decay_distance),
+        "normalization_mass": total_weight,
+        "population": int(sum(item["candidate_count"] for item in trajectories)),
+        "probability_fallback": bool(report.probability_fallback),
+        "trajectories": trajectories,
+    }
+
+
+class SourceProbabilitySampler:
+    """Precompute a compact descriptor's positive-support sampling table."""
+
+    def __init__(self, descriptor: dict):
+        trajectories = descriptor.get("trajectories", [])
+        if not trajectories:
+            raise ValueError("probability descriptor has no trajectories")
+        self.counts = np.asarray(
+            [int(item["candidate_count"]) for item in trajectories], dtype=np.int64)
+        if np.any(self.counts <= 0):
+            raise ValueError("probability descriptor has an empty trajectory")
+        self.offsets = np.cumsum(np.r_[0, self.counts])
+        self.fragment_ids = np.asarray(
+            [int(item["fragment_id"]) for item in trajectories], dtype=np.int64)
+        self.first_starts = np.asarray(
+            [int(item["first_start"]) for item in trajectories], dtype=np.int64)
+        self.strides = np.asarray(
+            [int(item["stride"]) for item in trajectories], dtype=np.int64)
+        self.mode = descriptor.get("mode")
+        self.support_rows = None
+        self.cumulative_mass = None
+        if self.mode == "uniform":
+            return
+        if self.mode != "anchor_neighbor_max_linear":
+            raise ValueError("unsupported source probability descriptor mode")
+        decay = int(descriptor["decay_distance"])
+        if decay <= 0:
+            raise ValueError("decay_distance must be positive")
+        support_rows = []
+        support_weights = []
+        for owner, item in enumerate(trajectories):
+            positions = item["anchor_positions"]
+            scores = item["anchor_scores"]
+            if len(positions) != len(scores):
+                raise ValueError("anchor positions and scores must have matching lengths")
+            weights = np.zeros(self.counts[owner], dtype=np.float64)
+            for position, score in zip(positions, scores):
+                position = int(position)
+                contribution = max(0.0, float(score))
+                if position < 0 or position >= len(weights):
+                    raise ValueError("anchor position outside candidate range")
+                lo = max(0, position - decay + 1)
+                hi = min(len(weights), position + decay)
+                neighbors = np.arange(lo, hi, dtype=np.int64)
+                values = contribution * (1.0 - np.abs(neighbors - position) / decay)
+                weights[neighbors] = np.maximum(weights[neighbors], values)
+            positive = np.flatnonzero(weights > 0)
+            support_rows.append(self.offsets[owner] + positive)
+            support_weights.append(weights[positive])
+        rows = np.concatenate(support_rows) if support_rows else np.zeros(0, dtype=np.int64)
+        values = (np.concatenate(support_weights) if support_weights
+                  else np.zeros(0, dtype=np.float64))
+        mass = float(values.sum())
+        if mass <= 0:
+            raise ValueError("zero-mass descriptor must use uniform mode")
+        self.support_rows = rows
+        self.cumulative_mass = np.cumsum(values / mass)
+        self.cumulative_mass[-1] = 1.0
+
+    def sample(self, rng: np.random.Generator,
+               n_samples: int) -> tuple[np.ndarray, np.ndarray]:
+        """Sample legal (fragment_id, physical_start) pairs with replacement."""
+        if n_samples <= 0:
+            raise ValueError("n_samples must be positive")
+        if self.mode == "uniform":
+            rows = rng.integers(0, int(self.offsets[-1]), size=n_samples)
+        else:
+            selected = np.searchsorted(
+                self.cumulative_mass, rng.random(n_samples), side="right")
+            rows = self.support_rows[selected]
+        owners = np.searchsorted(self.offsets[1:], rows, side="right")
+        local_positions = rows - self.offsets[owners]
+        return (self.fragment_ids[owners],
+                self.first_starts[owners] + local_positions * self.strides[owners])
+
+
+def sample_source_probability_descriptor(descriptor: dict, rng: np.random.Generator,
+                                         n_samples: int) -> tuple[np.ndarray, np.ndarray]:
+    """Sample legal (fragment_id, physical_start) pairs from a descriptor."""
+    return SourceProbabilitySampler(descriptor).sample(rng, n_samples)
 
 
 __all__ = [
     "ADSConfig",
     "ADSMatch",
+    "ADSMatchSummary",
     "ADSTrajectoryResult",
     "ADSRunReport",
     "ADSPipeline",
+    "source_probability_descriptor",
+    "sample_source_probability_descriptor",
+    "SourceProbabilitySampler",
     "uniform_anchor_positions",
     "cosine_similarity_matrix",
     "global_top_k",
+    "global_top_k_hit_masks",
+    "summarize_similarity_matrix",
     "aggregate_source_scores",
     "spread_anchor_scores",
     "normalize_sampling_probabilities",

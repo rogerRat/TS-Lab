@@ -388,6 +388,7 @@ def ads_select(
     gradient_batch_size: int = 128,
     progress_callback=None,
     gradient_cache=None,
+    coarse_anchor_positions=None,
 ) -> ArmOutput:
     """Run ADS and draw a fixed source-window sample from its probabilities."""
     from rage.ads import ADSPipeline
@@ -405,6 +406,7 @@ def ads_select(
         gradient_batch_size=gradient_batch_size,
         progress_callback=progress_callback,
         gradient_cache=gradient_cache,
+        coarse_anchor_positions=coarse_anchor_positions,
     ).run(reference_fragments, pool)
     probabilities_by_fragment = report.source_probabilities
     results_by_fragment = {item.fragment_id: item for item in report.source_results}
@@ -470,6 +472,11 @@ def ads_select(
             "source_probability_min": float(probabilities.min()),
             "source_probability_max": float(probabilities.max()),
             "matched_pairs_by_round": [len(matches) for matches in report.matches_by_round],
+            "matched_reference_anchors_by_round": [
+                matches.reference_anchor_hits for matches in report.matches_by_round],
+            "matched_source_anchors_by_round": [
+                matches.source_anchor_hits for matches in report.matches_by_round],
+            "score_matrix_summaries": report.score_matrix_summaries,
         },
     )
 

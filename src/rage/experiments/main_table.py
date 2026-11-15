@@ -88,10 +88,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--selection-generation", choices=["eager", "cuda_graph"], default="cuda_graph")
     parser.add_argument("--selector", choices=["rage", "ads"], default="rage",
                         help="focal gradient selection method")
-    parser.add_argument("--ads-q-coarse", type=float, default=32.0)
-    parser.add_argument("--ads-q-fine", type=float, default=8.0)
-    parser.add_argument("--ads-eta", type=float, default=1.0,
-                        help="reference-to-source target anchor density ratio")
+    parser.add_argument("--ads-q", type=float, default=16.0,
+                        help="total source-plus-reference anchor density budget")
+    parser.add_argument("--ads-eta", type=float, default=None,
+                        help="required reference-to-source anchor density ratio")
     budget_group = parser.add_mutually_exclusive_group()
     budget_group.add_argument("--ads-top-k", type=int, default=None)
     budget_group.add_argument("--ads-top-ratio", type=float, default=None)
@@ -101,9 +101,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--ads-aggregation", choices=["linear", "max", "exp", "relu"],
                         default="max")
     parser.add_argument("--ads-sampling-replacement",
-                        action=argparse.BooleanOptionalAction, default=False,
+                        action=argparse.BooleanOptionalAction, default=True,
                         help="sample selected source windows with or without replacement")
-    parser.add_argument("--ads-selection-seed", type=int, default=101)
+    parser.add_argument("--ads-selection-seed", type=int, default=0)
     parser.add_argument("--cover-density", type=float, default=0.02)
     parser.add_argument("--error-density", type=float, default=0.02)
     parser.add_argument("--split-density", type=float, default=0.005)
@@ -142,14 +142,13 @@ def _ads_config_from_args(args) -> ADSConfig:
         args.ads_top_k, args.ads_top_ratio, args.ads_target_fine_density))
     if modes > 1:
         raise ValueError("specify only one ADS top-k, top-ratio, or target density mode")
+    if args.ads_eta is None:
+        raise ValueError("--ads-eta is required when ADS is selected")
     return ADSConfig(
-        q_coarse=args.ads_q_coarse,
-        q_fine=args.ads_q_fine,
+        q=args.ads_q,
         eta=args.ads_eta,
-        top_k=(args.ads_top_k if args.ads_top_ratio is None
-               and args.ads_target_fine_density is None else
-               (64 if modes == 0 else None)),
-        top_ratio=args.ads_top_ratio,
+        top_k=args.ads_top_k,
+        top_ratio=(0.2 if modes == 0 else args.ads_top_ratio),
         target_fine_density=args.ads_target_fine_density,
         rounds=args.ads_rounds,
         decay_distance=args.ads_decay_distance,
@@ -198,7 +197,7 @@ def check_baseline_resume(out_dir, args):
                          "Old selected sets and student cells are not compatible.")
     if current["selector"] == "ads":
         ads_keys = (
-            "ads_q_coarse", "ads_q_fine", "ads_eta", "ads_top_k",
+            "ads_q", "ads_eta", "ads_top_k",
             "ads_top_ratio", "ads_target_fine_density", "ads_rounds",
             "ads_decay_distance", "ads_aggregation", "ads_sampling_replacement",
             "ads_selection_seed",
@@ -341,12 +340,13 @@ def main(argv: list[str] | None = None) -> int:
             ))
         else:
             ads_config = _ads_config_from_args(args)
-            print("%s-[main_table]-[ads-config]-[q_coarse=%s q_fine=%s eta=%s "
-                  "top_k=%s top_ratio=%s target_fine_density=%s rounds=%s "
+            print("%s-[main_table]-[ads-config]-[q=%s eta=%s source_spacing=%s "
+                  "reference_spacing=%s top_k=%s top_ratio=%s target_fine_density=%s rounds=%s "
                   "decay_distance=%s aggregation=%s n_select=%s replacement=%s "
                   "seed=%s]" % (
                       time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                      ads_config.q_coarse, ads_config.q_fine, ads_config.eta,
+                      ads_config.q, ads_config.eta,
+                      ads_config.source_spacing, ads_config.reference_spacing,
                       ads_config.top_k, ads_config.top_ratio,
                       ads_config.target_fine_density, ads_config.rounds,
                       ads_config.decay_distance, ads_config.aggregation,
