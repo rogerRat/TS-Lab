@@ -19,6 +19,7 @@ from transformers import GenerationConfig
 
 from configs.logger import configure_logger, format_duration
 from configs.paths import PROJECT_ROOT, output_path
+from experiment_config import ARMS, TASKS
 from rage.ads import SourceProbabilitySampler
 from rage.experiments.full_pool_models import build_model
 from rage.experiments.development_inputs import load_fragments
@@ -27,8 +28,6 @@ from rage.experiments.regions import RegionWindows
 from rage.experiments.train_eval import TrainingRecipe, fine_tune
 
 ROOT = PROJECT_ROOT
-TASKS = ("fev-09", "time-01", "time-02", "time-03", "time-04", "time-06", "time-07", "time-08")
-ARMS = ("ads-vic", "uni", "traj", "orig", "reft")
 SELECTION_ROOT = ROOT / "outputs/selection/v1-rage-ads-v2"
 TRAIN_ROOT = ROOT / "outputs/train/v1-rage-ads-v2"
 EVAL_ROOT = ROOT / "outputs/eval/v1-rage-ads-v2"
@@ -347,7 +346,7 @@ def run_cell(task, arm, values, legal, value_offsets, legal_offsets, logger):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task", choices=TASKS + ("all",), default="all")
-    parser.add_argument("--arm", choices=ARMS + ("all",), default="all")
+    parser.add_argument("--arm", choices=ARMS + ("ads-rev", "all"), default="all")
     args = parser.parse_args()
     tasks = TASKS if args.task == "all" else (args.task,)
     arms = ARMS if args.arm == "all" else (args.arm,)

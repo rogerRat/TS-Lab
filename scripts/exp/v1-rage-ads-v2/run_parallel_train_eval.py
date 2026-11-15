@@ -12,10 +12,9 @@ import time
 
 from configs.logger import configure_logger, format_duration
 from configs.paths import PROJECT_ROOT, output_path
+from experiment_config import ARMS, TASKS
 
 ROOT = PROJECT_ROOT
-TASKS = ("fev-09", "time-01", "time-02", "time-03", "time-04", "time-06", "time-07", "time-08")
-ARMS = ("ads-vic", "uni", "traj", "orig", "reft")
 TRAIN_ROOT = ROOT / "outputs/train/v1-rage-ads-v2"
 EVAL_ROOT = ROOT / "outputs/eval/v1-rage-ads-v2"
 SELECTION_ROOT = ROOT / "outputs/selection/v1-rage-ads-v2"
@@ -147,6 +146,7 @@ def main():
     signal.signal(signal.SIGTERM, _handle_termination)
     parser = __import__("argparse").ArgumentParser(description=__doc__)
     parser.add_argument("--workers", type=int, required=True)
+    parser.add_argument("--arms", nargs="+", choices=ARMS + ("ads-rev",), default=list(ARMS))
     args = parser.parse_args()
     if args.workers <= 0:
         raise ValueError("workers must be positive")
@@ -164,9 +164,12 @@ def main():
                PYTHONPATH="/root/TS-Lab/src:/root/TS-Lab/third_parties/fev/src:"
                           "/root/TS-Lab/third_parties/TIME/src:/root/TS-Lab:" +
                           os.environ.get("PYTHONPATH", ""))
-    pending = [(task, arm) for task in TASKS for arm in ARMS if not cell_complete(task, arm)]
-    logger.info("stage=config pending_cells=%d workers=%d tasks=%d arms=%d model=TimerXL-84M steps=4000 batch=32 sampler=compact-ADS",
-                len(pending), args.workers, len(TASKS), len(ARMS))
+    active_arms = tuple(args.arms)
+    pending = [(task, arm) for task in TASKS for arm in active_arms if not cell_complete(task, arm)]
+    total_cells = len(TASKS) * len(active_arms)
+    completed_at_start = total_cells - len(pending)
+    logger.info("stage=config pending_cells=%d workers=%d tasks=%d arms=%d arm_names=%s model=TimerXL-84M steps=4000 batch=32 sampler=compact-ADS",
+                len(pending), args.workers, len(TASKS), len(active_arms), ",".join(active_arms))
     running = {}
     completed = []
     failed = []
@@ -196,9 +199,10 @@ def main():
                 del running[process]
                 if code == 0 and cell_complete(info["task"], info["arm"]):
                     completed.append((info["task"], info["arm"]))
-                    logger.info("stage=cell-complete task=%s arm=%s elapsed=%s completed=%d active=%d eta=%s",
-                                info["task"], info["arm"], format_duration(elapsed), len(completed),
-                                len(running), format_duration((time.monotonic() - started)
+                    logger.info("stage=cell-complete task=%s arm=%s elapsed=%s completed=%d/%d active=%d eta=%s",
+                                info["task"], info["arm"], format_duration(elapsed),
+                                completed_at_start + len(completed), total_cells, len(running),
+                                format_duration((time.monotonic() - started)
                                                               * len(pending) / max(len(completed), 1)))
                 else:
                     failed.append(dict(task=info["task"], arm=info["arm"], return_code=code))
@@ -227,8 +231,9 @@ def main():
             if measured:
                 samples.append(dict(**measured, **cpu_fields, sampled_at=time.time()))
             if now - last_heartbeat >= 30:
-                logger.info("stage=heartbeat completed=%d/32 active=%d pending=%d failed=%d eta=%s",
-                            len(completed), len(running), len(pending), len(failed),
+                logger.info("stage=heartbeat completed=%d/%d active=%d pending=%d failed=%d eta=%s",
+                            completed_at_start + len(completed), total_cells,
+                            len(running), len(pending), len(failed),
                             format_duration((now - started) * len(pending) / max(len(completed), 1)))
                 last_heartbeat = now
             time.sleep(1.0)
@@ -238,11 +243,13 @@ def main():
     if failed or pending:
         raise RuntimeError("one or more train/evaluation cells failed; completed cells remain resumable")
     for task in TASKS:
-        for arm in ARMS:
+        for arm in active_arms:
             if not cell_complete(task, arm):
                 raise RuntimeError("train/evaluation cell lacks completion markers: %s/%s" % (task, arm))
     run_manifest = dict(experiment="v1-rage-ads-v2", phase="rolling-train-evaluation",
-                        tasks=list(TASKS), arms=list(ARMS), workers=args.workers,
+                        tasks=list(TASKS), arms=list(active_arms), workers=args.workers,
+                        total_cells=total_cells, completed_cells_at_start=completed_at_start,
+                        completed_cells_this_run=len(completed),
                         cell_durations_seconds=durations,
                         gpu_utilization_average_percent=(sum(x["gpu_utilization_percent"] for x in samples)
                                                          / len(samples) if samples else None),
@@ -275,14 +282,15 @@ def main():
                             if any("host_cpu_utilization_percent" in x for x in samples) else None),
                         monitor_samples=len(samples), elapsed_seconds=time.monotonic() - started,
                         cell_durations_unit="wall seconds per task-arm cell, including training, export and rolling evaluation")
-    target = output / "parallel-run-manifest.json"
+    target = output / ("parallel-run-manifest-ads-rev.json" if active_arms == ("ads-rev",) else "parallel-run-manifest.json")
     temporary = target.with_name(target.name + ".partial")
     temporary.write_text(json.dumps(run_manifest, indent=2, sort_keys=True) + "\n", encoding="ascii")
     os.replace(temporary, target)
     (TRAIN_ROOT / ".complete").write_text("complete\n", encoding="ascii")
     (EVAL_ROOT / ".complete").write_text("complete\n", encoding="ascii")
-    logger.info("stage=complete cells=%d workers=%d elapsed=%s gpu_avg=%s gpu_peak_mib=%s host_avg_mib=%s host_peak_mib=%s output=%s",
-                len(completed), args.workers, format_duration(run_manifest["elapsed_seconds"]),
+    logger.info("stage=complete cells=%d/%d new_cells=%d workers=%d elapsed=%s gpu_avg=%s gpu_peak_mib=%s host_avg_mib=%s host_peak_mib=%s output=%s",
+                completed_at_start + len(completed), total_cells, len(completed), args.workers,
+                format_duration(run_manifest["elapsed_seconds"]),
                 run_manifest["gpu_utilization_average_percent"], run_manifest["gpu_memory_peak_mib"],
                 run_manifest["host_memory_average_mib"], run_manifest["host_memory_peak_mib"], output)
 

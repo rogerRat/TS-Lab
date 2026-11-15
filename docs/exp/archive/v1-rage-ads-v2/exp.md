@@ -1,0 +1,118 @@
+# v1-rage-ads-v2：ADS-VIC 迭代阈值匹配与基线比较
+
+## 基础信息
+
+| 字段 | 内容 |
+|---|---|
+| 实验代号 | v1-rage-ads-v2 |
+| 目标 | 在 v1 已完成的任务与模型评估协议上，比较 ADS-VIC、同预算均匀锚点、轨迹级均匀锚点、原始预训练模型和 reference-only 训练 |
+| 文档创建时间 | 2026-11-14 |
+| 最后修改时间 | 2026-11-15 |
+| 实际实验启动时间 | 2026-11-14 16:41:56 CST（选择阶段；8 任务并行） |
+| 当前状态 | 原 rolling-baseline-v2 已完成；新增 ads-rev 批次按 q0=32、q1=16 从头选择并训练评估，选择8/8完成；8个训练单元运行中，约1.9–2.0k/4k步；训练评估待完成 |
+| 继承实验 | `v1-rage-ads`；旧批次和指标保持独立历史记录 |
+
+## 继承设置
+
+除本文件明确修改的算法规则外，继承 `docs/exp/v1-rage-ads/exp.md` 的任务、模型和评估设置；source pool 按本版改为 256 条轨迹，不继承 src-96 数量。任务为 FEV 9、TIME 1/2/3/4/6/7/8 rolling 任务；TimerXL 84M；rolling-safe reference；共同梯度检查点、损失、可训练参数与投影；评估定义；运行环境 `rage-timerxl`。
+
+学生模型沿用 v1 配置：TimerXL 84M、BF16 LoRA q_proj/v_proj，r=8、alpha=16、dropout=0；AdamW lr=1e-4、weight decay=0、betas=(0.9,0.999)、eps=1e-8；有效 batch 32、微批次 8、梯度裁剪 1；4000 次优化器更新、cosine 日程、3% warmup、min_lr_ratio=0，每 500 步保存状态。各训练方法的窗口来源遵循本版方法定义；`orig` 不训练。模型优化步数与选择阶段的梯度锚点预算分开统计。
+
+## 方法定义
+
+算法公式与流程以项目根目录 `ALGO.md` 为准。本版方法如下：
+
+| 方法 | 计算与采样 |
+|---|---|
+| `ads-vic` / ADS-VIC | 匹配所有 `cosine > 0.1` 的配对；精算区间取命中锚点形成的连续内包段，不向外延拓；默认 `q_0=32`、q 间隔每轮缩小 4 倍、`R=2`。窗口分数取每个 source 锚点对全部 reference 的最大余弦；负分截为 0，再以 `h=4` 有限邻域线性衰减、重叠取 max。非全零权重不做平滑，邻域外窗口可能概率为 0；全零总权重才均匀回退。 |
+| `uni` | ADS-VIC 完成后，按同任务 source/reference 实际使用的唯一锚点数分别精确配平，在完整轨迹池均匀布点；不做阈值驱动的后续精算。以 uni 自身锚点匹配分数生成窗口概率，采用与 ADS-VIC 相同的负分截零、`h=4` 有限邻域和全零回退规则。因此均匀布锚点不代表全源窗口等概率。 |
+| `traj` / `uni-traj` | source/reference 每条轨迹用 `q_0=32` 均匀布点并平均归一化后的梯度；source 轨迹分数为对全部 reference 均值梯度余弦的最大值，负值截为 0 后归一化。零分轨迹及其全部 source 窗口概率为 0；仅全轨迹权重总和为 0 时回退到轨迹均匀分布。正概率轨迹内对合法窗口均匀抽样，不加 epsilon 平滑。 |
+| `orig` | 不训练，直接评测原始预训练权重。 |
+| `reft` / ref-trained | 只用对应任务的 reference 集合训练，再执行相同 rolling 评测。 |
+| `ads-rev` | 独立从 q0=32 粗锚点开始；任一侧锚点只要参与 `cos>=0.1` 配对即排除；仅在剩余粗锚点的连续区间按 q1=16（相对 q0 密度翻倍）均匀加密一轮。最终仍按全部 source/reference 锚点的最高余弦分数、负分截零、h=4 邻域 max 规则构造窗口概率；不运行标准 ADS-VIC 的 q1=8 正向细化，也不运行 uni。 |
+
+ADS-VIC 沿用 v1 的 `eta=1`、`h=4`、锚点分数 max 聚合、重叠邻域 max 合并及其余模型/评估设置。v1 的 q=16 间隔参数、Top 20% `rho` 筛选和旧 R 语义不继承。
+
+## 采样概率支持与零概率处理
+
+ADS-VIC/uni 对锚点的负最大余弦分数截为 0，再只在距离锚点小于 h=4 的有限邻域分配线性衰减权重；多个邻域按 max 合并。某 source 窗口若没有任何正分锚点覆盖，则概率为 0，训练中不可抽中。均匀回退只在全任务总权重为 0 时触发；部分窗口为 0 时不添加下限或 epsilon 混合。uni 的均匀性只约束锚点布置，不约束最终窗口概率。
+
+traj 先对每条 source/reference 轨迹的锚点梯度分别归一化后求均值，再计算轨迹余弦。source 分数取所有 reference 轨迹的最大值并截到非负；零分轨迹概率为 0，其所有窗口不可抽中。只有全部 source 轨迹权重均为 0 才使用等概率回退。orig 不训练，基线评测不使用源窗口抽样；reft 在 reference 合法窗口上均匀有放回抽样，因此不进入 source 窗口零概率统计。
+
+## 轮次、阈值与布点
+
+- q 表示相邻锚点的间隔。默认 `q_0=32`、倍率 4，故 `q_1=8`；`R=3` 时 `q_2=2`。
+- `R` 是包括粗算的总轮数：1 仅粗算；2 粗算一次并精算一次；3 粗算一次并精算两次。默认 `R=2`。
+- 对长度 L、间隔 Q 的区间，局部点位为 `{0, L-1} ∪ {kQ-1 | 1≤k≤floor(L/Q)}`，去重后计算。例：`L=13,Q=4` 得到 `{0,3,7,11,12}`。
+- 每轮只在阈值命中锚点形成的连续内包区间中布点；区间首尾无条件纳入候选。重复锚点复用，不重复反向传播。
+- ADS 配对筛选为严格 `cosine > 0.1`，不再用固定 Top 20%。
+
+## 同预算 uni 规则
+
+ADS-VIC 先按 q 和实际命中区间自然运行，不限制为预设总预算。运行后按任务统计全部轮次中不同锚点位置的并集，source/reference 分别记为 `B_src`、`B_ref`。缓存复用点计入逻辑锚点数，同时另报实际新反向传播数。
+
+`uni` 在完整 source/reference 轨迹池中分别均匀放置恰好 `B_src`、`B_ref` 个唯一锚点，source/reference 分侧匹配。各轨迹首尾强制点计入预算，剩余点按容量比例用最大余数法分配；每轨按等距浮点位置映射到整数起点，间隔可取相邻整数，不要求 q 为整数。若预算不足以覆盖强制端点，则报告不可匹配，不静默超预算。`uni` 不做阈值驱动的后续精算，但用相同的后续得分聚合、窗口概率、训练和评测流程。
+
+该方法是按 ADS-VIC 实际预算事后匹配的控制实验，不会预先固定 ADS-VIC 预算；每个任务的 uni 有效平均间隔允许为非整数；用等距浮点位置映射到整数起点，预算数量精确，不把锚点数近似到整数 q。墙钟开销与锚点预算分开报告。
+
+## 数据、评测、执行与产物
+
+- 数据、任务和评估配置：继承 v1，任何测试目标均不得进入 reference、选择或训练输入。
+- 新脚本目录：`scripts/exp/v1-rage-ads-v2/`；选择入口 `run_selection.py`，8 任务并行入口 `run_selection_parallel.sh`，训练评估入口 `train_eval.py`，并行 runner `run_parallel_train_eval.py`，阶段衔接 `run_training_after_selection.sh`。
+- 选择输出：`outputs/selection/v1-rage-ads-v2/`；训练输出：`outputs/train/v1-rage-ads-v2/`；评估输出：`outputs/eval/v1-rage-ads-v2/`；日志：`logs/v1-rage-ads-v2/`。
+- 新臂入口：选择 `scripts/exp/v1-rage-ads-v2/run_ads_rev_selection.py`；训练和评估复用 `train_eval.py` 与 `run_parallel_train_eval.py --arms ads-rev`。选择、训练、评估分别写入现有 outputs 根目录下的 `ads-rev/` 臂路径；日志写入 `logs/v1-rage-ads-v2/`。
+
+## 批次管理
+
+| 批次 | 内容 | 状态 | 输出 |
+|---|---|---|---|
+| `baseline-design-v2` | ADS-VIC 阈值迭代、q 间隔布点、事后同预算 uni、uni-traj、orig、reft 方法定义 | 设计已冻结 | 仅方法定义；无模型指标 |
+| `rolling-baseline-v2` | src-256 上的 ADS-VIC、同预算 uni、uni-traj、orig 与 reference-only 训练；八项 rolling 任务 | 选择 8/8 完成；训练和评估 40/40 单元完成；采样支持审计 40/40 行完成 | `outputs/selection/v1-rage-ads-v2/`、`outputs/train/v1-rage-ads-v2/`、`outputs/eval/v1-rage-ads-v2/`；各单元指标在对应评估目录，零概率统计见结果文档 |
+| `ads-rev-reverse-complement` | src-256 八任务；从 q0=32 开始，排除 `cos>=0.1` 命中锚点，在未命中粗锚点段按 q1=16 均布一轮；按现有高分与概率规则训练评估；不设 uni | 选择8/8完成；训练4,000步、评估8/8均于2026-11-15 09:50 CST完成 | `outputs/selection/v1-rage-ads-v2/<task>/ads-rev/`、`outputs/train/v1-rage-ads-v2/<task>/ads-rev/`、`outputs/eval/v1-rage-ads-v2/<task>/ads-rev/`；矩阵命中配对数和两侧命中锚点数写入 selection.json |
+
+## Source pool（v2）
+
+- 最终 source pool 为 256 条轨迹，配置名 `src-256`，窗口长度 576；必须完整包含现有 `src-96` 的 96 条轨迹。
+- 父池为 `configs/data/src-4096.yaml` 与 `data/src/shard_dataset/src-4096/`。新加入的 160 条从 src-4096 中排除 src-96 已有轨迹后的 4000 条候选中分层抽取。
+- 配置配额：对每个 source/subset 配置 c，令 `N4096_c` 为 src-4096 轨迹数、`N96_c` 为 src-96 已有轨迹数、`R_c=N4096_c-N96_c`。新抽取配额按 `160 * R_c / 4000` 计算，先取 floor，再按最大余数法补齐至 160；余数并列按配置键排序。配置内使用 seed 0 无放回抽取，新增轨迹不与 src-96 重复。最终顺序按父池 ordinal 排列并重编号。
+- 最终配置数为 `N256_c=N96_c+Nadd_c`。由于必须保留 src-96，而 src-96 对父池中低占比配置有至少一条覆盖，最终 256 条的比例不可能对所有配置都严格等于 src-4096 的 1/16；按剩余父池比例扩展是满足“完整包含 src-96”约束下的配额规则。配置配比须在生成后回读 manifest 报告。
+- 计划配置和数据路径：`configs/data/src-256.yaml`、`data/src/shard_dataset/src-256/values.npy`、`offsets.npy`、`manifest.json`。
+- 检查状态：2026-11-14 16:37 CST 已按规则物化 `configs/data/src-256.yaml` 与 `data/src/shard_dataset/src-256/`。manifest 回读为 256 条、35 个配置、6,529,220 个点；96 条继承轨迹均按 parent ordinal 和 series_id 核对，offset 长度、总点数、有限值和完成标记均通过字段级检查。
+
+## 执行记录（2026-11-14）
+
+- 环境：`rage-timerxl`；模型 TimerXL 84M；投影维度 4096、seed 42；学生训练继承 4000 更新、有效 batch 32、seed 0。
+- 选择启动命令：`bash scripts/exp/v1-rage-ads-v2/run_selection_parallel.sh`，tmux 会话 `v1_rage_ads_v2_selection`；八任务分别起独立 worker。
+- 训练评估衔接：`bash scripts/exp/v1-rage-ads-v2/run_training_after_selection.sh`，tmux 会话 `v1_rage_ads_v2_train`；监听选择完成事件后运行 `run_parallel_train_eval.py --workers 12`，共 40 个任务/方法单元。
+- 日志：`logs/v1-rage-ads-v2/selection-queue.log`、各任务 `selection-<task>.log` 与 `pipeline.log`。
+- 16:41:56 首次并行尝试因窗口起点内部零基、`extract_window` 外部一基不一致而失败，未生成任何选择结果；映射改为 `index + 1` 后于 16:42:40 重启。重启后 GPU 利用率实测 100%，显存使用约 7,820 MiB。
+
+- 16:50 CST 对未完成首轮选择执行逻辑审查后主动中断八个 worker；该轮未产生选择结果。修正稀疏锚点连续区间分组和 uni 重叠梯度复用后，16:51 CST 重启选择与训练事件监听。第二轮进程正在推进源侧粗锚点阶段。详见 `docs/logs/2026-11-14-v1-rage-ads-v2-correction.md`。
+
+- 17:44 巡检后按容器 66.6 GB 内存上限调整并行度：保留三个进行中的 q1 worker，time-01/time-03 暂停并排入最多 2-worker 恢复。选择当前 1/8 完成，GPU 使用率 99%，显存约 2,935 MiB。详细状态见 `docs/logs/2026-11-14-v1-rage-ads-v2-memory-capacity.md`。
+
+- 18:08 检查 cgroup 接近内存上限（64.9/66.6 GB，`oom_kill=0`）；旧 worker 的全量相似度临时矩阵导致峰值过高。已终止三个未完成旧 worker，选择器改为分块计算，恢复队列最多并发 2 项；18:10 内存约 7.7 GB，恢复任务 GPU 使用率约 99%。详见 `docs/logs/2026-11-14-v1-rage-ads-v2-memory-overflow-check.md`。
+
+- 2026-11-14 19:22 容器重启后恢复：保留 FEV09、TIME01、TIME08 三项完成产物，按最多 2-worker 顺序恢复其余五项；monitor 会话已重启，训练/评估会在选择根完成后自动启动。详见 `docs/logs/2026-11-14-v1-rage-ads-v2-container-restart.md`。
+
+- 21:13 CST 选择完成 5/8；TIME04、TIME06 正在运行，TIME07 待运行。详见已完成任务的锚点预算、配对规模和解释边界：`docs/logs/2026-11-14-v1-rage-ads-v2-status-2113.md`。
+
+
+- 2026-11-14 21:57 巡检：选择完成 6/8；TIME06 进程仍在 CPU 上运行，距最近阶段日志 43.9 分钟，TIME07 待调度。训练/评测尚未启动，GPU 当前空闲；内存约 19.2/66.6 GB，未见 cgroup OOM。详见 `docs/logs/2026-11-14-2157-v1-rage-ads-v2-status.md`。
+
+- 2026-11-15 01:07 巡检：选择完成 7/8；TIME06 已完成，耗时约 4 小时、末轮配对 37,028,337,900 对；TIME07 ADS-VIC 已完成，正在计算 uni source 梯度。训练/评测尚未启动。当前进程已载入旧版 CPU 相似度函数，不能热替换；重启会丢失 TIME07 未落盘状态，本轮保留运行进程。详见 `docs/logs/2026-11-15-0107-v1-rage-ads-v2-status.md`。
+
+
+
+- 2026-11-15 01:46：选择全部完成；训练评估恢复为 12-worker tmux runner，完成 13/40 单元、0 个当前失败；概率支持审计 40/40 行完成。修复 reference 窗口 owner 索引与 FEV orig manifest 入口，runner 改为错误单元后继续剩余队列。相似度匹配增加 CUDA 分块路径、显存保护及 CPU fallback，CUDA parity 测试通过。见 docs/logs/2026-11-15-0146-v1-rage-ads-v2-status.md。
+
+
+## 运行器维护调整（2026-11-15）
+
+- 将任务与方法清单集中到 scripts/exp/v1-rage-ads-v2/experiment_config.py，选择、训练、审计、监控及 shell 启动脚本共用同一份清单；当前任务和方法取值未变。
+- 训练运行器的完成数现在以启动时已有的完整单元数为基数，并按全部 40 个任务/方法单元显示；运行 manifest 同时记录启动时已完成数与本次新完成数。
+- 监控仍每 10 分钟向 logs/v1-rage-ads-v2/progress-poll.jsonl 追加状态；后续启动的监控仅在选择任务或训练/评估根状态变化时新增文档记录。
+- 本次编辑没有重启、停止或改变已运行进程。已运行的监控进程仍持有旧版脚本，会继续按原方式轮询和写巡检文档直至退出；训练、审计进程继续当前批次。
+- 训练输入校验、完成标记、采样支持审计和现有 manifest 保持不变，避免在进行中的批次改变数据判定或结果记录格式。
+
+- 2026-11-15 02:00 CST：选择 8/8、训练/评估 40/40 均完成；根 complete 标记及 parallel-run-manifest.json 已生成。GPU 峰值显存 12,130 MiB，平均利用率约 96.4%；容器 memory.events 未见 OOM。采样支持审计表和方法的零概率规则已补齐，详见 ALGO.md 与 results.md。

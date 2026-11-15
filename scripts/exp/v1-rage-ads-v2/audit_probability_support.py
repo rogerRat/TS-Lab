@@ -13,10 +13,9 @@ import yaml
 from configs.logger import configure_logger, format_duration
 from configs.paths import PROJECT_ROOT, output_path
 from rage.ads import SourceProbabilitySampler
+from experiment_config import ARMS, TASKS
 
 ROOT = PROJECT_ROOT
-TASKS = ("fev-09", "time-01", "time-02", "time-03", "time-04", "time-06", "time-07", "time-08")
-ARMS = ("ads-vic", "uni", "traj", "orig", "reft")
 SELECTION_ROOT = ROOT / "outputs/selection/v1-rage-ads-v2"
 OUTPUT_ROOT = SELECTION_ROOT / "audit/probability-support"
 SOURCE_CONFIG = ROOT / "configs/data/src-256.yaml"
