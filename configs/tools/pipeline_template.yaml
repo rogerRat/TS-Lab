@@ -1,0 +1,14 @@
+schema_version: 1
+run_id: example
+stages:
+  - name: warmup
+    config: configs/experiments/example/warmup.yaml
+  - name: grad_cache
+    config: configs/experiments/example/grad_cache.yaml
+  - name: select
+    config: configs/experiments/example/select.yaml
+    method: crb
+  - name: train
+    config: configs/experiments/example/train.yaml
+  - name: eval
+    config: configs/experiments/example/eval.yaml

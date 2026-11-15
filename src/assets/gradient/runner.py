@@ -9,8 +9,8 @@ from assets.gradient import GradientCache, WindowRequest
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", choices=("chronos-tiny", "chronos-small", "chronos-base",
-        "timesfm-2.5", "timerxl-84m", "timemoe-200m"), required=True)
+    from rage.experiments.students import STUDENTS, HISTORICAL_STUDENTS
+    parser.add_argument("--model", choices=STUDENTS + HISTORICAL_STUDENTS, required=True)
     parser.add_argument("--gradient-kind", choices=("full_model", "output_head"),
                         default="full_model", help="full parameters or output-head proxy")
     parser.add_argument("--ckpt", "--model-path", dest="ckpt")
@@ -34,8 +34,15 @@ def main(argv=None):
                                          gradient_workers=args.gradient_workers)
     if args.gradient_kind == "output_head":
         from gradient.output_head import OutputHeadGradientProbe
-        family = ("chronos" if args.model.startswith("chronos-") else
-                  "timerxl" if args.model.startswith("timerxl-") else "timesfm")
+        families = {
+            "chronos": ("chronos-tiny", "chronos-small", "chronos-base"),
+            "timerxl": ("timerxl-84m",),
+            "timesfm": ("timesfm-2.5",),
+        }
+        family = next((name for name, models in families.items()
+                       if args.model in models), None)
+        if family is None:
+            raise ValueError("output_head gradients are unsupported for model: " + args.model)
         probe = OutputHeadGradientProbe(probe, family)
         probe.execution = SelectionExecution(gradient_batch=args.gradient_batch_size,
                                              gradient_workers=1)

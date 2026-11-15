@@ -153,9 +153,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--evaluation-mode", choices=("single_window", "rolling"))
     args = parser.parse_args(argv)
     config_path = config_file(args.config)
     config = EvaluationRunConfig.from_file(config_path)
+    if args.evaluation_mode is not None:
+        values = config.as_mapping()
+        inference = values["adapter"]["config"].get("inference")
+        if not isinstance(inference, dict):
+            raise ValueError("adapter.config.inference is required for evaluation-mode override")
+        inference["evaluation_mode"] = args.evaluation_mode
+        config = EvaluationRunConfig.from_mapping(values, config_path)
     configure_logger("evaluate", "evaluate", "evaluate_run", "EVALUATE")
     log.info("Evaluation configuration loaded: benchmark=%s model_id=%s config=%s", config.benchmark, config.model_id, config.source_path)
     result = run(config, args.checkpoint, args.output_dir, args.resume)

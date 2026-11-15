@@ -239,6 +239,7 @@ def rage_crb_select(
     pool_blocks: tuple[list[GradientBlock], dict] | None = None,
     pool_block_cache: dict | None = None,
     device: str | None = None,
+    score_matrix_path: Path | None = None,
 ) -> ArmOutput:
     """RAGE: unchanged CRB reconstruction/recall, whole-block point-budget delivery.
 
@@ -305,6 +306,13 @@ def rage_crb_select(
 
     top_values, top_indices = _streamed_top_b(
         reference_matrix, loader, len(candidate_blocks), take, device=device)
+    if score_matrix_path is not None:
+        score_path = Path(score_matrix_path)
+        score_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = score_path.with_suffix(score_path.suffix + ".partial")
+        with temporary.open("wb") as stream:
+            np.savez_compressed(stream, scores=top_values, candidate_block_indices=top_indices)
+        temporary.replace(score_path)
     matching_done = time.perf_counter()
 
     # ---- block best-cosine over returning (query, block) pairs -----------
