@@ -1,6 +1,6 @@
 # 实验总表
 
-最后修改日期：2026-11-14
+最后修改日期：2026-11-15
 
 本文件逐行记录全部实验与批次的工作、状态和实际结果，未开始、部分完成、终止的批次同样列出。
 每个实验的完整参数、方法、数据构建方式和评估口径见 `docs/exp/<实验代号>.md`；
@@ -31,7 +31,7 @@
 | `v0-grad-mech-l2-norm` | [v0-grad-mech-l2-norm.md](exp/archive/v0-grad-mech-l2-norm/exp.md) | 3 |
 | `v0-grad-traj-level-norm-gap` | [v0-grad-traj-level-norm-gap.md](exp/archive/v0-grad-traj-level-norm-gap/exp.md) | 3 |
 | `v0-timer-XL-grad-4-change-velocity` | [v0-timer-XL-grad-4-change-velocity.md](exp/archive/v0-timer-XL-grad-4-change-velocity/exp.md) | 3 |
-| `v1-crb-redo` | [v1-crb-redo.md](exp/v1-crb-redo/exp.md) | 14 |
+| `v1-crb-redo` | [v1-crb-redo.md](exp/v1-crb-redo/exp.md) | 15 |
 | `v0-proxy-dp-segmentation` | [v0-proxy-dp-segmentation.md](exp/archive/v0-proxy-dp-segmentation/exp.md) | 2 |
 | `v0-timerXL-grad-4-lm-head` | [v0-timerXL-grad-4-lm-head.md](exp/archive/v0-timerXL-grad-4-lm-head/exp.md) | 2 |
 | `v0-chronostiny-timerxl-lora-full-64` | [v0-chronostiny-timerxl-lora-full-64.md](exp/archive/v0-chronostiny-timerxl-lora-full-64/exp.md) | 1 |
@@ -68,8 +68,9 @@
 | `v1-rage-timesFM-trev-2.5-rand-seed1` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
 | `v1-rage-timesFM-trev-2.5-rand-seed2` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
 | `v1-rage-timesFM-trev-2.5-rand-seed3` | [v1-rage-trev.md](exp/archive/v1-rage-trev/exp.md) | 1 |
-| `v2-ads` | [v2-ads/exp.md](exp/v2-ads/exp.md) | 2 |
-| `v2-foundation-expansion` | [v2-foundation-expansion.md](exp/v2-foundation-expansion/exp.md) | 1 |
+| `v1-rage-ads` | [v1-rage-ads.md](exp/v1-rage-ads/exp.md) | 3 |
+| `v1-rage-ads-v2` | [v1-rage-ads-v2.md](exp/v1-rage-ads-v2/exp.md) | 2 |
+| `v1-timerxl-step1000-gradient-shift` | [v1-timerxl-step1000-gradient-shift.md](exp/v1-timerxl-step1000-gradient-shift/exp.md) | 1 |
 
 ## 批次总表
 
@@ -77,23 +78,27 @@
 
 | 实验代号 | 批次 | 工作 | 状态 | 实际结果 |
 |---|---|---|---|---|
-| v2-ads | implementation-validation | ADS 算法、函数/脚本接口、YAML 与 CLI 参数流及测试 | 完成：53 项相关测试通过 | 仅代码验证；正式训练评估未启动、无模型指标；[实验记录](exp/v2-ads/exp.md) / [结果](exp/v2-ads/results.md) |
-| v2-ads | ads-main-formal | 用 ADS 替换 CRB 的正式选择、训练和评估 | 未开始：正式数据和参数尚未冻结 | 无输出、无结果；[实验记录](exp/v2-ads/exp.md) / [结果](exp/v2-ads/results.md) |
-| v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
+| v1-rage-ads | ads-api-q-single | ADS 单一 q/eta 接口、max 邻域概率描述与抽样函数验证 | 完成：25 项 ADS 定向测试通过，完成标记已生成 | 无模型指标；[实验记录](exp/v1-rage-ads/exp.md) / [结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads | rolling-parallelism-profile | 梯度、审计、训练、rolling评估并发试跑及资源测量 | 完成：正式规模审计、32/128-step训练及评估并发扫描完成 | 测得正式审计选8 workers、训练/评估选12 workers；未产出训练效果指标；profile JSON及详细资源见[结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads | rolling-eight-task | 八任务 rolling 安全历史、ADS 选择、梯度与零概率支持审计、训练评估及任务级汇总 | 完成：32/32训练评估单元和零概率支持审计完成 | rage平均名次1.625；p=0窗口比例rage/ancUni/Traj=59.10%/78.96%/53.82%；八任务平均MASE=1.4788/1.4637/1.4744/1.4905；[实验记录](exp/v1-rage-ads/exp.md) / [结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads-v2 | baseline-design-v2 | 必含src-96的src-256源池及ADS-VIC/基线方法定义 | 设计冻结 | 仅方法定义，无指标；[实验记录](exp/v1-rage-ads-v2/exp.md) / [结果](exp/v1-rage-ads-v2/results.md) |
+| v1-rage-ads-v2 | ads-rev-reverse-complement | 八任务 ads-rev：q0=32，排除 cos>=0.1 锚点，在未命中区间按 q1=16 均匀加密；无 uni | 选择8/8、训练8/8、评估8/8均完成（2026-11-15 09:50 CST） | 选择配对98,904,745/1,761,504,746（5.615%）；source锚点命中59.60%、reference锚点100%；MASE：FEV09 0.733576；TIME01 0.720485；TIME02 1.274494；TIME03 1.250550；TIME04 4.374898；TIME06 1.095141；TIME07 1.563999；TIME08 1.144074；均值1.519652；MASE 指标见 outputs/eval/v1-rage-ads-v2/<task>/ads-rev/；ads-rev q0/q1 直方图见 outputs/selection/v1-rage-ads-v2/ads-rev/cosine-histograms.png；ADS-VIC 当前任务最大余弦阶段图见 outputs/selection/v1-rage-ads-v2/ads-vic/anchor-max-cosine/current-fev-09-time-04/saved-anchor-max-histograms.svg；[实验记录](exp/v1-rage-ads-v2/exp.md) / [结果](exp/v1-rage-ads-v2/results.md) |
+| v1-rage-ads-v2 | rolling-baseline-v2 | src-256 上 ADS-VIC、uni、traj、orig、reft 八任务选择及训练评估 | 已完成：选择8/8、训练评估40/40、概率支持审计40/40 | 各方法零概率支持比例见实验结果文档；模型原始指标位于 outputs/eval/v1-rage-ads-v2/；[实验记录](exp/v1-rage-ads-v2/exp.md) / [结果](exp/v1-rage-ads-v2/results.md) |
 | v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |
 | v1-crb-redo | 12tasks-ref-grad-prepare | 对 4 FEV 与 8 TIME 目标任务的安全历史准备 TimerXL CRB 1:0:1 与等预算 Uniform 参考梯度；后续匹配选择批次的前置依赖 | 完成：8 项安全历史及两方法梯度均核验；4 项因无法支持筛选而放弃，后续不再使用 | 8 项 CRB/Uniform 各合计 9079 个名义锚点，逐项见实验文档 |
 | v1-crb-redo | timerXL-base-uni-01-traj-rr | 双侧 Uniform 轨迹代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.601606；选样 55分42秒；索引文件每任务 2.03 MiB，详见结果报告 |
 | v1-crb-redo | timerXL-base-uni-01-block-rr | 双侧 Uniform 块代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.527675；选样 53分30秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-traj-rr | 双侧 CRB 轨迹代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.590119；选样 56分12秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-block-rr | 双侧 CRB 块代表，RR 无放回选择全局前 10% 源窗口；8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.516385；选样 59分30秒；索引文件每任务 2.03 MiB |
-| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR；BF16 完整评分矩阵；8 项单任务训练评估 | 部分完成：4/8 项选样，3/8 项训练评估完成，截至 13:57 CST，TIME CPHL/H 训练 100/4,000 步 | 已完成 FEV 9、TIME 1、2 的 MASE 为 0.670380、1.208172、1.025688；全指标见实验结果文档 |
-| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR；BF16 完整评分矩阵；8 项单任务训练评估 | 等待 Uniform win 队列完成 | 尚未开始，暂无评估结果 |
+| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR；BF16 完整评分矩阵；8 项原计划中的 win 评测 | 部分完成：FEV 9、TIME 1–4 共 5 项选样、训练评估完成；TIME 6 因 259,085 个 ref 窗口对应约 1.26 TiB 矩阵、超过当时约 381 GiB 可用空间而跳过；TIME 7–8 按用户限定范围跳过 | 五项 MASE 为 0.670380、1.208172、1.025688、1.549088、3.120710；TIME 7/8 矩阵估算 7.83/0.30 GiB，按范围跳过；详见实验结果文档 |
+| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR；BF16 完整评分矩阵；仅 FEV 9、TIME 1–4 | 完成：FEV 9、TIME 1–4 五项均完成选样、4,000 步训练和评估，批次标记已生成 | 五项 MASE：0.675108、1.213646、1.134415、1.455521、3.167945；TIME 6 因约 1.26 TiB 矩阵超出空间跳过，TIME 7–8 按用户范围跳过；详见实验结果文档 |
+| v1-crb-redo | sgwdev-metrics | 8 任务的全源方向 cos、安全历史—测试梯度对齐和 top10% 筛选后方向接近度 | 完成：16/16 任务-方法组合指标已记录，批次 .complete 已生成 | 全源方向 cos 范围 -0.00766274–0.00379170；安全历史—真实测试方向 cos 范围 -0.04071205–0.02130944；top10% 筛选后 cos 范围 -0.00254030–0.04166267；详细数值见 results.md。
 | v1-crb-redo | timerXL-ours-rage101-01-block-max-topk | ref 评分 max 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-linear-topk | ref 评分 linear 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-zeroclip-topk | ref 评分 zeroclip 聚合的 TopK 方案 | 本轮不执行 | 无 |
 | v1-crb-redo | timerXL-ours-rage101-01-block-exp-topk | ref 评分 exp 聚合的 TopK 方案 | 本轮不执行 | 无 |
-| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/results.md |
-| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/results.md |
+| v1-crb-redo | timerXL-baseline-full-sgwdev | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/results.md |
+| v1-crb-redo | timerXL-baseline-rand01-sgwdev | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/results.md |
 | v0-timerxl-src96-first4-full-grad-4096d-bf16 | 前四条完整轨迹 | 逐窗口计算 TimerXL LoRA 梯度并投影 4096 维、BF16 保存 | 完成 | 484,907 个合法窗口；八个 worker 与批次完成标记已核验 |
 | v0-chronostiny-timerxl-lora-track0 | ordinal 0全量梯度与相关性 | 原始ChronosTiny LoRA 4096D投影，完整230,161窗口；同轨TimerXL关系比较 | 完成 | 非临近窗口对余弦Spearman 0.076；相邻窗口余弦Spearman −0.138；只代表单轨 |
 | v0-chronostiny-timerxl-lora-full-64 | 64轨全窗口梯度与相关性 | 使用原始ChronosTiny权重计算前64轨全部合法窗口的LoRA 4096D BF16投影；与同窗口TimerXL比较梯度关系 | 用户调整后停止，保留部分缓存 | 8个worker曾启动；未完成全轨，结果不用于分析 |
@@ -229,3 +234,8 @@
 | v1-rage-timerXL-trev-84m-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
 | v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
 | v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+
+| v1-timerxl-step1000-gradient-shift | paired-src96-step1000 | 原始与 step-1000 TimerXL 的配对 LoRA 参数梯度比较 | 完成：6,144 窗口、96 轨迹；梯度计算、bootstrap 与完成标记核验通过 | 方向差 0.5653 [0.5256, 0.6054]；平均余弦 0.4347；详见 [实验记录](exp/v1-timerxl-step1000-gradient-shift/exp.md) / [结果](exp/v1-timerxl-step1000-gradient-shift/results.md) |
+| `main-ads-v0` | [main-ads-v0/exp.md](exp/main-ads-v0/exp.md) | 1 |
+| main-ads-v0 | traj-replay | src-256 TimerXL LoRA 训练 2,000 步；每 10 步记录 loss；ordinal 0、1 全窗口梯度投影缓存 | traj-replay 训练与两条轨迹梯度缓存已完成；继承八个下游任务，仅启用 TIME1 | 无训练指标或梯度文件；Replay 内容待定；[实验记录](exp/main-ads-v0/exp.md) / [结果](exp/main-ads-v0/results.md) |
+| main-ads-v0 | ads-histgram | ordinal 1 为 ref、ordinal 0 为 src；七种 q 下 uni、全矩阵最高25%配对 ADS-VIC、预算匹配 uni | 完成；旧 cos>0.1 结果作废；BF16计算/uint8 256桶结果及 .complete 已核验 | 100/256桶统计、预算匹配矩阵和图见 outputs/selection/main-ads-v0/ads-histgram-bf16-u8/；q级结果见 [实验文档](exp/main-ads-v0/exp.md) / [实验结果](exp/main-ads-v0/results.md) |

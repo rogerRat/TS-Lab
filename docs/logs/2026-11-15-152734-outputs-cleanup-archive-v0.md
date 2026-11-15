@@ -1,0 +1,47 @@
+# outputs 清理与 v0 归档
+
+- 操作时间：2026-11-15 15:27:34 
+- 项目：`/root/TS-Lab`
+- 数据盘 outputs：`/root/autodl-tmp/rage/outputs`
+- 数据盘 archive：`/root/autodl-tmp/rage/archive`
+- 项目 `archive/` 软链接目标：`/root/autodl-tmp/rage/archive`
+- 处理方式：将 `outputs/` 下一级目录中的全部 `v0-` 实验条目按原相对路径移动到 `archive/outputs/`，之后清空 `outputs/` 下其余内容。移动发生在同一数据盘文件系统内。
+- v0 条目：32
+- v0 实际文件：5153 个，合计 36.71 GiB
+- v0 实际目录：450 个
+- v0 软链接：1920 个；为保持外部相对目标有效，改为绝对目标的链接：1902 个
+- 清理的非 v0 内容：10710 个文件、3190 个目录、83 个软链接
+- 移动后失效的 v0 软链接：0 个
+- 归档条目：
+  - `train/v0-active-value-rank`
+  - `train/v0-chronostiny-timerxl-lora-full-64`
+  - `train/v0-chronostiny-timerxl-lora-track0`
+  - `train/v0-crb-cos-var`
+  - `train/v0-crb-cos-var-uniform-preview`
+  - `train/v0-crb-final-test-timerXL-64tr`
+  - `train/v0-crb-mech-test`
+  - `train/v0-crb-mech-test-ultra-smooth`
+  - `train/v0-crb-reconst-fine`
+  - `train/v0-crb-reconst-test`
+  - `train/v0-crb-var`
+  - `train/v0-directional-marginal-gain`
+  - `train/v0-grad-mech-l2-norm`
+  - `train/v0-grad-mech-test`
+  - `train/v0-grad-traj-level-norm-gap`
+  - `train/v0-gradient-proxy-cost`
+  - `train/v0-gradient-proxy-test`
+  - `train/v0-gradient-variance-decomposition`
+  - `train/v0-proxy-dp-segmentation`
+  - `train/v0-proxy-dp-segmentation-longest4-unweighted`
+  - `train/v0-proxy-dp-segmentation-longest4-window`
+  - `train/v0-timer-XL-grad-4-change-velocity`
+  - `train/v0-timer-XL-grad-4-curvature`
+  - `train/v0-timer-XL-grad-64-change-velocity`
+  - `train/v0-timerXL-grad-4-lm-head`
+  - `train/v0-timerxl-src96-first4-full-grad-4096d-bf16`
+  - `train/v0-uni-data-evaluation`
+  - `train/v0-uni-reconst-scale`
+  - `train/v0-vage`
+  - `train/v0-vage-methods-nmin1`
+  - `train/v0-vage-nmin1`
+  - `train/v0-var-proxy-estimate`

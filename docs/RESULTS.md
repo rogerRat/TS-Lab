@@ -1,6 +1,6 @@
 # 实验结果总览
 
-最后修改日期：2026-11-14
+最后修改日期：2026-11-15
 
 本文件逐行记录全部实验与批次的工作、状态和实际结果，绝不编造或替换指标；
 数值以实际生成的产物、完成标记和日志为依据。逐实验完整报告见 `docs/results/<实验代号>.md`。
@@ -49,26 +49,31 @@
 | `v1-rage-trev-seed0-final` | [results/v1-rage-trev-seed0-final.md](exp/archive/v1-rage-trev/v1-rage-trev-seed0-final.md) |
 | `v1-rage-trev-timerxl-seed0` | [results/v1-rage-trev-timerxl-seed0.md](exp/archive/v1-rage-trev/v1-rage-trev-timerxl-seed0.md) |
 | `v1-rage-trev-timesfm-seed0` | [results/v1-rage-trev-timesfm-seed0.md](exp/archive/v1-rage-trev/v1-rage-trev-timesfm-seed0.md) |
-| `v2-ads` | [v2-ads/results.md](exp/v2-ads/results.md) |
-| `v2-foundation-expansion` | [results/v2-foundation-expansion.md](exp/v2-foundation-expansion/results.md) |
+| `v1-rage-ads` | [v1-rage-ads/results.md](exp/v1-rage-ads/results.md) |
+| `v1-rage-ads-v2` | [v1-rage-ads-v2/results.md](exp/v1-rage-ads-v2/results.md) |
+| `v1-timerxl-step1000-gradient-shift` | [v1-timerxl-step1000-gradient-shift/results.md](exp/v1-timerxl-step1000-gradient-shift/results.md) |
 
 ## 批次结果总表
 
 | 实验代号 | 批次 | 工作 | 状态 | 实际结果 |
 |---|---|---|---|---|
-| v2-ads | implementation-validation | ADS 核心与入口接入测试 | 完成 | 53 项相关测试通过；无模型评估指标；详见 [v2-ads 结果](exp/v2-ads/results.md) |
-| v2-ads | ads-main-formal | ADS 正式实验 | 未开始 | 正式参数未冻结，无产物和指标；详见 [v2-ads 结果](exp/v2-ads/results.md) |
-| v2-foundation-expansion | Chronos-2、Bolt、Moirai 2.0 六模型接入 | 训练、推理、LoRA、逐窗口梯度选择接口与验证 | 工程接入完成：六模型 CPU 真权重、LoRA 更新、单窗梯度和双窗批量 VJP 已通过；GPU 正式实验未启动 | 六模型冒烟产物已生成；尚无正式训练或评估结果，现有 GPU 批次保持运行 |
+| v1-rage-ads | ads-api-q-single | 单一 q/eta、max 重叠邻域概率描述及重采样接口 | 完成 | 25 项 ADS 定向测试通过；无模型指标；详见 [v1-rage-ads 结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads | rolling-parallelism-profile | 梯度、审计、训练、rolling评估并发试跑及资源测量 | 完成 | 梯度 batch32/VJP32 单 worker 608.1 windows/s、8 worker 1,112.8 windows/s；审计4k抽样8 worker 0.0497 task/s；128-step训练12 worker 0.4036 cells/s；评估16 worker 1.3571 jobs/s；仅性能试跑，无效果指标；详见 [v1-rage-ads 结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads | rolling-eight-task | FEV 9、TIME 1/2/3/4/6/7/8 的 ADS 审计、训练与 rolling 评估 | 完成：32/32训练评估单元及概率支持审计完成 | rage平均名次1.625；p=0窗口比例rage/ancUni/Traj=59.10%/78.96%/53.82%；八任务平均MASE=1.4788/1.4637/1.4744/1.4905；详见 [v1-rage-ads 结果](exp/v1-rage-ads/results.md) |
+| v1-rage-ads-v2 | baseline-design-v2 | src-256及ADS-VIC方法设计 | 设计冻结 | 无运行指标；详见 [v1-rage-ads-v2 结果](exp/v1-rage-ads-v2/results.md) |
+| v1-rage-ads-v2 | ads-rev-reverse-complement | 八任务 ads-rev：q0=32，排除 cos>=0.1 锚点，在未命中区间按 q1=16 均匀加密；无 uni | 选择8/8、训练8/8、评估8/8均完成（2026-11-15 09:50 CST） | 选择配对98,904,745/1,761,504,746（5.615%）；source锚点命中59.60%、reference锚点100%；MASE：FEV09 0.733576；TIME01 0.720485；TIME02 1.274494；TIME03 1.250550；TIME04 4.374898；TIME06 1.095141；TIME07 1.563999；TIME08 1.144074；均值1.519652；MASE 指标见 outputs/eval/v1-rage-ads-v2/<task>/ads-rev/；ads-rev q0/q1 直方图见 outputs/selection/v1-rage-ads-v2/ads-rev/cosine-histograms.png；ADS-VIC 当前任务最大余弦阶段图见 outputs/selection/v1-rage-ads-v2/ads-vic/anchor-max-cosine/current-fev-09-time-04/saved-anchor-max-histograms.svg；[实验记录](exp/v1-rage-ads-v2/exp.md) / [结果](exp/v1-rage-ads-v2/results.md) |
+| v1-rage-ads-v2 | rolling-baseline-v2 | 八任务、五方法选择与训练评估 | 选择8/8、训练评估40/40完成；模型指标文件已生成 | 源窗口零概率比例 ADS-VIC/uni/traj/orig=30.3042%/19.7117%/17.5960%/0%，reft不适用；逐任务表和原始指标路径见 [v1-rage-ads-v2 结果](exp/v1-rage-ads-v2/results.md) |
 | v1-crb-redo | 12tasks-ref-grad-prepare | 12 项安全历史资格检查，8 项准备 CRB/Uniform 梯度 | 完成；4 项放弃 | 8 项每方法各 9079 个名义锚点，4 项因无法支持筛选不再使用 |
 | v1-crb-redo | grad-prepare | src-8192热身三模型1000步；src-96按q=32准备CRB 1:0:1和同预算Uniform梯度 | 完成：三模型热身与梯度标记、整批完成标记均已生成 | TimerXL、TimesFM、Chronos 各方法均完成；详见梯度输出 |
-| v1-crb-redo | timerXL-baseline-full | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/results.md |
-| v1-crb-redo | timerXL-baseline-rand01 | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/results.md |
+| v1-crb-redo | timerXL-baseline-full-sgwdev | src-96全量合法窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中10项MASE低于rand01；详见docs/exp/v1-crb-redo/results.md |
+| v1-crb-redo | timerXL-baseline-rand01-sgwdev | src-96固定10%随机窗口；预训练权重起训4,000步；12任务评估 | 完成：4,000步训练及FEV 4 + TIME 8评估，批次标记已生成 | 12项中2项MASE低于full；详见docs/exp/v1-crb-redo/results.md |
 | v1-crb-redo | timerXL-base-uni-01-traj-rr | 双侧 Uniform 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.601606；选样 55分42秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-base-uni-01-block-rr | 双侧 Uniform 块 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.527675；选样 53分30秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-traj-rr | 双侧 CRB 轨迹 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.590119；选样 56分12秒；索引文件每任务 2.03 MiB |
 | v1-crb-redo | timerXL-ours-rage101-01-block-rr | 双侧 CRB 块 RR，8 项单任务训练评估 | 完成：8/8 组训练评估 | MASE 宏平均 1.516385；选样 59分30秒；索引文件每任务 2.03 MiB |
-| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR，BF16 完整评分矩阵，8 项单任务训练评估 | 部分完成：4/8 项选样，3/8 项训练评估完成；截至 13:57 CST，TIME CPHL/H 训练中 | 已完成 FEV 9、TIME 1、2 的 MASE 为 0.670380、1.208172、1.025688；全指标见逐实验结果 |
-| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR，BF16 完整评分矩阵，8 项单任务训练评估 | 等待 Uniform win 队列完成 | 尚未开始，暂无结果 |
+| v1-crb-redo | timerXL-base-uni-01-win-rr | 双侧 Uniform 窗口 RR；BF16 完整评分矩阵 | 部分完成：5 项选样、训练评估完成；TIME 6 因约 1.26 TiB 矩阵超过当时可用空间而跳过，TIME 7–8 按用户限定范围跳过 | MASE 为 0.670380、1.208172、1.025688、1.549088、3.120710；详见逐实验结果 |
+| v1-crb-redo | timerXL-ours-rage101-01-win-rr | 双侧 CRB 窗口 RR；BF16 完整评分矩阵；仅 FEV 9、TIME 1–4 | 完成：FEV 9、TIME 1–4 五项均完成选样、4,000 步训练和评估，批次标记已生成 | 五项 MASE：0.675108、1.213646、1.134415、1.455521、3.167945；TIME 6 因约 1.26 TiB 矩阵超出空间跳过，TIME 7–8 按用户范围跳过；详见实验结果文档 |
+| v1-crb-redo | sgwdev-metrics | 全源方向 cos、安全历史—测试对齐、top10% 筛选后 cos | 完成：16 组全源估计，16 组历史-测试对齐，42 个完成选样组合 | 全源方向 cos 范围 -0.00766274–0.00379170；安全历史—真实测试方向 cos 范围 -0.04071205–0.02130944；安全历史—测试两两 cos P50 -0.022–0.028、P90 0.072–0.201、P99 0.096–0.389，正 cos 占比 33.3%–59.1%；top10% 筛选后 cos 范围 -0.00254030–0.04166267；详细数值见 results.md；RR 四 arm 平均 MASE 仅 3/8 任务胜过两基线（相对较强基线平均收益 -5.57%）；与收益的 Spearman rho：n=8，全源 -0.524、top10% -0.548、安全历史—测试平均 -0.214、历史—测试 P99 -0.595（描述性）；src best-reference P99 高分 block 的时间聚集优于同轨迹随机基线（adjacent 178–571 vs null 33.5–244.9，empirical p=0.002），top10 轨迹占 60.7%–98.9%；详细数值与 MASE 表见 docs/exp/v1-crb-redo/results.md
 | v0-timerxl-src96-first4-full-grad-4096d-bf16 | 前四条完整轨迹 | 逐窗口计算 TimerXL LoRA 梯度并投影 4096 维、BF16 保存 | 完成 | 484,907 个合法窗口；八个 worker 与批次完成标记已核验 |
 | v0-chronostiny-timerxl-lora-track0 | ordinal 0全量梯度与相关性 | 原始ChronosTiny LoRA 4096D投影，完整230,161窗口；同轨TimerXL关系比较 | 完成 | 非临近窗口对余弦Spearman 0.076；相邻窗口余弦Spearman −0.138；只代表单轨 |
 | v0-chronostiny-timerxl-lora-full-64 | 64轨全窗口梯度与相关性 | 使用原始ChronosTiny权重计算前64轨全部合法窗口的LoRA 4096D BF16投影；与同窗口TimerXL比较梯度关系 | 用户调整后停止，保留部分缓存 | 8个worker曾启动；未完成全轨，结果不用于分析 |
@@ -204,3 +209,7 @@
 | v1-rage-timerXL-trev-84m-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
 | v1-rage-timesFM-trev-2.5-rand-seed3 | 3-rand | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；随机 10% 数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
 | v1-rage-timesFM-trev-2.5-full-seed3 | 3-full | 训练 BF16 LoRA 4,000 步，并在八个步骤完成 FEV/TIME 评估；完整数据池 | Deprecated | Not trained; prepared inputs and configs removed; source selection invalid; retained for reference only |
+
+| v1-timerxl-step1000-gradient-shift | paired-src96-step1000 | 原始/step-1000 TimerXL 配对 LoRA 梯度比较 | 完成；.complete 已核验 | 方向差 0.5653（95% CI 0.5256–0.6054），平均余弦 0.4347，相对 L2 差 7.1115；详见 [实验结果](exp/v1-timerxl-step1000-gradient-shift/results.md) |
+| main-ads-v0 | traj-replay | src-256 TimerXL LoRA 2,000 步训练及两条完整轨迹的 4096 维 seed 0 梯度缓存 | 训练及两条完整轨迹梯度缓存完成；下游仅启用 TIME1 | 200 个 loss 记录点；梯度缓存见 outputs/grad_cache/main-ads-v0/traj-replay/；[实验结果](exp/main-ads-v0/results.md) |
+| main-ads-v0 | ads-histgram | 七种 q 下 uni、每个粗矩阵分数最高25%配对 ADS-VIC 与逐侧预算匹配 uni 的余弦分布 | 完成；BF16计算/uint8 256桶矩阵；.complete 已核验 | ADS锚点总数 q1/q2/q4/q8/q16/q31/q64=230,314/229,435/227,665/139,355/64,998/28,653/10,443；100及256桶统计、匹配矩阵和图见 outputs/selection/main-ads-v0/ads-histgram-bf16-u8/；[实验结果](exp/main-ads-v0/results.md) |
