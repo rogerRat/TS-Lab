@@ -45,3 +45,15 @@ GPU 0（RTX 4080）由 `scripts/exp/v1-crb-redo/rr_select_win.py --family base-u
 ## 2026-11-13 14:06 CST win 选择与训练耗时对比
 
 核对四个已完成 Uniform win 任务的选择 manifest 和训练评估日志：选择耗时分别为 15.08、9.15、12.71、21.96 分钟；训练入口的总耗时（含 4,000 步训练、导出、评估及清理）分别为 6.9、8.1、7.7、8.1 分钟。因此选择耗时即使对照完整训练评估入口也更长。选择日志的 `stage=score-matrix-progress` 明确记录 `device=cuda`，评分矩阵用 BF16 CUDA matmul 计算；候选排序读取矩阵后由 NumPy 在 CPU 上执行。该差异解释了 GPU 只负责评分阶段，选择总耗时还包括候选排名和 RR 轮询。
+
+## 2026-11-13 15:21 CST win 队列磁盘阻塞与文档更新
+
+检查时 GPU 利用率 0%、显存 0 MiB，tmux 队列及实验进程均不存在。Uniform win 的 FEV 9、TIME 1–4 共 5/8 项选样、训练和评估均完成；CRB win 0/8。TIME 6 的 ref 窗口数为 259,085，BF16 完整矩阵需 1,381,602,889,040 bytes（约 1.26 TiB），而 AutoDL 数据盘可用空间约 381 GiB。磁盘容量预检抛出 `OSError: Insufficient free disk for BF16 score matrix and 1 GiB headroom`，评分计算未开始，队列随之退出；TIME 7–8 未运行。TIME 4 的 MASE 3.120710 及全部指标、TIME 4 选择耗时 715.72 s 和矩阵规模已补入结果文档；实验设计、全局 EXP/RESULTS 索引已同步为部分完成/阻塞状态。没有删除既有数据或输出。
+
+## 2026-11-13 15:24 CST win 矩阵尺寸方法间一致性说明
+
+澄清 win 阶段的存储阻塞：完整评分矩阵形状为 N_ref×N_src，BF16 每项 2 bytes。同一任务下 Uniform 与 CRB 使用相同 ref/src 窗口集合和数量，因此矩阵大小相同。当前被磁盘预检拦下的是 Uniform win TIME 6（259,085×2,666,312，约 1.26 TiB）；CRB win 尚未启动，但其 TIME 6 预计需要相同空间，在现有约 381 GiB 可用空间下也不能执行完整矩阵方案。更新实验设计、结果文档和全局索引，纠正其可能被读作仅 CRB 超限的歧义。
+\n## 2026-11-13 15:38 CST win 批次范围调整与 CRB 队列启动\n\n用户确认不再执行 Uniform win 剩余任务，并将 CRB win 限定为 Uniform win 已完成的五项：FEV 9、TIME 1–4；两种方法的 TIME 6–8 均标记为不执行，原因是 ref 窗口数增加导致完整 BF16 矩阵超过当前处理范围。TIME 6 矩阵为 1,381,602,889,040 bytes（约 1.26 TiB）；TIME 7–8 未物化矩阵，结果文档按窗口数和矩阵公式列出估值。核验五项 12tasks-ref-grad-prepare 完成标记、src 梯度 worker 0–7 完成标记均存在，数据盘可用约 381 GiB。将队列脚本改为仅运行 CRB 五项，移除对已退出上游队列 tmux 会话的等待，并在五项完成后写批次 `.complete`。同步实验设计、结果文档和全局索引。\n
+## 2026-11-13 15:39 CST CRB win 五项队列启动
+
+在 tmux 会话 `v1-crb-redo-crb-win` 启动修改后的队列脚本，范围为 FEV 9、TIME 1–4，预算 266,631，评分矩阵 BF16。15:39:47 开始 FEV 9 选样，队列日志写入 `logs/v1-crb-redo/crb-win-20261113.log`。TIME 6 按预估矩阵 1,381,602,889,040 bytes（约 1.26 TiB）超过当时约 381 GiB 可用空间跳过；TIME 7/8 矩阵约 7.83/0.30 GiB，按用户限定范围跳过。
