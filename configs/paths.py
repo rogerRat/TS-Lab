@@ -33,6 +33,7 @@ OUTPUT_ROOTS = {
     "source_shard": SOURCE_SHARD_DATA,
     "reference_shard": REFERENCE_SHARD_DATA,
     "train": TRAIN_OUTPUTS,
+    "grad_cache": PROJECT_ROOT / "outputs" / "grad_cache",
     "eval": EVAL_OUTPUTS,
     "selection": SELECTION_OUTPUTS,
     "vis": VIS_OUTPUTS,

@@ -119,6 +119,13 @@ class TimerXLAdapter(FoundationModelAdapter):
             raise ValueError("context exceeds the pinned Timer-XL contract")
         import torch
         model = self.load()
+        minimum_context = int(model.config.input_token_len)
+        if values.shape[1] < minimum_context:
+            values = np.pad(
+                values,
+                ((0, 0), (minimum_context - values.shape[1], 0)),
+                mode="edge",
+            )
         target = next(model.parameters()).device
         model.eval()
         with torch.no_grad():
