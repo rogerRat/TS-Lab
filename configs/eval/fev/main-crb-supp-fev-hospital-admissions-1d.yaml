@@ -1,0 +1,20 @@
+schema_version: 1
+benchmark: fev
+model:
+  id: v1_rage_ads_timerxl
+adapter:
+  class: adapters.foundation.eval.fev:FoundationFEVEvaluationAdapter
+  config:
+    model:
+      model_key: timerxl-84m
+      device: cuda
+      torch_dtype: bfloat16
+    inference:
+      batch_size: 32
+      evaluation_mode: rolling
+      seed: 0
+bench_config:
+  task_file: main-crb-supp-tasks.yaml
+  expected_tasks: 1
+  task_indices:
+  - 9
