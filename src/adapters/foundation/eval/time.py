@@ -6,7 +6,7 @@ from typing import Any, Iterable, Mapping
 
 import numpy as np
 
-from .common import build_checkpoint_adapter, clean_context, tiled_quantiles
+from .common import build_checkpoint_adapter, clean_context, predict_quantiles
 
 
 class FoundationTIMEEvaluationAdapter:
@@ -20,7 +20,7 @@ class FoundationTIMEEvaluationAdapter:
         model, inference = value["model"], value["inference"]
         if set(model) != {"model_key", "device", "torch_dtype"}:
             raise ValueError("model requires model_key, device, and torch_dtype")
-        if model["model_key"] not in {"timerxl-84m", "timesfm-2.5"} or model["torch_dtype"] != "bfloat16":
+        if model["model_key"] not in {"timerxl-84m", "timesfm-2.5", "chronos-2-small"} or model["torch_dtype"] != "bfloat16":
             raise ValueError("unsupported model or precision")
         required = {"batch_size", "context_length", "quantile_levels", "seed", "evaluation_mode"}
         if set(inference) != required:
@@ -71,8 +71,8 @@ class FoundationTIMEEvaluationAdapter:
             for begin in range(0, len(indices), int(inference["batch_size"])):
                 rows = indices[begin:begin + int(inference["batch_size"])]
                 batch = np.stack([contexts[index] for index in rows])
-                point = self._foundation.forecast(batch, prediction_length=int(prediction_length))
-                output[rows] = tiled_quantiles(point, levels)
+                output[rows] = predict_quantiles(
+                    self._foundation, batch, int(prediction_length), levels)
         if not np.isfinite(output).all():
             raise ValueError("TIME deterministic quantile output contains non-finite values")
         return output

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 import numpy as np
 
 from .base import FoundationModelAdapter
@@ -16,10 +17,13 @@ class ChronosFamilyAdapter(FoundationModelAdapter):
         if self._model is None:
             from chronos import BaseChronosPipeline
             from configs.paths import PRETRAINED_MODELS_DIR
+            model_id = self.spec.model_id
+            local_checkpoint = Path(model_id).is_dir()
             pipeline = BaseChronosPipeline.from_pretrained(
-                self.spec.model_id,
+                model_id,
                 revision=self.spec.revision,
                 cache_dir=str(PRETRAINED_MODELS_DIR / "huggingface"),
+                local_files_only=local_checkpoint,
                 device_map=self.device,
             )
             self._model = pipeline.model
@@ -47,6 +51,23 @@ class ChronosFamilyAdapter(FoundationModelAdapter):
     def _independent_groups(context):
         import torch
         return torch.arange(context.shape[0], device=context.device)
+
+    def forecast_quantiles(self, contexts: np.ndarray, *, prediction_length: int):
+        import torch
+        values = as_finite_batch(contexts, name="contexts")
+        if values.shape[1] > self.spec.max_context:
+            raise ValueError("context exceeds the model contract")
+        if prediction_length < 1 or prediction_length > 1024:
+            raise ValueError("prediction length exceeds the Chronos-2 contract")
+        model = self.load()
+        self._horizon = prediction_length
+        with torch.no_grad():
+            output = self._forward(self._tensor(values))
+            result = output.quantile_preds[:, :, :prediction_length]
+        if result.shape[-1] != prediction_length:
+            raise ValueError("Chronos-2 returned fewer forecast steps than requested")
+        return (result.detach().float().cpu().numpy(),
+                np.asarray(model.chronos_config.quantiles, dtype=np.float32))
 
     def forecast(self, contexts: np.ndarray, *, prediction_length: int) -> np.ndarray:
         import torch

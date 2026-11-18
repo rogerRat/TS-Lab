@@ -9,7 +9,7 @@ import fev
 import numpy as np
 
 from adapters.chronos.eval.fev import configure_evaluation_windows
-from .common import build_checkpoint_adapter, clean_context, tiled_quantiles
+from .common import build_checkpoint_adapter, clean_context, predict_quantiles
 
 
 class FoundationFEVEvaluationAdapter(fev.ForecastingModel):
@@ -23,7 +23,7 @@ class FoundationFEVEvaluationAdapter(fev.ForecastingModel):
         model, inference = value["model"], value["inference"]
         if set(model) != {"model_key", "device", "torch_dtype"}:
             raise ValueError("model requires model_key, device, and torch_dtype")
-        if model["model_key"] not in {"timerxl-84m", "timesfm-2.5"}:
+        if model["model_key"] not in {"timerxl-84m", "timesfm-2.5", "chronos-2-small"}:
             raise ValueError("unsupported foundation model key")
         if model["torch_dtype"] != "bfloat16":
             raise ValueError("foundation evaluations require BF16")
@@ -85,6 +85,8 @@ class FoundationFEVEvaluationAdapter(fev.ForecastingModel):
                     context = np.pad(context, (required_length - len(context), 0), mode="edge")
                 contexts.append(context.astype(np.float32, copy=False))
             forecasts = np.empty((len(contexts), int(task.horizon)), dtype=np.float32)
+            quantiles = np.empty((len(contexts), len(levels), int(task.horizon)),
+                                 dtype=np.float32)
             by_length: dict[int, list[int]] = {}
             for index, context in enumerate(contexts):
                 by_length.setdefault(len(context), []).append(index)
@@ -93,9 +95,10 @@ class FoundationFEVEvaluationAdapter(fev.ForecastingModel):
                     for begin in range(0, len(indices), self.batch_size):
                         rows = indices[begin:begin + self.batch_size]
                         batch = np.stack([contexts[index] for index in rows])
-                        point = self._foundation.forecast(batch, prediction_length=int(task.horizon))
-                        forecasts[rows] = np.asarray(point, dtype=np.float32)
-            quantiles = tiled_quantiles(forecasts, levels)
+                        batch_quantiles = predict_quantiles(
+                            self._foundation, batch, int(task.horizon), levels)
+                        quantiles[rows] = batch_quantiles
+                        forecasts[rows] = batch_quantiles[:, levels.index(0.5), :]
             predictions = {"predictions": forecasts}
             for level in task.quantile_levels:
                 predictions[str(level)] = quantiles[:, levels.index(level), :]
