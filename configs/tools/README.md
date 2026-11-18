@@ -89,7 +89,35 @@ selector reuses the shared CRB/ADS APIs and writes its selection artifact,
 gradient cache and score matrix or score summaries under standard output roots.
 `uni` is uniform sampling and has no score matrix.
 
+## Cached-gradient replay
+
+```yaml
+schema_version: 1
+run_id: replay-example
+context_length: 480
+prediction_length: 96
+window_stride: 1
+replay:
+  q_values: [4, 8, 16, 32, 64, 128]
+  chunk_rows: 4096
+  cosine_ge: 0.9
+  save_window_metrics: true
+  plot: true
+  stores:
+    - label: trajectory-000
+      cache_dir: outputs/grad_cache/<run>/trajectory-000
+output_dir: outputs/selection/replay-example
+```
+
+Each store must already contain `gradient_sketches.npy`, `manifest.json` and a
+`.complete` marker. Replay reads anchors from the memory-mapped cache and
+rebuilds every remaining window by linear interpolation, so it never computes
+gradients. `replay.q_values` sets equivalent anchor spacing; each spacing
+allocates `K = max(2, ceil(N / q))` anchors and builds both a longest-gap
+bisection layout and a budget-matched uniform layout.
+
 ## Evaluation
+
 
 ```yaml
 schema_version: 1

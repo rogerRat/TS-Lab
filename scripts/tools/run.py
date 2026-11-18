@@ -26,6 +26,7 @@ TOOLS = {
     "select": "select.py",
     "train": "train.py",
     "eval": "eval.py",
+    "replay": "replay.py",
 }
 
 
@@ -63,8 +64,8 @@ def main(argv=None) -> int:
                 raise ValueError("each stage must name one supported tool")
             name = row["name"]
             stage_config = resolve(required(row, "config"))
-            command = [sys.executable, str(root / "scripts/tools" / TOOLS[name]),
-                       "--config", str(stage_config)]
+            module = "scripts.tools." + Path(TOOLS[name]).stem
+            command = [sys.executable, "-m", module, "--config", str(stage_config)]
             if row.get("method"):
                 command.extend(["--method", str(row["method"])])
             logger.info("stage=start name=%s command=%s", name, command)
