@@ -1,0 +1,9 @@
+{
+  "title": "# main-crb-supp-chronos2-small 结果明细",
+  "notice": "仅在对应评估完成并存在原始指标文件时填写数值。全部指标按任务、方法和训练步数独立列出。",
+  "result_header": "| 任务 | 基准 | 方法 | 训练步数 | 状态 | MASE | 原始指标文件 |",
+  "exp_header": "| 实验 | 任务 | 方法 | 工作内容 | 状态 | 实际结果 | 详情文档 |",
+  "global_header": "| 实验 | 任务 | 方法与步数 | 状态 | MASE | 结果文件 |",
+  "completed": "已完成",
+  "pending": "未开始"
+}
