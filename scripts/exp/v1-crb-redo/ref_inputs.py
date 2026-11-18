@@ -29,10 +29,10 @@ def write_json(path, value):
     os.replace(temporary, path)
 
 
-def fev_rows(index):
+def fev_rows(index, config_path=None):
     import fev
     from datasets import Dataset
-    config = yaml.safe_load((ROOT / "configs/eval/fev/v1-crb-redo-timerxl-tasks.yaml").read_text())
+    config = yaml.safe_load((Path(config_path) if config_path is not None else ROOT / "configs/eval/fev/v1-crb-redo-timerxl-tasks.yaml").read_text())
     declaration = config["tasks"][index]
     source = Path(declaration["dataset_path"])
     if not source.is_file() or source.suffix != ".parquet":
@@ -55,37 +55,45 @@ def fev_rows(index):
         target_columns=list(targets), boundary="first_get_window_0_get_input_data")
 
 
-def time_rows(name):
+def time_rows(name, config_path=None):
     from evaluate.time import _validate_bench_config
     from timebench.evaluation.data import Dataset
-    config = yaml.safe_load((ROOT / "configs/eval/time/v1-rage-trev-timerxl.yaml").read_text())
+    config = yaml.safe_load((Path(config_path) if config_path is not None else ROOT / "configs/eval/time/v1-rage-trev-timerxl.yaml").read_text())
     checked = _validate_bench_config(config["bench_config"])
     matches = [task for task in checked["tasks"] if task["dataset"] == name and task["term"] == "short"]
     if len(matches) != 1:
         raise ValueError("TIME task is not uniquely selected")
     settings = checked["datasets"][name]
     horizon = int(settings["short"]["prediction_length"])
-    kwargs = dict(name=name, term="short", prediction_length=horizon, test_length=horizon,
+    mode = config["adapter"]["config"]["inference"].get("evaluation_mode", "single_window")
+    from evaluate.time import evaluation_test_length
+    test_length = evaluation_test_length(int(settings["test_length"]), horizon, mode)
+    kwargs = dict(name=name, term="short", prediction_length=horizon, test_length=test_length,
                   val_length=settings.get("val_length", 0), storage_path=checked["dataset_root"])
     native = Dataset(to_univariate=False, **kwargs)
     dataset = native if native.target_dim == 1 else Dataset(to_univariate=True, **kwargs)
     def rows():
+        seen = set()
         for ordinal, row in enumerate(dataset.test_data.input):
             values = np.asarray(row["target"], dtype=np.float32)
             if values.ndim != 1:
                 raise ValueError("TIME input must be native univariate after evaluation conversion")
             entity = str(row.get("item_id", ordinal))
+            if entity in seen:
+                continue
+            seen.add(entity)
             yield entity, values, dict(entity=entity, ordinal=ordinal,
-                boundary_source="time_single_window_test_data_input")
+                boundary_source="time_first_rolling_input_before_test_tail")
     return rows(), dict(benchmark="time", dataset=name, term="short", horizon=horizon,
         source=str(checked["dataset_root"] / name),
         source_revision=checked["dataset_values"]["revision"],
-        boundary="evaluation_test_data_input_with_test_length_prediction_length",
+        boundary="evaluation_test_data_input_with_matched_evaluation_test_length",
+        evaluation_mode=mode, test_length=test_length,
         to_univariate=bool(native.target_dim != 1))
 
 
-def prepare_one(task_id, kind, key, logger):
-    out = output_path("reference_shard", DATA_ROOT / task_id)
+def prepare_one(task_id, kind, key, logger, config_path=None, data_root=None):
+    out = output_path("reference_shard", (Path(data_root) if data_root is not None else DATA_ROOT) / task_id)
     marker, payload = out / "manifest.json", out / "references.npz"
     if marker.is_file() and payload.is_file() and (out / ".complete").is_file():
         logger.info("stage=skip task=%s reason=complete", task_id)
@@ -94,7 +102,7 @@ def prepare_one(task_id, kind, key, logger):
         raise FileExistsError("Incomplete reference task directory needs audit: " + str(out))
     out.mkdir(parents=True, exist_ok=True)
     logger.info("stage=task-start task=%s kind=%s", task_id, kind)
-    rows, source = fev_rows(key) if kind == "fev" else time_rows(key)
+    rows, source = fev_rows(key, config_path) if kind == "fev" else time_rows(key, config_path)
     fragments, audit, seen = [], [], set()
     for entity, values, fields in rows:
         if entity in seen:
