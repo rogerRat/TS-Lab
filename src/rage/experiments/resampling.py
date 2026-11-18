@@ -526,3 +526,32 @@ class ResampledWindows:
         if "native_scores" in payload:
             selected.native_scores = payload["native_scores"]
         return selected
+
+
+class FixedSubsetWindows:
+    """Uniform training view over a fixed set of legal windows in a shared pool."""
+    def __init__(self, values, locations, selected_indices, *, window_length, metadata=None):
+        self.values = values
+        self.locations = locations
+        self.selected_indices = np.asarray(selected_indices, dtype=np.int64)
+        self.window_length = int(window_length)
+        self.metadata = dict(metadata or {})
+        if self.selected_indices.ndim != 1 or not len(self.selected_indices):
+            raise ValueError("fixed subset indices must be a nonempty vector")
+        if np.any(self.selected_indices < 0) or np.any(self.selected_indices >= len(locations)):
+            raise ValueError("fixed subset index is outside the shared pool")
+        self.training_contract = dict(fixed_subset=self.metadata,
+                                      selected_window_count=len(self.selected_indices))
+
+    def __len__(self):
+        return len(self.selected_indices)
+
+    def sample_indices(self, rng, count):
+        return rng.integers(0, len(self.selected_indices), size=int(count), dtype=np.int64)
+
+    def __getitem__(self, rows):
+        rows = np.asarray(rows, dtype=np.int64)
+        selected = self.selected_indices[rows]
+        starts = np.asarray(self.locations[selected], dtype=np.int64)
+        offsets = np.arange(self.window_length, dtype=np.int64)
+        return np.asarray(self.values[starts[:, None] + offsets[None, :]], dtype=np.float32)

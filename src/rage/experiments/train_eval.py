@@ -246,11 +246,11 @@ def fine_tune(
         optimizer = make_adamw(model, lr=learning_rate, weight_decay=weight_decay)
     rng = np.random.default_rng(seed)
     from .regions import RegionWindows
-    from .resampling import ResampledWindows
+    from .resampling import FixedSubsetWindows, ResampledWindows
     resampled = isinstance(windows, ResampledWindows)
     if resampled and sampling_probabilities is not None:
         raise ValueError("Static resampling probabilities must not be applied twice")
-    regional = isinstance(windows, (RegionWindows, ResampledWindows))
+    regional = isinstance(windows, (RegionWindows, ResampledWindows, FixedSubsetWindows))
     if not regional:
         windows = np.asarray(windows, dtype=np.float32)
     prepare = getattr(engine, "prepare_training_tensors", None)
